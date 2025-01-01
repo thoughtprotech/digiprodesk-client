@@ -1,0 +1,82 @@
+[
+  {
+    "title": "Olive Indiranagar",
+    "status": "active"
+  },
+  {
+    "title": "Olive Whitefield",
+    "status": "hold"
+  },
+  {
+    "title": "Olive Koramangala",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive HSR",
+    "status": "incoming"
+  },
+  {
+    "title": "Olive JP Nagar",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive Sarjapur",
+    "status": "hold"
+  },
+  {
+    "title": "Olive Marathahalli",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive BTM",
+    "status": "incoming"
+  },
+  {
+    "title": "Olive Bannerghatta",
+    "status": "hold"
+  },
+  {
+    "title": "Olive Silk Board",
+    "status": "hold"
+  },
+  {
+    "title": "Olive Yelahanka",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive Hebbal",
+    "status": "incoming"
+  },
+  {
+    "title": "Olive Malleshwaram",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive Rajajinagar",
+    "status": "hold"
+  },
+  {
+    "title": "Olive Vijaynagar",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive Basavanagudi",
+    "status": "incoming"
+  },
+  {
+    "title": "Olive Banashankari",
+    "status": "incoming"
+  },
+  {
+    "title": "Olive Jayanagar",
+    "status": "hold"
+  },
+  {
+    "title": "Olive Jalahalli",
+    "status": "disconnected"
+  },
+  {
+    "title": "Olive Peenya",
+    "status": "incoming"
+  }
+]
