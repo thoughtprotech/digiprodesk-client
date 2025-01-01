@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import html2canvas from "html2canvas";
 import { Crop, X } from "lucide-react";
 import Tooltip from "./ToolTip";
+import Button from "./Button";
 
 // Props interface to define the onScreenshotTaken function
 interface ScreenshotComponentProps {
@@ -193,20 +194,10 @@ const ScreenshotComponent: React.FC<ScreenshotComponentProps> = ({
         }}
       >
         <Tooltip tooltip="Capture" position="bottom">
-          <button
-            className="w-fit rounded-md bg-zinc-300/60 dark:bg-zinc-700/60 border-2 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-700 duration-300 px-4 py-2 flex items-center justify-center space-x-1"
-            onClick={takeScreenshot}
-          >
-            <Crop />
-          </button>
+          <Button color="zinc" icon={<Crop className="w-6 h-6" />} onClick={takeScreenshot} />
         </Tooltip>
         <Tooltip tooltip="Cancel" position="bottom">
-          <button
-            className="w-fit rounded-md bg-red-500/60 border-2 border-red-500 hover:bg-red-500 px-4 py-2 flex items-center justify-center space-x-1 duration-300"
-            onClick={cancelScreenshot}
-          >
-            <X />
-          </button>
+          <Button color="red" icon={<X className="w-6 h-6" />} onClick={cancelScreenshot} />
         </Tooltip>
       </div>
     </div>

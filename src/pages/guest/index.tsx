@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import Button from "@/components/ui/Button";
 import Image from "next/image";
-import { useRouter } from "next/router";
 import { useState } from "react";
 
 export default function Index() {
@@ -42,9 +41,11 @@ export default function Index() {
               className="w-64"
             />
             <div className="w-full">
-              <button className="w-full font-bold rounded-md bg-blue-500 px-4 py-2 flex items-center justify-center space-x-1"
+              <Button
+                color="indigo"
+                text="Meet Virtual Receptionist"
                 onClick={() => setInCall(true)}
-              >Meet Virtual Receptionist</button>
+              />
             </div>
           </div>
           <Image

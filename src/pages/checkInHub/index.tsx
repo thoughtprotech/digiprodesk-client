@@ -12,6 +12,7 @@ import CallingCard from "./_components/CallingCard";
 import ImageViewer from "@/components/ui/ImageViewer";
 import Chip from "@/components/ui/Chip";
 import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
 
 
 
@@ -119,6 +120,23 @@ export default function Index() {
     return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Commenced" />));
   }
 
+  const handleConfirmHoldCall = (callId: string) => {
+    setScreenshotImage([]);
+    setTakeScreenshot(false);
+    setBookingId("");
+    setCallNotes("");
+    setConfirmEndCall({
+      status: false,
+      callId: ""
+    });
+    setInCall({
+      status: true,
+      callId
+    });
+    toast.custom((t: any) => (<Toast t={t} type="info" content="Call Put On Hold" />));
+    return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Commenced" />));
+  }
+
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
@@ -149,7 +167,7 @@ export default function Index() {
       </div>}>
       <div className="w-full h-full flex">
         {/* Left Panel */}
-        <div className={`h-[90.5vh] ${isRightPanelCollapsed ? 'w-full pr-0' : 'w-2/3'} transition-all duration-300 ease-in-out border-r-2 border-r-border pr-2`}>
+        <div className={`h-[90.5vh] ${isRightPanelCollapsed ? 'w-full pr-0' : 'w-2/3'} transition-all duration-300 ease-in-out`}>
           {inCall.status ? (
             <div className="w-full h-full bg-black rounded-md relative z-0">
               {/* TODO: Implement Video Feed Below */}
@@ -185,51 +203,51 @@ export default function Index() {
           {/* Summary Section */}
           {!isRightPanelCollapsed && (
             <div className="w-full h-full flex flex-col space-y-2 overflow-hidden">
-              <div className="w-full border-b-2 border-b-border pb-2 flex space-x-4">
+              <div className="w-full flex space-x-4">
                 <div
-                  className={`w-full bg-sky-500/30 hover:bg-sky-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "all" ? "border-sky-500" : "border-transparent"}`}
+                  className={`w-full h-fit bg-sky-500/30 hover:bg-sky-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "all" ? "border-sky-500" : "border-transparent"}`}
                   onClick={() => handleFilterChange("all")}
                 >
                   <div className="flex space-x-2 items-center">
                     <div className="border-r-2 border-r-sky-500 pr-2">
                       <Phone className="w-5 h-5 text-sky-500" />
                     </div>
-                    <div>
-                      <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">ALL CALLS</h1>
-                      <h1 className="font-bold text-xl">12</h1>
+                    <div className="flex items-center gap-2">
+                      <h1 className="font-bold text-xl">{MockCardData.filter(call => call.status === "hold" || call.status === "incoming").length}</h1>
+                      <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">CALLS</h1>
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`w-full bg-indigo-500/30 hover:bg-indigo-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "hold" ? "border-indigo-500" : "border-transparent"}`}
+                  className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "hold" ? "border-indigo-500" : "border-transparent"}`}
                   onClick={() => handleFilterChange("hold")}
                 >
                   <div className="flex space-x-2 items-center">
                     <div className="border-r-2 border-r-indigo-500 pr-2">
                       <Pause className="w-5 h-5 text-indigo-500" />
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="font-bold text-xl">{MockCardData.filter(call => call.status === "hold").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">ON HOLD</h1>
-                      <h1 className="font-bold text-xl">6</h1>
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`w-full bg-orange-500/30 hover:bg-orange-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "incoming" ? "border-orange-500" : "border-transparent"}`}
+                  className={`w-full h-fit bg-orange-500/30 hover:bg-orange-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "incoming" ? "border-orange-500" : "border-transparent"}`}
                   onClick={() => handleFilterChange("incoming")}
                 >
                   <div className="flex space-x-2 items-center">
                     <div className="border-r-2 border-r-orange-500 pr-2">
                       <PhoneIncoming className="w-5 h-5 text-orange-500" />
                     </div>
-                    <div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="font-bold text-xl">{MockCardData.filter(call => call.status === "incoming").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">INCOMING</h1>
-                      <h1 className="font-bold text-xl">6</h1>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className={`w-full ${inCall.status ? "h-1/2" : "h-full"} overflow-y-auto`}>
+              <div className={`w-full ${inCall.status ? "h-1/2" : "h-full"} overflow-y-auto border-2 border-border rounded-md p-2`}>
                 {/* Grid Section */}
                 <div className={`w-full h-full pb-2 grid grid-cols-2 gap-2 auto-rows-min overflow-x-hidden`}>
                   {/* Show Incoming and On Hold Calls in 2 columns when filter is "all" */}
@@ -288,9 +306,9 @@ export default function Index() {
                 </div>
               </div>
               {inCall.status && (
-                <div className="w-full h-full max-h-[50%] flex flex-col gap-2 justify-between items-center border-t-2 border-t-gray-500 relative z-50">
-                  <div className="w-full h-full flex flex-col overflow-y-auto overflow-x-hidden">
-                    <div className="w-full flex justify-between items-center py-2 sticky top-0 z-50 bg-background">
+                <div className="w-full h-full max-h-[50%] flex flex-col space-y-2 justify-between items-center border-2 border-border rounded-md p-2 relative z-50">
+                  <div className="w-full h-full flex flex-col space-y-2 overflow-y-auto overflow-x-hidden">
+                    <div className="w-full flex justify-between items-center pb-1 sticky top-0 z-50 bg-background border-b-2 border-border">
                       <div className="flex flex-col">
                         <Chip text="CALL IN PROGRESS" className="bg-green-500/30 border-green-500 text-green-500 px-2" />
                         <h1 className="font-bold text-lg">{inCall.callId}</h1>
@@ -299,7 +317,7 @@ export default function Index() {
                         <input
                           type="text"
                           placeholder="Booking ID"
-                          className="w-full px-2 py-1 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
+                          className="w-full px-2 py-1 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold placeholder:text-highlight placeholder:font-bold"
                           onChange={(e) => setBookingId(e.target.value)}
                           value={bookingId}
                           id="bookingId"
@@ -314,14 +332,12 @@ export default function Index() {
                           {/* Image Thumbnail */}
                           {screenshotImage.map((image, index) => (
                             <div key={index} className="w-fit max-w-full h-fit max-h-36 relative z-50">
-                              <button
-                                className="bg-red-500/60 border-2 border-red-500 hover:bg-red-500 duration-300 rounded-md px-1 p-1 absolute top-0 right-0"
-                                onClick={() => handleDeleteImage(index)}
-                              >
-                                <Tooltip tooltip="Delete Document" position="top">
-                                  <Trash className="w-3 h-3 text-text" />
-                                </Tooltip>
-                              </button>
+                              <Button
+                                className="bg-red-500/60 border-2 border-red-500 hover:bg-red-500 duration-300 rounded-md px-1 p-1 absolute top-0 right-0" color="red" icon={
+                                  <Tooltip tooltip="Delete Document" position="top">
+                                    <Trash className="w-3 h-3 text-text" />
+                                  </Tooltip>
+                                } onClick={() => handleDeleteImage(index)} />
                               <div className="w-full h-full flex items-center justify-center object-contain">
                                 <ImageViewer src={image}>
                                   <Image
@@ -339,7 +355,7 @@ export default function Index() {
                       </div>
                     ) : (
                       <div className="w-full h-full flex flex-col space-y-4 justify-center items-center rounded-md border-2 border-dashed border-border">
-                        <h1 className="font-bold text-xl text-textAlt">No Document Captured</h1>
+                        <h1 className="font-bold text-xl text-highlight">No Document Captured</h1>
                       </div>
                     )
                     }
@@ -349,7 +365,7 @@ export default function Index() {
                     <div className="w-full">
                       <textarea
                         placeholder="Notes (Optional)"
-                        className="w-full px-2 py-0.5 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
+                        className="w-full px-2 py-0.5 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold placeholder:text-highlight placeholder:font-bold"
                         style={{
                           height: "3.5rem",
                           resize: "none"
@@ -361,36 +377,25 @@ export default function Index() {
                     </div>
                     {/* Call Controls */}
                     <div className="w-full h-fit rounded-md flex space-x-2 items-center p-1">
-                      <button className="w-full rounded-md bg-zinc-300/30 dark:bg-zinc-700/30 border-2 border-zinc-500 px-4 py-2 flex items-center justify-center space-x-1 hover:bg-zinc-500 duration-300"
-                        onClick={() => { setTakeScreenshot(true) }}>
-                        <Tooltip tooltip="Add Document">
-                          <FilePlus2 className="w-6 h-6" />
-                        </Tooltip>
-                      </button>
-                      <button className={micMuted ? "bg-orange-500/30 border-2 border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1" : "w-full rounded-md bg-zinc-300/30 dark:bg-zinc-700/30 border-2 border-zinc-500 px-4 py-2 flex items-center justify-center space-x-1 hover:bg-zinc-500 duration-300"} onClick={() => {
-                        setMicMuted(!micMuted)
-                      }}>
-                        <Tooltip tooltip={micMuted ? "Unmute Mic" : "Mute Mic"}>
+                      <Button color="zinc" icon={<Tooltip tooltip="Add Document">
+                        <FilePlus2 className="w-6 h-6" />
+                      </Tooltip>} onClick={() => setTakeScreenshot(true)} />
+                      <Button
+                        className={micMuted ? "bg-orange-500/30 border-2 border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer" : "w-full rounded-md bg-zinc-500/30 border-2 border-zinc-500 px-4 py-2 flex items-center justify-center space-x-1 hover:bg-zinc-500 duration-300 cursor-pointer"}
+                        icon={<Tooltip tooltip={micMuted ? "Unmute Mic" : "Mute Mic"}>
                           <MicOff className="w-6 h-6" />
-                        </Tooltip>
-                      </button>
-                      <button className={cameraOff ? "bg-orange-500/30 border-2 border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1" : "w-full rounded-md bg-zinc-300/30 dark:bg-zinc-700/30 border-2 border-zinc-500 px-4 py-2 flex items-center justify-center space-x-1 hover:bg-zinc-500 duration-300"} onClick={() => {
-                        setCameraOff(!cameraOff)
-                      }}>
-                        <Tooltip tooltip={cameraOff ? "Turn On Camera" : "Turn Off Camera"}>
+                        </Tooltip>} onClick={() => setMicMuted(!micMuted)} />
+                      <Button
+                        className={cameraOff ? "bg-orange-500/30 border-2 border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer" : "w-full rounded-md bg-zinc-500/30 border-2 border-zinc-500 px-4 py-2 flex items-center justify-center space-x-1 hover:bg-zinc-500 duration-300 cursor-pointer"}
+                        icon={<Tooltip tooltip={cameraOff ? "Turn On Camera" : "Turn Off Camera"}>
                           <VideoOff className="w-6 h-6" />
-                        </Tooltip>
-                      </button>
-                      <button className="w-full rounded-md bg-indigo-500/30 border-2 border-indigo-500 hover:bg-indigo-500 px-4 py-2 flex items-center justify-center space-x-1 duration-300" onClick={handleCallHold}>
-                        <Tooltip tooltip="Hold Call">
-                          <Pause className="w-6 h-6" />
-                        </Tooltip>
-                      </button>
-                      <button className="w-full rounded-md bg-red-500/30 border-2 border-red-500 hover:bg-red-500 px-4 py-2 flex items-center justify-center space-x-1 duration-300" onClick={handleCallEnd}>
-                        <Tooltip tooltip="End Call">
-                          <PhoneOff className="w-6 h-6" />
-                        </Tooltip>
-                      </button>
+                        </Tooltip>} onClick={() => setCameraOff(!cameraOff)} />
+                      <Button color="indigo" icon={<Tooltip tooltip="Hold Call">
+                        <Pause className="w-6 h-6" />
+                      </Tooltip>} onClick={handleCallHold} />
+                      <Button color="red" icon={<Tooltip tooltip="End Call">
+                        <PhoneOff className="w-6 h-6" />
+                      </Tooltip>} onClick={handleCallEnd} />
                     </div>
                   </div>
                 </div>
@@ -438,22 +443,11 @@ export default function Index() {
               })}>
                 <div className="w-full h-full flex flex-col gap-4 justify-center">
                   <div>
-                    <h1 className="font-semibold text-xl">You need to end the current call to attend another</h1>
-                  </div>
-                  <div>
-                    <h1 className="font-medium">Would you like to end this call and move to the next?</h1>
+                    <h1 className="font-medium">Would you like to end or place the call on hold?</h1>
                   </div>
                   <div className="w-full flex justify-between gap-2 border-t-2 border-t-border pt-4">
-                    <button className="w-full h-fit rounded-md bg-highlight hover:bg-zinc-300 dark:hover:bg-zinc-700 duration-300 px-4 py-2 flex items-center justify-center space-x-1" onClick={() => setConfirmEndCall({
-                      status: false,
-                      callId: ""
-                    })}>
-                      <h1>Cancel</h1>
-                    </button>
-                    <button className="w-full h-fit rounded-md bg-red-500 hover:bg-red-700 duration-300 px-4 py-2 flex items-center justify-center space-x-1" onClick={() => handleConfirmEndCall(confirmEndCall.callId)}>
-                      <PhoneOff className="w-6 h-6" />
-                      <h1>End Call</h1>
-                    </button>
+                    <Button text="Hold Call" color="indigo" icon={<PhoneOff className="w-6 h-6" />} onClick={() => handleConfirmHoldCall(confirmEndCall.callId)} />
+                    <Button text="End Call" color="red" icon={<PhoneOff className="w-6 h-6" />} onClick={() => handleConfirmEndCall(confirmEndCall.callId)} />
                   </div>
                 </div>
               </Modal>

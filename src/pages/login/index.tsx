@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -74,10 +75,11 @@ export default function Login() {
               />
             </div>
             <div className="w-full">
-              <button
-                className="w-full p-2 rounded-md bg-indigo-500 text-white font-bold"
+              <Button
+                color="indigo"
                 onClick={handleLogIn}
-              >Login</button>
+                text="Log In"
+              />
             </div>
           </div>
         </div>
