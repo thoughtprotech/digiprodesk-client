@@ -11,7 +11,10 @@ export default function CallingCard({
   status,
   inCall,
   setInCall,
-  setConfirmEndCall
+  setConfirmEndCall,
+  joinCall,
+  resumeCall,
+  roomId
 }: {
   title: string;
   status: string;
@@ -21,6 +24,9 @@ export default function CallingCard({
   };
   setInCall: any;
   setConfirmEndCall: any;
+  joinCall: (roomId: string) => void;
+  resumeCall: (roomId: string) => void;
+  roomId: string;
 }) {
   const [elapsedTime, setElapsedTime] = useState(0); // Time in seconds
 
@@ -42,34 +48,46 @@ export default function CallingCard({
     if (inCall.status) {
       return setConfirmEndCall({
         status: true,
-        callId: title
+        callId: title,
+        roomId: roomId
       });
     }
 
-    setInCall({
-      status: true,
-      callId: title
-    });
+    if (status === "pending") {
+      setInCall({
+        status: true,
+        callId: title,
+        roomId: roomId
+      });
+      joinCall(roomId);
+    } else {
+      setInCall({
+        status: true,
+        callId: title,
+        roomId: roomId
+      });
+      resumeCall(roomId);
+    }
     return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Commenced" />));
   }
 
   return (
-    <div className="w-full h-full bg-foreground rounded-lg p-2 flex flex-col space-y-2 justify-between border-2 border-border">
+    <div className="w-full h-full bg-background rounded-lg p-2 flex flex-col space-y-2 justify-between border-2 border-border">
       <div className="w-full flex flex-col gap-2 justify-between pb-1">
         <div className="w-full flex justify-between space-x-3 border-b-2 border-b-border pb-2">
           <div>
-            {status === "incoming" && (
-              <h1 className="w-fit text-[0.65rem] font-bold rounded bg-orange-500/30 text-orange-500 px-2">
+            {status === "pending" && (
+              <h1 className="w-fit text-[0.65rem] font-bold rounded text-orange-500">
                 INCOMING CALL
               </h1>
             )}
             {status === "active" && (
-              <h1 className="w-fit text-[0.65rem] font-bold rounded bg-green-500/30 text-green-500 px-2">
+              <h1 className="w-fit text-[0.65rem] font-bold rounded text-green-500">
                 ACTIVE
               </h1>
             )}
-            {status === "hold" && (
-              <h1 className="w-fit text-[0.65rem] font-bold rounded bg-indigo-500/30 text-indigo-500 px-2">
+            {status === "onHold" && (
+              <h1 className="w-fit text-[0.65rem] font-bold rounded text-indigo-500">
                 CALL ON HOLD
               </h1>
             )}
@@ -87,16 +105,16 @@ export default function CallingCard({
           </div>
           <div>
             <Tooltip
-              tooltip={status === "incoming" ? "Accept Call" : "Resume Call"}
+              tooltip={status === "pending" ? "Accept Call" : "Resume Call"}
               position="bottom"
             >
               <Button
-                className={`w-fit h-fit whitespace-nowrap rounded-md ${status === "incoming"
-                  ? "bg-green-500/30 hover:bg-green-500 border-2 border-green-500"
-                  : "bg-indigo-500/30 hover:bg-indigo-500 border-2 border-indigo-500"
+                className={`w-fit h-fit whitespace-nowrap rounded-md ${status === "pending"
+                  ? "bg-green-500/50 dark:bg-green-500/30 hover:bg-green-500 dark:hover:bg-green-500 border border-green-500"
+                  : "bg-indigo-500/50 dark:bg-indigo-500/30 hover:bg-indigo-500 dark:hover:bg-indigo-500 border border-indigo-500"
                   } duration-300 font-bold text-sm justify-center items-center flex px-4 py-1`}
                 onClick={handleJoinCall}
-                icon={status === "incoming" ? (
+                icon={status === "pending" ? (
                   <Phone className="w-4 h-4" />
                 ) : (
                   <Play className="w-4 h-4" />
