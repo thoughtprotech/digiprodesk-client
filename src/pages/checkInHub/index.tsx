@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
-import { FilePlus2, Headset, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, VideoOff } from "lucide-react";
+import { FilePlus2, Headset, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
 import ScreenshotComponent from "@/components/ui/Screenshotcomponent";
@@ -14,6 +14,9 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Peer, { MediaConnection } from "peerjs";
 import { io } from "socket.io-client";
+import { parseCookies } from "nookies";
+import { useRouter } from "next/router";
+import { toTitleCase } from "@/utils/stringFunctions";
 
 
 
@@ -49,6 +52,7 @@ export default function Index() {
   const [, setPeerId] = useState<string>('');
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
+  const videoCallRef = useRef<MediaStreamTrack | null>(null);
   const peerInstance = useRef<Peer | null>(null);
   const [callList, setCallList] = useState<{
     from: string,
@@ -57,6 +61,8 @@ export default function Index() {
     to: string | null
   }[]>([]);
   const mediaConnectionRef = useRef<MediaConnection | null>(null);
+
+  const router = useRouter();
 
   const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
     query: {
@@ -104,50 +110,77 @@ export default function Index() {
   }
 
   useEffect(() => {
-    const peer = new Peer(userId);
+    const cookies = parseCookies();
 
-    socket.emit("get-call-list");
+    const { userToken } = cookies;
 
-    socket.on("call-list-update", (data) => {
-      console.log(data);
-      setCallList(data);
-    });
+    if (!userToken) {
+      router.push("/");
+    } else if (userToken !== "host") {
+      router.push("/guest");
+    } else {
+      const peer = new Peer(userId);
 
-    peer.on('open', (id: string) => {
-      setPeerId(id);
-    });
+      socket.emit("get-call-list");
 
-    peer.on('call', (call: MediaConnection) => {
-      // Use modern getUserMedia method for answering the call
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then((mediaStream: MediaStream) => {
-          if (currentUserVideoRef.current) {
-            currentUserVideoRef.current.srcObject = mediaStream;
-            currentUserVideoRef.current.play();
-          }
+      socket.on("call-list-update", (data) => {
+        console.log(data);
+        setCallList(data);
+      });
 
-          call.answer(mediaStream);
-          call.on('stream', (remoteStream: MediaStream) => {
-            if (remoteVideoRef.current) {
-              remoteVideoRef.current.srcObject = remoteStream;
-              remoteVideoRef.current.play();
+      peer.on('open', (id: string) => {
+        setPeerId(id);
+      });
+
+      peer.on('call', (call: MediaConnection) => {
+        // Use modern getUserMedia method for answering the call
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then((mediaStream: MediaStream) => {
+            if (currentUserVideoRef.current) {
+              currentUserVideoRef.current.srcObject = mediaStream;
+              currentUserVideoRef.current.play();
             }
+
+            videoCallRef.current = mediaStream.getVideoTracks()[0];
+
+            call.answer(mediaStream);
+            call.on('stream', (remoteStream: MediaStream) => {
+              if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = remoteStream;
+                remoteVideoRef.current.play();
+              }
+            });
+
+            // Save the current call to ref for later closing
+            mediaConnectionRef.current = call;
+          })
+          .catch((err) => {
+            console.error("Error accessing media devices.", err);
           });
+      });
 
-          // Save the current call to ref for later closing
-          mediaConnectionRef.current = call;
-        })
-        .catch((err) => {
-          console.error("Error accessing media devices.", err);
-        });
-    });
+      peerInstance.current = peer;
 
-    peerInstance.current = peer;
-
-    return () => {
-      peerInstance.current?.destroy();
-    };
+      return () => {
+        peerInstance.current?.destroy();
+      };
+    }
   }, []);
+
+  const handleToggleCamera = () => {
+    console.log(mediaConnectionRef.current?.localStream.getVideoTracks());
+    const videoTracks = mediaConnectionRef.current?.localStream.getVideoTracks();
+    videoTracks![0].enabled = !videoTracks![0].enabled;
+    setCameraOff(!cameraOff);
+  };
+
+  const handleToggleMic = () => {
+    console.log(mediaConnectionRef.current?.localStream.getAudioTracks());
+    const audioTracks = mediaConnectionRef.current?.localStream.getAudioTracks();
+    audioTracks![0].enabled = !audioTracks![0].enabled;
+    setMicMuted(!micMuted);
+  }
+
 
   const handleFilterChange = (status: string) => {
     setFilter(status);
@@ -192,6 +225,8 @@ export default function Index() {
       callId: "",
       roomId: ""
     });
+    setMicMuted(false);
+    setCameraOff(false);
     endCall(inCall.roomId);
     return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Ended" />));
   }
@@ -206,7 +241,8 @@ export default function Index() {
       callId: "",
       roomId: ""
     });
-    holdCall(inCall.roomId);
+    setMicMuted(false);
+    setCameraOff(false); holdCall(inCall.roomId);
     return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Put On Hold" />));
   }
 
@@ -274,7 +310,10 @@ export default function Index() {
           <Headset />
         </div>
         <div>
-          <h1 className='font-bold text-2xl'>CHECK-IN HUB</h1>
+          <h1 className='font-bold'>CHECK-IN HUB</h1>
+        </div>
+        <div>
+          <h1 className='font-bold text-2xl border-l pl-2 border-l-border'>OLIVE HEAD OFFICE</h1>
         </div>
       </div>
     } header={
@@ -316,13 +355,11 @@ export default function Index() {
                   <ScreenshotComponent onScreenshotTaken={handleScreenshot} cancelScreenshot={cancelScreenshot} />
                 </div>
               )}
-              {/* Toolbar */}
-
             </div>
           ) : (
             <div className="w-full h-full bg-foreground border-2 border-border rounded-md mb-20 p-4 flex flex-col space-y-4 justify-center items-center">
               <div>
-                <h1 className="font-bold text-2xl text-textAlt">Not In Call</h1>
+                <h1 className="font-bold text-2xl text-textAlt">No Ongoing Call</h1>
               </div>
             </div>
           )}
@@ -334,7 +371,7 @@ export default function Index() {
             <div className="w-full h-full flex flex-col space-y-2 overflow-hidden">
               <div className="w-full flex space-x-4 p-2 rounded-md border-2 border-border bg-foreground">
                 <div
-                  className={`w-full h-fit bg-sky-500/50 dark:bg-sky-500/30 hover:bg-sky-300/70 dark:hover:bg-sky-700 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "all" ? "border-sky-500" : "border-transparent"}`}
+                  className={`w-full h-fit bg-sky-500/30 hover:bg-sky-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "all" ? "border-sky-500" : "border-transparent"}`}
                   onClick={() => handleFilterChange("all")}
                 >
                   <div className="flex space-x-2 items-center">
@@ -348,7 +385,7 @@ export default function Index() {
                   </div>
                 </div>
                 <div
-                  className={`w-full h-fit bg-indigo-500/50 dark:bg-indigo-500/30 hover:bg-indigo-300/70 dark:hover:bg-indigo-800 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "onHold" ? "border-indigo-500" : "border-transparent"}`}
+                  className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "onHold" ? "border-indigo-500" : "border-transparent"}`}
                   onClick={() => handleFilterChange("onHold")}
                 >
                   <div className="flex space-x-2 items-center">
@@ -362,7 +399,7 @@ export default function Index() {
                   </div>
                 </div>
                 <div
-                  className={`w-full h-fit bg-orange-500/30 hover:bg-orange-500/50 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "pending" ? "border-[#FF9300] dark:border-orange-500" : "border-transparent"}`}
+                  className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "pending" ? "border-[#FF9300] dark:border-orange-500" : "border-transparent"}`}
                   onClick={() => handleFilterChange("pending")}
                 >
                   <div className="flex space-x-2 items-center">
@@ -410,7 +447,7 @@ export default function Index() {
                           ))
                         ) : (
                           <div className="col-span-full w-full rounded-md border-2 border-dashed border-border p-4">
-                            <h1 className="text-center text-xl text-textAlt font-bold">No Calls Available</h1>
+                            <h1 className="text-center text-xl text-textAlt font-bold">No Calls In Progress</h1>
                           </div>
                         );
                       })()}
@@ -434,7 +471,7 @@ export default function Index() {
                       ))
                     ) : (
                       <div className="col-span-full w-full rounded-md border-2 border-dashed border-border p-4">
-                        <h1 className="text-center text-xl text-textAlt font-bold">No Calls Available</h1>
+                        <h1 className="text-center text-xl text-textAlt font-bold">No Calls In Progress</h1>
                       </div>
                     )
                   )}
@@ -446,7 +483,7 @@ export default function Index() {
                     <div className="w-full flex justify-between items-center sticky top-0 z-50">
                       <div className="flex flex-col">
                         <Chip text="CALL IN PROGRESS" className="border-green-500 text-green-500" />
-                        <h1 className="font-bold text-lg">{inCall.callId}</h1>
+                        <h1 className="font-bold text-lg">{toTitleCase(inCall.callId || "")}</h1>
                       </div>
                       <div className="w-fit">
                         <input
@@ -489,7 +526,7 @@ export default function Index() {
                       </div>
                     ) : (
                       <div className="w-full h-full flex flex-col space-y-4 justify-center items-center rounded-md border-2 border-dashed border-border">
-                        <h1 className="font-bold text-xl text-highlight">No Document Captured</h1>
+                        <h1 className="font-bold text-xl text-highlight">No Document Snapshot</h1>
                       </div>
                     )
                     }
@@ -498,7 +535,7 @@ export default function Index() {
                     {/* Notes */}
                     <div className="w-full">
                       <textarea
-                        placeholder="Notes (Optional)"
+                        placeholder="Notes"
                         className="w-full px-2 py-0.5 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold placeholder:text-highlight placeholder:font-bold"
                         style={{
                           height: "3.5rem",
@@ -518,14 +555,23 @@ export default function Index() {
                         className={micMuted ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer" : ""}
                         color={!micMuted ? "zinc" : null}
                         icon={<Tooltip tooltip={micMuted ? "Unmute Mic" : "Mute Mic"}>
-                          <MicOff className="w-6 h-6" />
-                        </Tooltip>} onClick={() => setMicMuted(!micMuted)} />
+                          {
+                            !micMuted ?
+                              <Mic className="w-6 h-6" />
+                              :
+                              <MicOff className="w-6 h-6" />
+                          }
+                        </Tooltip>} onClick={handleToggleMic} />
                       <Button
                         className={cameraOff ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer" : ""}
                         color={!cameraOff ? "zinc" : null}
                         icon={<Tooltip tooltip={cameraOff ? "Turn On Camera" : "Turn Off Camera"}>
-                          <VideoOff className="w-6 h-6" />
-                        </Tooltip>} onClick={() => setCameraOff(!cameraOff)} />
+                          {!cameraOff ?
+                            <Video className="w-6 h-6" />
+                            :
+                            <VideoOff className="w-6 h-6" />
+                          }
+                        </Tooltip>} onClick={handleToggleCamera} />
                       <Button color="indigo" icon={<Tooltip tooltip="Hold Call">
                         <Pause className="w-6 h-6" />
                       </Tooltip>} onClick={handleCallHold} />

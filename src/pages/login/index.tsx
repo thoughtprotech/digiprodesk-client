@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import { setCookie } from "nookies";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -22,8 +23,66 @@ export default function Login() {
       return toast.custom((t: any) => <Toast content="Password is required." type="warning" t={t} />);
     }
 
-    toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
-    return router.push("/watchCenter");
+    const { userName, password } = formData;
+
+    if (userName === "olive_indiranagar" && password === "olive@123") {
+      setCookie(
+        null, "userToken", "olive_indiranagar", {
+        maxAge: 30 * 24 * 60 * 60,
+        path: "/"
+      })
+
+      toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
+      return router.push("/guest");
+    }
+
+    if (userName === "olive_koramangala" && password === "olive@123") {
+      setCookie(
+        null, "userToken", "olive_koramangala", {
+        maxAge: 30 * 24 * 60 * 60,
+        path: "/"
+      })
+      toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
+      return router.push("/guest");
+    }
+
+    if (userName === "olive_hsr" && password === "olive@123") {
+      setCookie(
+        null, "userToken", "olive_hsr", {
+        maxAge: 30 * 24 * 60 * 60,
+      })
+      toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
+      return router.push("/guest");
+    }
+
+    if (userName === "olive_marathahalli" && password === "olive@123") {
+      setCookie(
+        null, "userToken", "olive_marathahalli", {
+        maxAge: 30 * 24 * 60 * 60,
+      })
+      toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
+      return router.push("/guest");
+    }
+
+    if (userName === "olive_whitefield" && password === "olive@123") {
+      setCookie(
+        null, "userToken", "olive_whitefield", {
+        maxAge: 30 * 24 * 60 * 60,
+      })
+      toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
+      return router.push("/guest");
+    }
+
+    if (userName === "host" && password === "host") {
+      setCookie(
+        null, "userToken", "host", {
+        maxAge: 30 * 24 * 60 * 60,
+      })
+      toast.custom((t: any) => <Toast content="Logged In Successfully!" type="success" t={t} />);
+      return router.push("/checkInHub");
+    }
+
+    return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
   }
 
   return (

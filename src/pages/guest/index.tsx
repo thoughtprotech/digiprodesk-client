@@ -1,11 +1,14 @@
-import Button from "@/components/ui/Button";
+import { toTitleCase } from "@/utils/stringFunctions";
+import { LogOut } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import { destroyCookie, parseCookies } from "nookies";
 import Peer, { MediaConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
 export default function Index() {
-  const [userId] = useState<string>(`Guest-${Math.floor(Math.random() * 1000)}`);
+  const [userId, setUserId] = useState<string>("");
   const [, setPeerId] = useState<string>('');
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -14,14 +17,10 @@ export default function Index() {
   const [currentRoomId, setCurrentRoomId] = useState<string>('');
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<string>('notInCall');
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
-  const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
-    query: {
-      userId
-    },
-    withCredentials: true,
 
-  });
+  const router = useRouter();
 
   const call = (remotePeerId: string) => {
     console.log("Calling peer with ID: ", remotePeerId);
@@ -54,90 +53,108 @@ export default function Index() {
     setCurrentRoomId(roomId);
     setInCall(true);
     setCallStatus('calling');
-    socket.emit("initiate-call", JSON.stringify({ roomId }));
+    if (socketRef.current) {
+      socketRef.current.emit("initiate-call", JSON.stringify({ roomId }));
+    }
   };
 
+  const handleLogOut = () => {
+    destroyCookie(null, "userToken");
+    return router.push("/");
+  }
+
   useEffect(() => {
-    const peer = new Peer(userId);
+    const cookies = parseCookies();
+    const { userToken } = cookies;
 
-    socket.on("call-joined", (data) => {
-      console.log({ currentRoomId });
-      console.log(data.roomId);
-      if (data.roomId === currentRoomId) {
-        console.log(data.to);
-        call(data.to);
-        setCallStatus('inProgress');
-      }
-    });
+    if (!userToken) {
+      router.push("/");
+    } else {
+      setUserId(userToken);
+    }
+  }, []);
 
-    socket.on("call-on-hold", (data) => {
-      if (data.roomId === currentRoomId) {
-        setCallStatus('onHold');
-      }
-    });
+  useEffect(() => {
+    if (userId !== "") {
+      const peer = new Peer(userId);
+      peerInstance.current = peer;
 
-    socket.on("call-resumed", (data) => {
-      if (data.roomId === currentRoomId) {
-        console.log({ data });
-        call(data.to);
-        setCallStatus('inProgress');
-      }
-    });
+      const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
+        query: {
+          userId,
+        },
+        withCredentials: true,
+      });
 
-    socket.on("call-ended", (data) => {
-      if (data.roomId === currentRoomId) {
-        console.log(data);
+      socketRef.current = socket; // Store socket in ref
 
-        // Close the active PeerJS call when the call-ended event is triggered
-        if (mediaConnectionRef.current) {
-          mediaConnectionRef.current.close();
-          mediaConnectionRef.current = null;
+      socket.on("call-joined", (data) => {
+        if (data.roomId === currentRoomId) {
+          call(data.to);
+          setCallStatus("inProgress");
         }
-        // Close current video streams
-        if (currentUserVideoRef.current) {
-          currentUserVideoRef.current.srcObject = null;
+      });
+
+      socket.on("call-on-hold", (data) => {
+        if (data.roomId === currentRoomId) {
+          setCallStatus("onHold");
         }
+      });
 
-        setInCall(false);
-        setCallStatus('notInCall');
-      }
-    });
+      socket.on("call-resumed", (data) => {
+        if (data.roomId === currentRoomId) {
+          call(data.to);
+          setCallStatus("inProgress");
+        }
+      });
 
-    peer.on('open', (id: string) => {
-      setPeerId(id);
-    });
-
-    peer.on('call', (call: MediaConnection) => {
-      // Use modern getUserMedia method for answering the call
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-        .then((mediaStream: MediaStream) => {
-          if (currentUserVideoRef.current) {
-            currentUserVideoRef.current.srcObject = mediaStream;
-            currentUserVideoRef.current.play();
+      socket.on("call-ended", (data) => {
+        if (data.roomId === currentRoomId) {
+          if (mediaConnectionRef.current) {
+            mediaConnectionRef.current.close();
+            mediaConnectionRef.current = null;
           }
+          if (currentUserVideoRef.current) {
+            currentUserVideoRef.current.srcObject = null;
+          }
+          setInCall(false);
+          setCallStatus("notInCall");
+        }
+      });
 
-          call.answer(mediaStream);
-          call.on('stream', (remoteStream: MediaStream) => {
-            if (remoteVideoRef.current) {
-              remoteVideoRef.current.srcObject = remoteStream;
-              remoteVideoRef.current.play();
+      peer.on("open", (id: string) => {
+        setPeerId(id);
+      });
+
+      peer.on("call", (call: MediaConnection) => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          .then((mediaStream: MediaStream) => {
+            if (currentUserVideoRef.current) {
+              currentUserVideoRef.current.srcObject = mediaStream;
+              currentUserVideoRef.current.play();
             }
+
+            call.answer(mediaStream);
+            call.on("stream", (remoteStream: MediaStream) => {
+              if (remoteVideoRef.current) {
+                remoteVideoRef.current.srcObject = remoteStream;
+                remoteVideoRef.current.play();
+              }
+            });
+
+            mediaConnectionRef.current = call;
+          })
+          .catch((err) => {
+            console.error("Error accessing media devices.", err);
           });
+      });
 
-          // Store the incoming call in the ref
-          mediaConnectionRef.current = call;
-        })
-        .catch((err) => {
-          console.error("Error accessing media devices.", err);
-        });
-    });
-
-    peerInstance.current = peer;
-
-    return () => {
-      peerInstance.current?.destroy();
-    };
-  }, [currentRoomId]);
+      return () => {
+        socket.disconnect();
+        peerInstance.current?.destroy();
+      };
+    }
+  }, [userId, currentRoomId]);
 
   return (
     <div className="w-full h-screen bg-background flex flex-col text-white">
@@ -152,23 +169,32 @@ export default function Index() {
           />
         </div>
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <h1 className="font-bold text-2xl">Welcome To Olive Indiranagar</h1>
+          <h1 className="font-bold text-[46px]">Welcome To {toTitleCase(userId)}</h1>
         </div>
       </div>
       {!inCall && callStatus === "notInCall" && (
         <div className="w-full h-full flex justify-center items-center relative">
-          <div className="rounded-lg p-4 flex flex-col justify-center items-center space-y-4 z-50 bg-foreground">
+          <Image
+            src="/images/background.png"
+            alt="Logo"
+            width={1000}
+            height={1000}
+            className="w-full h-full absolute object-fill"
+          />
+          <div className="w-80 h-72 rounded-lg p-4 flex flex-col justify-between items-center space-y-4 z-50 bg-zinc-900">
             <div className="w-full flex justify-center">
-              <h1 className="font-bold text-2xl">Meet Your Virtual Receptionist</h1>
+              <h1 className="font-bold text-2xl">Receptionist</h1>
             </div>
-            <Image
-              src="/images/receptionist.png"
-              alt="Receptionist"
-              width={1000}
-              height={1000}
-              className="w-64"
-            />
-            <Button color="indigo" onClick={initiateCall} text="Call Virtual Receptionist" />
+            <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 rounded-md p-2 cursor-pointer" onClick={initiateCall}>
+              <Image
+                src="/images/receptionist.png"
+                alt="Receptionist"
+                width={1000}
+                height={1000}
+                className="w-28"
+              />
+              <h1 className="text-xl font-bold whitespace-nowrap">Meet Virtual Receptionist</h1>
+            </div>
           </div>
         </div>
       )}
@@ -196,6 +222,9 @@ export default function Index() {
           </div>
         )
       }
+      <div className="absolute top-4 right-2 z-50 flex items-center">
+        <LogOut className="cursor-pointer" color="red" onClick={handleLogOut} />
+      </div>
     </div>
   )
 }

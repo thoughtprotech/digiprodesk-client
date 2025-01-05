@@ -4,6 +4,7 @@ import { ReactNode } from "react";
 // import { ThemeContext } from "@/context/ThemeContext";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
+import { destroyCookie } from "nookies";
 
 
 
@@ -70,7 +71,8 @@ export default function Index({
       return router.push('/checkInHub');
     }
     if (id === 'logout') {
-      return router.push('/login');
+      destroyCookie(null, 'userToken');
+      return router.push('/');
     }
   };
 

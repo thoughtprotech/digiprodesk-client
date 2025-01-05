@@ -5,6 +5,7 @@ import { Phone, Play } from "lucide-react";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import Button from "@/components/ui/Button";
+import { toTitleCase } from "@/utils/stringFunctions";
 
 export default function CallingCard({
   title,
@@ -101,7 +102,7 @@ export default function CallingCard({
         </div>
         <div className="h-fit flex justify-between items-start space-x-3">
           <div>
-            <h1 className="font-bold">{title}</h1>
+            <h1 className="font-bold">{toTitleCase(title || "")}</h1>
           </div>
           <div>
             <Tooltip
