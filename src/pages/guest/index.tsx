@@ -18,7 +18,7 @@ export default function Index() {
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<string>('notInCall');
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
-
+  const mediaRecorderRef = useRef<MediaRecorder|null>(null);
 
   const router = useRouter();
 
@@ -42,6 +42,29 @@ export default function Index() {
             }
           });
         }
+
+        //Recording Start
+        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9' });
+        mediaRecorder.ondataavailable = async (event) => {
+          if (event.data.size > 0) {
+            const formData = new FormData();
+            formData.append("chunk", event.data);
+            formData.append("role", 'guest');
+    
+            // Send the video chunk to the server
+            await fetch("https://shy-silence-53846.pktriot.net/api/upload", {
+              method: "POST",
+              body: formData,
+            });
+          }
+        };
+    
+        mediaRecorder.start(2000); // Send video chunks every 2 seconds
+        mediaRecorderRef.current = mediaRecorder;
+        //Recording End
+
+        
+
       })
       .catch((err) => {
         console.error("Error accessing media devices.", err);
@@ -79,7 +102,7 @@ export default function Index() {
       const peer = new Peer(userId);
       peerInstance.current = peer;
 
-      const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
+      const socket = io("https://shy-silence-53846.pktriot.net/", {
         query: {
           userId,
         },
