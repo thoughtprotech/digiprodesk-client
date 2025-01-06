@@ -18,7 +18,8 @@ export default function Index() {
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<string>('notInCall');
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder|null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
 
   const router = useRouter();
 
@@ -48,23 +49,23 @@ export default function Index() {
         mediaRecorder.ondataavailable = async (event) => {
           if (event.data.size > 0) {
             const formData = new FormData();
-            formData.append("chunk", event.data);
-            formData.append("role", 'guest');
-    
-            // Send the video chunk to the server
-            await fetch("https://shy-silence-53846.pktriot.net/api/upload", {
-              method: "POST",
-              body: formData,
-            });
+            formData.append("videoChunk", event.data);
+            formData.append("sessionId", currentRoomId);
+
+            try {
+              const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
+                method: "POST",
+                body: formData,
+              });
+              const result = await response.json();
+              uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
+            } catch (error) {
+              console.error("Error uploading chunk:", error);
+            }
           }
         };
-    
         mediaRecorder.start(2000); // Send video chunks every 2 seconds
         mediaRecorderRef.current = mediaRecorder;
-        //Recording End
-
-        
-
       })
       .catch((err) => {
         console.error("Error accessing media devices.", err);
@@ -102,7 +103,7 @@ export default function Index() {
       const peer = new Peer(userId);
       peerInstance.current = peer;
 
-      const socket = io("https://shy-silence-53846.pktriot.net/", {
+      const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
         query: {
           userId,
         },
@@ -131,7 +132,7 @@ export default function Index() {
         }
       });
 
-      socket.on("call-ended", (data) => {
+      socket.on("call-ended", async (data) => {
         if (data.roomId === currentRoomId) {
           if (mediaConnectionRef.current) {
             mediaConnectionRef.current.close();
@@ -140,8 +141,26 @@ export default function Index() {
           if (currentUserVideoRef.current) {
             currentUserVideoRef.current.srcObject = null;
           }
+          if (mediaRecorderRef.current) {
+            mediaRecorderRef.current.stop(); // Stop recording
+            mediaRecorderRef.current = null;
+          }
           setInCall(false);
           setCallStatus("notInCall");
+
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/merge-chunks`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ sessionId: currentRoomId }),
+            });
+            const result = await response.json();
+            console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
+          } catch (error) {
+            console.error("Error merging video:", error);
+          }
         }
       });
 
