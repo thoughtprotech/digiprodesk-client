@@ -60,7 +60,10 @@ export default function Index() {
     status: string,
     to: string | null
   }[]>([]);
+  const currentRoomId = useRef<string>('');
   const mediaConnectionRef = useRef<MediaConnection | null>(null);
+  const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   const router = useRouter();
 
@@ -72,6 +75,7 @@ export default function Index() {
   });
 
   const joinCall = (roomId: string) => {
+    currentRoomId.current = roomId;
     socket.emit("join-call", JSON.stringify({ roomId }));
   }
 
@@ -151,8 +155,54 @@ export default function Index() {
               }
             });
 
-            // Save the current call to ref for later closing
             mediaConnectionRef.current = call;
+            // Recording Start
+            const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9' });
+
+            // Create an array to hold the data chunks
+            let recordedChunks: Blob[] = [];
+
+            mediaRecorder.ondataavailable = async (event) => {
+              if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+              }
+            };
+
+            mediaRecorder.onstop = async () => {
+              // Once the recording is stopped, create a new blob and send it
+              const blob = new Blob(recordedChunks, { type: 'video/webm' });
+
+              const formData = new FormData();
+              formData.append("videoChunk", blob, "chunk.webm");
+              formData.append("sessionId", currentRoomId.current);
+              formData.append("user", "host");
+
+              try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
+                  method: "POST",
+                  body: formData,
+                });
+                const result = await response.json();
+                uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
+              } catch (error) {
+                console.error("Error uploading chunk:", error);
+              } finally {
+                // Reset recorded chunks after sending
+                recordedChunks = [];
+              }
+            };
+
+            // Start recording, then stop every 2 seconds to prepare for next chunk
+            mediaRecorder.start();
+
+            setInterval(() => {
+              if (mediaRecorder.state === "recording") {
+                mediaRecorder.stop();  // Stop to trigger onstop event
+                mediaRecorder.start(); // Start again for next chunk
+              }
+            }, 2000); // Send video chunks every 2 seconds
+
+            mediaRecorderRef.current = mediaRecorder;
           })
           .catch((err) => {
             console.error("Error accessing media devices.", err);
@@ -160,6 +210,7 @@ export default function Index() {
       });
 
       peerInstance.current = peer;
+
 
       return () => {
         peerInstance.current?.destroy();
@@ -210,10 +261,36 @@ export default function Index() {
     }
   }
 
-  const handleCallEnd = () => {
+  const handleCallEnd = async () => {
     if (bookingId === "") {
       document.getElementById("bookingId")?.focus();
       return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
+    }
+
+    if (mediaConnectionRef.current) {
+      mediaConnectionRef.current.close();
+      mediaConnectionRef.current = null;
+    }
+    if (currentUserVideoRef.current) {
+      currentUserVideoRef.current.srcObject = null;
+    }
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop(); // Stop recording
+      mediaRecorderRef.current = null;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/merge-chunks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sessionId: currentRoomId.current, user: "host" }),
+      });
+      const result = await response.json();
+      console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
+    } catch (error) {
+      console.error("Error merging video:", error);
     }
 
     setScreenshotImage([]);

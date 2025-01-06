@@ -63,11 +63,12 @@ export default function Index() {
           const formData = new FormData();
           formData.append("videoChunk", blob, "chunk.webm");
           formData.append("sessionId", currentRoomId);
+          formData.append("user", "guest");
 
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
               method: "POST",
-              body: formData,
+              body: formData
             });
             const result = await response.json();
             uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
@@ -179,7 +180,7 @@ export default function Index() {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ sessionId: currentRoomId }),
+              body: JSON.stringify({ sessionId: currentRoomId, user: "guest" }),
             });
             const result = await response.json();
             console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
