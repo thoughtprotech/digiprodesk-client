@@ -44,33 +44,58 @@ export default function Index() {
           });
         }
 
-        //Recording Start
+        // Recording Start
         const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9' });
+
+        // Create an array to hold the data chunks
+        let recordedChunks: Blob[] = [];
+
         mediaRecorder.ondataavailable = async (event) => {
           if (event.data.size > 0) {
-            const formData = new FormData();
-            formData.append("videoChunk", event.data);
-            formData.append("sessionId", currentRoomId);
-
-            try {
-              const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
-                method: "POST",
-                body: formData,
-              });
-              const result = await response.json();
-              uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
-            } catch (error) {
-              console.error("Error uploading chunk:", error);
-            }
+            recordedChunks.push(event.data);
           }
         };
-        mediaRecorder.start(2000); // Send video chunks every 2 seconds
+
+        mediaRecorder.onstop = async () => {
+          // Once the recording is stopped, create a new blob and send it
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+
+          const formData = new FormData();
+          formData.append("videoChunk", blob, "chunk.webm");
+          formData.append("sessionId", currentRoomId);
+
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
+              method: "POST",
+              body: formData,
+            });
+            const result = await response.json();
+            uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
+          } catch (error) {
+            console.error("Error uploading chunk:", error);
+          } finally {
+            // Reset recorded chunks after sending
+            recordedChunks = [];
+          }
+        };
+
+        // Start recording, then stop every 2 seconds to prepare for next chunk
+        mediaRecorder.start();
+
+        setInterval(() => {
+          if (mediaRecorder.state === "recording") {
+            mediaRecorder.stop();  // Stop to trigger onstop event
+            mediaRecorder.start(); // Start again for next chunk
+          }
+        }, 2000); // Send video chunks every 2 seconds
+
         mediaRecorderRef.current = mediaRecorder;
       })
       .catch((err) => {
         console.error("Error accessing media devices.", err);
       });
   };
+
 
   const initiateCall = () => {
     const roomId = `room-${Math.floor(Math.random() * 1000)}`;
