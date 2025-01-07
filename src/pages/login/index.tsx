@@ -137,7 +137,7 @@ export default function Login() {
               <Button
                 color="indigo"
                 onClick={handleLogIn}
-                text="Log In"
+                text="Log In To Virtual Assistance"
               />
             </div>
           </div>
