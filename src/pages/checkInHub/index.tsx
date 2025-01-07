@@ -279,19 +279,19 @@ export default function Index() {
       mediaRecorderRef.current = null;
     }
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/merge-chunks`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ sessionId: currentRoomId.current, user: "host" }),
-      });
-      const result = await response.json();
-      console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
-    } catch (error) {
-      console.error("Error merging video:", error);
-    }
+    // try {
+    //   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/merge-chunks`, {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify({ sessionId: currentRoomId.current, user: "host" }),
+    //   });
+    //   const result = await response.json();
+    //   console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
+    // } catch (error) {
+    //   console.error("Error merging video:", error);
+    // }
 
     setScreenshotImage([]);
     setTakeScreenshot(false);

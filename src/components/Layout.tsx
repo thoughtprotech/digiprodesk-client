@@ -1,4 +1,4 @@
-import { Cctv, FileText, Headset, LayoutDashboard, LogOut, MapPin, Menu, Settings, Users } from "lucide-react";
+import { Cctv, FileClock, Headset, LayoutDashboard, LogOut, MapPin, Menu, Settings, Users } from "lucide-react";
 import Dropdown from "./ui/DropDown";
 import { ReactNode } from "react";
 // import { ThemeContext } from "@/context/ThemeContext";
@@ -87,10 +87,10 @@ export default function Index({
               <div className={
                 `${router.pathname === '/admin/documents' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
               }
-                onClick={() => router.push('/admin/documents')}
+                onClick={() => router.push('/admin/calls')}
               >
-                <Tooltip tooltip="Documents" position="bottom">
-                  <FileText className="w-5 h-5" />
+                <Tooltip tooltip="Call Logs" position="bottom">
+                  <FileClock className="w-5 h-5" />
                 </Tooltip>
               </div>
               <div className={
