@@ -64,6 +64,21 @@ export default function Index() {
   const mediaConnectionRef = useRef<MediaConnection | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Initialize the audio element
+    audioRef.current = new Audio('/sounds/call-ringtone.wav');
+    audioRef.current.volume = 0.5; // Set volume as needed
+
+    // Cleanup on component unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   const router = useRouter();
 
@@ -126,11 +141,51 @@ export default function Index() {
       const peer = new Peer(userId);
 
       socket.emit("get-call-list");
-
       socket.on("call-list-update", (data) => {
         console.log(data);
+
+        // Identify new "pending" calls
+        const newPendingCalls = data.filter(
+          (call: {
+            from: string; roomId: string; status: string; to: string | null;
+          }) =>
+            call.status === "pending" &&
+            !callList.some((existingCall) => existingCall.roomId === call.roomId)
+        );
+
+        // Log or handle the new pending calls if needed
+        console.log("New pending calls:", newPendingCalls);
+
+        if (newPendingCalls.length > 0) {
+          // Handle new pending calls here, e.g., show a notification
+          if (audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              console.error('Error playing audio:', error);
+            });
+          }
+          newPendingCalls.map((call: { from: string; roomId: string; status: string; to: string | null; }) => {
+            toast.custom((t: any) => (
+              // <Toast t={t} type="info" content={`New Call from ${toTitleCase(call.from)}`} />
+
+              <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md ${t.visible ? 'animate-enter' : 'animate-leave'
+                }`}>
+                <div className="w-full p-2 bg-orange-700/40 flex items-center gap-2">
+                  <PhoneIncoming className="w-5 h-5 text-orange-500" />
+                  <h1 className="font-bold">
+                    Incoming Call From {toTitleCase(call.from)}</h1>
+                </div>
+              </div>
+            ), {
+              position: "top-left",
+              duration: 10000
+            });
+          })
+        }
+
+        // Update the call list state
         setCallList(data);
       });
+
 
       peer.on('open', (id: string) => {
         setPeerId(id);
@@ -217,6 +272,11 @@ export default function Index() {
       };
     }
   }, []);
+
+  useEffect(() => {
+    // If callList gets updated with new calls, console log only those new calls
+
+  }, [callList])
 
   const handleToggleCamera = () => {
     console.log(mediaConnectionRef.current?.localStream.getVideoTracks());
