@@ -165,9 +165,7 @@ export default function Index() {
           }
           newPendingCalls.map((call: { from: string; roomId: string; status: string; to: string | null; }) => {
             toast.custom((t: any) => (
-              // <Toast t={t} type="info" content={`New Call from ${toTitleCase(call.from)}`} />
-
-              <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md ${t.visible ? 'animate-enter' : 'animate-leave'
+              <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md absolute top-[3.6rem] ${t.visible ? 'animate-enter' : 'animate-leave'
                 }`}>
                 <div className="w-full p-2 bg-orange-700/40 flex items-center gap-2">
                   <PhoneIncoming className="w-5 h-5 text-orange-500" />
