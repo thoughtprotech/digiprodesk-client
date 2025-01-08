@@ -69,7 +69,7 @@ export default function Index() {
   useEffect(() => {
     // Initialize the audio element
     audioRef.current = new Audio('/sounds/call-ringtone.wav');
-    audioRef.current.volume = 0.5; // Set volume as needed
+    audioRef.current.volume = 0.9; // Set volume as needed
 
     // Cleanup on component unmount
     return () => {
