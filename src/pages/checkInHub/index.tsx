@@ -175,7 +175,7 @@ export default function Index() {
               </div>
             ), {
               position: "top-left",
-              duration: 10000
+              duration: 10000,
             });
           })
         }

@@ -89,7 +89,7 @@ export default function Login() {
     <div className="flex h-screen">
       <div className="w-1/2 h-full">
         <Image
-          src={`/images/loginBackground.png`}
+          src={`/images/loginBackground.jpg`}
           alt="Login"
           width={1000}
           height={1000}
@@ -110,10 +110,11 @@ export default function Login() {
             <div className="w-full flex flex-col border-b-2 border-b-border pb-2">
               <h1 className="font-bold text-lg text-textAlt">WELCOME BACK!</h1>
               <h1 className="font-bold text-4xl">
+                Let&apos;s Get You {" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">
-                  Log In {" "}
+                  Signed In
                 </span>
-                To Your Account.</h1>
+              </h1>
             </div>
             <div className="w-full">
               <input
