@@ -126,7 +126,77 @@ export default function Index() {
 
   useEffect(() => {
     if (userId !== "") {
-      const peer = new Peer(userId);
+      const peer = new Peer(userId, {
+        config: {
+          iceServers: [
+            {
+              urls: "turn:relay1.expressturn.com:80",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay1.expressturn.com:443",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay1.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay2.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay3.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay4.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay5.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay6.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay7.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay8.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay9.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay10.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+            {
+              urls: "turn:relay11.expressturn.com:3478",
+              username: "efE34XGFPG52SHEMJJ",
+              credential: "sI43EOvU8Z3d0hFk"
+            },
+          ]
+        }
+      });
       peerInstance.current = peer;
 
       const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
