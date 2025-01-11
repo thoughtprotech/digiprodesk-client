@@ -1,4 +1,4 @@
-import { Cctv, FileClock, Headset, LayoutDashboard, LogOut, MapPin, Menu, Settings, Users } from "lucide-react";
+import { Backpack, Cctv, Headset, LayoutDashboard, LogOut, MapPin, Menu, Settings, Users } from "lucide-react";
 import Dropdown from "./ui/DropDown";
 import { ReactNode } from "react";
 // import { ThemeContext } from "@/context/ThemeContext";
@@ -89,8 +89,8 @@ export default function Index({
               }
                 onClick={() => router.push('/admin/calls')}
               >
-                <Tooltip tooltip="Call Logs" position="bottom">
-                  <FileClock className="w-5 h-5" />
+                <Tooltip tooltip="Check Ins" position="bottom">
+                  <Backpack className="w-5 h-5" />
                 </Tooltip>
               </div>
               <div className={
