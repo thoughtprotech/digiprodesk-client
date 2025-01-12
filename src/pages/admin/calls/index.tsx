@@ -34,7 +34,7 @@ const mockCardData: {
 export default function Index() {
   const [searchParam, setSearchParam] = useState<string>('')
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setSearchParam(event.target.value)
   }
 
