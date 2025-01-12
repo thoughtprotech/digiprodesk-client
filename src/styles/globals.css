@@ -37,3 +37,36 @@ body {
 .toastStyle {
   @apply bg-background text-text;
 }
+
+/* style checkbox input field */
+input[type="checkbox"] {
+  @apply appearance-none bg-background;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 2.45rem;
+  height: 2.45rem;
+  border: 2px solid var(--border-color);
+  border-radius: 0.25rem;
+  outline: none;
+  transition: all 0.3s;
+  position: relative;
+  cursor: pointer;
+  background-color: var(--background);
+}
+
+input[type="checkbox"]:checked {
+  @apply bg-background;
+  border: 2px solid var(--border-color);
+}
+
+input[type="checkbox"]:checked::before {
+  content: "✓"; /* Unicode checkmark character */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem; /* Adjust the size of the checkmark */
+  color: var(--text-color); /* Set the color of the checkmark */
+  font-weight: bold;
+}

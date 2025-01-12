@@ -53,7 +53,7 @@ const Input: React.FC<InputProps> = ({
 
       if (onChange) {
         const syntheticEvent = {
-          target: { name: 'file', value: uploadedFile }
+          target: { name, value: uploadedFile }
         };
         onChange(syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>);
       }
@@ -65,7 +65,7 @@ const Input: React.FC<InputProps> = ({
     setFilePreview(null);
     if (onChange) {
       const syntheticEvent = {
-        target: { name: 'file', value: null }
+        target: { name, value: null }
       };
       onChange(syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>);
     }
@@ -142,8 +142,7 @@ const Input: React.FC<InputProps> = ({
       <input
         type="checkbox"
         onChange={onChange}
-        checked={value === 'true'} // Controlled input
-        className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 ${className}`}
+        checked={value === 'true'} // Convert string 'true' to boolean
         name={name}
       />
     );

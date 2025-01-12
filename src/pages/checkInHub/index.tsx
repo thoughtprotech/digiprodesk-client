@@ -260,7 +260,6 @@ export default function Index() {
       });
 
       peer.on('call', (call: MediaConnection) => {
-        // Use modern getUserMedia method for answering the call
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
           .then((mediaStream: MediaStream) => {
             if (currentUserVideoRef.current) {
@@ -279,24 +278,22 @@ export default function Index() {
             });
 
             mediaConnectionRef.current = call;
+
             // Recording Start
             const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp8,opus' });
 
             // Create an array to hold the data chunks
-            let recordedChunks: Blob[] = [];
+            const chunkQueue: Blob[] = [];
+            let isUploading = false;
 
-            mediaRecorder.ondataavailable = async (event) => {
-              if (event.data.size > 0) {
-                recordedChunks.push(event.data);
-              }
-            };
+            const uploadChunk = async () => {
+              if (chunkQueue.length === 0 || isUploading) return;
 
-            mediaRecorder.onstop = async () => {
-              // Once the recording is stopped, create a new blob and send it
-              const blob = new Blob(recordedChunks, { type: 'video/webm' });
+              isUploading = true;
+              const chunk = chunkQueue.shift(); // Remove the first chunk from the queue
 
               const formData = new FormData();
-              formData.append("videoChunk", blob, "chunk.webm");
+              formData.append("videoChunk", chunk!, "chunk.webm");
               formData.append("sessionId", currentRoomId.current);
               formData.append("user", "host");
 
@@ -310,18 +307,25 @@ export default function Index() {
               } catch (error) {
                 console.error("Error uploading chunk:", error);
               } finally {
-                // Reset recorded chunks after sending
-                recordedChunks = [];
+                isUploading = false;
+                uploadChunk(); // Check for the next chunk in the queue
               }
             };
 
-            // Start recording, then stop every 2 seconds to prepare for next chunk
+            mediaRecorder.ondataavailable = (event) => {
+              if (event.data.size > 0) {
+                chunkQueue.push(event.data); // Add the chunk to the queue
+                uploadChunk(); // Start the upload process
+              }
+            };
+
+            // Start recording, then stop every 2 seconds to prepare for the next chunk
             mediaRecorder.start();
 
             setInterval(() => {
               if (mediaRecorder.state === "recording") {
-                mediaRecorder.stop();  // Stop to trigger onstop event
-                mediaRecorder.start(); // Start again for next chunk
+                mediaRecorder.stop();  // Stop to trigger ondataavailable event
+                mediaRecorder.start(); // Start again for the next chunk
               }
             }, 2000); // Send video chunks every 2 seconds
 
@@ -331,6 +335,7 @@ export default function Index() {
             console.error("Error accessing media devices.", err);
           });
       });
+
 
       peerInstance.current = peer;
 
