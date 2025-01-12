@@ -1,9 +1,112 @@
 import Layout from '@/components/Layout'
-import { Backpack, Calendar, Clock, FilePlus2, Pause, Phone, PhoneIncoming, PhoneOff, Play, Ticket } from 'lucide-react';
+import { Backpack, Calendar, Clock, FilePlus2, Ticket, Timer } from 'lucide-react';
 import CallCard from '../_components/CallCard';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useEffect, useState } from 'react';
+
+interface Call {
+  roomId: string;
+  from: string;
+  status: string;
+  to: string;
+  bookingId?: string;
+  timestamps: {
+    timestamp: string;
+    status: 'pending' | 'accepted' | 'onHold' | 'resumed' | 'end';
+  }[]
+}
+
+const callMock: Call =
+{
+  roomId: '1',
+  from: 'John Doe',
+  status: 'pending',
+  bookingId: 'BKID123',
+  to: 'Jane Doe',
+  timestamps: [
+    {
+      timestamp: '2025-01-01T08:00:30.564Z',
+      status: 'pending',
+    },
+    {
+      timestamp: '2025-01-01T08:02:05.564Z',
+      status: 'accepted'
+    },
+    {
+      timestamp: '2025-01-01T08:05:00.564Z',
+      status: 'onHold'
+    },
+    {
+      timestamp: '2025-01-01T08:10:00.564Z',
+      status: 'resumed'
+    },
+    {
+      timestamp: '2025-01-01T08:15:00.564Z',
+      status: 'end'
+    }
+  ]
+};
+
+const callMapping: {
+  [key: string]: {
+    text: string;
+    bg: string;
+    color: string;
+  };
+} = {
+  pending: {
+    text: "Call Pending",
+    bg: "bg-orange-500/30",
+    color: "text-orange-500"
+  },
+  accepted: {
+    text: "Call Accepted",
+    bg: "bg-green-500/30",
+    color: "text-green-500"
+  },
+  onHold: {
+    text: "Call On Hold",
+    bg: "bg-indigo-500/30",
+    color: "text-indigo-500"
+  },
+  resumed: {
+    text: "Call Resumed",
+    bg: "bg-violet-500/30",
+    color: "text-violet-500"
+  },
+  end: {
+    text: "Call Ended",
+    bg: "bg-red-500/30",
+    color: "text-red-500"
+  }
+}
+
+export function TimelineCard({ timestamps }: {
+  timestamps: {
+    timestamp: string;
+    status: string;
+  }[]
+}) {
+  return (
+    <div className='w-full flex flex-col gap-1'>
+      {timestamps.map((timestamp, index) => (
+        <div key={index} className='w-full flex flex-col gap-1'>
+          <div className={`w-full flex items-center justify-between gap-2 ${callMapping[timestamp.status].bg} p-1 px-2 rounded-md`}>
+            <div>
+              <h1 className='font-bold text-text'>{callMapping[timestamp.status].text}</h1>
+            </div>
+            <div>
+              <h1 className={`text-[0.6rem] ${callMapping[timestamp.status].color} font-bold whitespace-nowrap`}>{
+                new Date(timestamp.timestamp).toLocaleTimeString()
+              }</h1>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 const mockCardData: {
   id: string;
@@ -51,22 +154,34 @@ export default function Index() {
     time: string;
     ticket: string;
   }[]>([]);
-  const [currentCall, setCurrentCall] = useState<string>("");
+  const [currentCall, setCurrentCall] = useState<Call | null>(null);
 
-  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setBookingId(event.target.value);
     console.log(event.target.value)
     const filteredData = mockCardData.filter(data => data.ticket.includes(event.target.value));
     setCallLogList(filteredData);
   }
 
-  const handleCallChange = (id: string) => {
-    setCurrentCall(id);
+  const handleCallChange = () => {
+    setCurrentCall(callMock);
   }
 
   useEffect(() => {
     setCallLogList(mockCardData);
   }, [mockCardData])
+
+  const formatDuration = (difference: number) => {
+    const hours = Math.floor(difference / (60 * 60 * 1000));
+    const minutes = Math.floor((difference % (60 * 60 * 1000)) / (60 * 1000));
+    const seconds = Math.floor((difference % (60 * 1000)) / 1000);
+
+    let result = '';
+    if (hours > 0) result += `${hours} hour${hours > 1 ? 's' : ''} `;
+    if (minutes > 0) result += `${minutes} min${minutes > 1 ? 's' : ''} `;
+    if (seconds > 0 || result === '') result += `${seconds} second${seconds > 1 ? 's' : ''}`;
+    return result.trim();
+  };
 
   return (
     <Layout headerTitle={
@@ -81,114 +196,109 @@ export default function Index() {
     }>
       <div className='w-full h-[90vh] flex flex-col-reverse gap-2'>
         <div className='w-full h-1/2 flex gap-2'>
-          <div className='w-1/4 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
+          <div className='w-1/2 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
             <div className='w-full border-b border-b-border pb-2 sticky top-0 z-50 bg-foreground'>
               <div>
                 <h1 className='text-2xl font-bold'>Call Details</h1>
               </div>
-              {currentCall !== "" && (
+              {currentCall && (
                 <div className="w-full flex items-center gap-3">
                   <div className="flex items-center gap-1">
+                    <Ticket className="w-4 text-textAlt" />
+                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{currentCall.bookingId}</h1>
+                  </div>
+                  <div className="flex items-center gap-1">
                     <Calendar className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">01-01-2025</h1>
+                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">
+                      {new Date(currentCall.timestamps[0].timestamp).toLocaleDateString()}
+                    </h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">08:00 AM</h1>
+                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{
+                      new Date(currentCall.timestamps[0].timestamp).toLocaleTimeString()
+                    }</h1>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Ticket className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">BKID123456</h1>
+                    <Timer className="w-4 text-textAlt" />
+                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{
+                      formatDuration(
+                        new Date(currentCall.timestamps[currentCall.timestamps.length - 1].timestamp).getTime()
+                        - new Date(currentCall.timestamps[0].timestamp).getTime()
+                      )
+                    }</h1>
                   </div>
                 </div>
               )}
             </div>
-            {currentCall ? (
-              <div className='w-full h-full flex flex-col gap-2'>
-                <div>
-                  <h1 className='font-bold text-xl'>Timeline</h1>
-                </div>
-                <div className='w-full h-full flex flex-col gap-2'>
-                  <div className='flex items-center gap-2'>
-                    <div className='w-1/4 h-full flex items-center border-r-2 border-r-border border-dashed pr-2'>
-                      <h1 className='text-sm text-textAlt font-bold whitespace-nowrap'>8:00 AM</h1>
+            {/* Timeline and call details */}
+            <div className='w-full h-full overflow-hidden'>
+              {currentCall ? (
+                <div className='w-full h-full overflow-hidden flex gap-2'>
+                  <div className='w-1/2 px-2 h-full overflow-auto flex flex-col gap-2 border-r border-r-border relative'>
+                    <div className='w-full flex bg-foreground sticky top-0'>
+                      <h1 className='font-bold text-xl'>Timeline</h1>
                     </div>
-                    <div className='w-fit flex flex-col bg-sky-700/30 p-1 px-2 rounded-md'>
-                      <div className='w-fit flex justify-center items-center gap-2'>
-                        <PhoneIncoming className='w-4 ' />
-                        <h1 className='font-bold text-sm'>Call Inbound</h1>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <div className='w-1/4 h-full flex items-center border-r-2 border-r-border border-dashed pr-2'>
-                      <h1 className='text-sm text-textAlt font-bold whitespace-nowrap'>8:00 AM</h1>
-                    </div>
-                    <div className='w-fit flex flex-col bg-green-700/30 p-1 px-2 rounded-md'>
-                      <div className='w-fit flex justify-center items-center gap-2'>
-                        <Phone className='w-4 ' />
-                        <h1 className='font-bold text-sm'>Call Accepted</h1>
-                      </div>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-2'>
-                    <div className='w-1/4 h-full flex items-center border-r-2 border-r-border border-dashed pr-2'>
-                      <h1 className='text-sm text-textAlt font-bold whitespace-nowrap'>8:02 AM</h1>
-                    </div>
-                    <div className='w-fit flex flex-col bg-indigo-700/30 p-1 px-2 rounded-md'>
-                      <div className='w-fit flex justify-center items-center gap-2'>
-                        <Pause className='w-4 ' />
-                        <h1 className='font-bold text-sm'>Call Put On Hold</h1>
-                      </div>
+                    <div className='w-full h-full flex flex-col gap-1'>
+                      {currentCall.timestamps.map((timestamp, index) => {
+                        const difference =
+                          index < currentCall.timestamps.length - 1
+                            ? new Date(currentCall.timestamps[index + 1].timestamp).getTime() - new Date(timestamp.timestamp).getTime()
+                            : 0;
+                        return (
+                          <div key={index} className='flex flex-col gap-1'>
+                            <TimelineCard timestamps={[timestamp]} />
+                            {index < currentCall.timestamps.length - 1 && (
+                              <div className='w-full flex items-center justify-center gap-2 bg-foreground border-2 border-border border-dashed p-1 px-2 rounded-md'>
+                                <div>
+                                  {/* <PhoneIncoming className='w-4 text-sky-500' /> */}
+                                  <h1 className='text-[0.6rem] text-textAlt font-bold whitespace-nowrap'>{ }
+                                    {/* Difference of timestamp of next timestamp and current */}
+                                    {difference > 0 ? `${formatDuration(difference)}` : ""}
+                                  </h1>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
-                  <div className='flex items-center gap-2'>
-                    <div className='w-1/4 h-full flex items-center border-r-2 border-r-border border-dashed pr-2'>
-                      <h1 className='text-sm text-textAlt font-bold whitespace-nowrap'>8:02 AM</h1>
-                    </div>
-                    <div className='w-fit flex flex-col bg-purple-700/30 p-1 px-2 rounded-md'>
-                      <div className='w-fit flex justify-center items-center gap-2'>
-                        <Play className='w-4 ' />
-                        <h1 className='font-bold text-sm'>Call Resumed</h1>
+                  <div className='w-1/2 h-full flex flex-col gap-2'>
+                    <div>
+                      <div>
+                        <h1 className='font-bold text-xl'>Booking ID</h1>
+                      </div>
+                      <div className='w-full h-full'>
+                        <Input type='text' placeholder='Enter Booking ID' />
                       </div>
                     </div>
-                  </div>
-
-                  <div className='flex items-center gap-2'>
-                    <div className='w-1/4 h-full flex items-center border-r-2 border-r-border border-dashed pr-2'>
-                      <h1 className='text-sm text-textAlt font-bold whitespace-nowrap'>8:05 AM</h1>
-                    </div>
-                    <div className='w-fit flex flex-col bg-red-700/30 p-1 px-2 rounded-md'>
-                      <div className='w-fit flex justify-center items-center gap-2'>
-                        <PhoneOff className='w-4 ' />
-                        <h1 className='font-bold text-sm'>Call Ended</h1>
+                    <div>
+                      <div>
+                        <h1 className='font-bold text-xl'>Notes</h1>
+                      </div>
+                      <div className='w-full h-full'>
+                        <Input type='textArea' placeholder='Enter Notes' />
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className='w-full h-full max-h-[50vh] p-2 rounded-md flex flex-col items-center justify-center gap-2 overflow-auto relative'>
-                <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
-              </div>
-            )}
+              ) : (
+                <div className='w-full h-full max-h-[50vh] p-2 rounded-md flex flex-col items-center justify-center gap-2 overflow-auto relative'>
+                  <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
+                </div>
+              )}
+            </div>
           </div>
-          <div className='w-3/4 h-full rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
+          {/* Documents */}
+          <div className='w-1/2 h-full rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
             <div className='w-full flex items-center bg-foreground justify-between border-b border-b-border pb-2 p-2 sticky top-0'>
               <div className='w-full'>
                 <div>
                   <h1 className='text-2xl font-bold'>Documents</h1>
                 </div>
-                {currentCall !== "" && (
-                  <div className="flex items-center gap-1">
-                    <h1 className="font-semibold text-sm text-textAlt border-r border-r-border pr-2">Notes</h1>
-                    <div>
-                      <h1 className='text-xs text-textAlt'>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Id odio beatae dignissimos nostrum </h1>
-                    </div>
-                  </div>
-                )}
               </div>
-              {currentCall !== "" && (
+              {!currentCall && (
                 <div>
                   <Button text='Add Document' icon={<FilePlus2 className='w-5 h-5' />} color="zinc" onClick={() => console.log('Add Document')} />
                 </div>
@@ -234,7 +344,7 @@ export default function Index() {
               <div className='flex flex-col gap-2 px-2'>
                 {
                   callLogList.map((call, index) => (
-                    <CallCard key={index} {...call} onClick={() => handleCallChange(call.id)} />
+                    <CallCard key={index} {...call} onClick={handleCallChange} />
                   ))
                 }
               </div>
