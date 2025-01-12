@@ -169,7 +169,7 @@ export default function Index() {
               </div>
             ) : (
               <div className='w-full h-full max-h-[50vh] p-2 rounded-md flex flex-col items-center justify-center gap-2 overflow-auto relative'>
-                <h1 className='text-2xl font-bold text-textAlt'>Select A Session</h1>
+                <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
               </div>
             )}
           </div>
@@ -209,7 +209,7 @@ export default function Index() {
               </div>
             ) : (
               <div className='w-full h-full rounded-md flex items-center justify-center'>
-                <h1 className='text-2xl font-bold text-textAlt'>Select A Session</h1>
+                <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
               </div>
             )}
           </div>
@@ -252,7 +252,7 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full h-full bg-foreground flex items-center justify-center'>
-                <h1 className='text-2xl font-bold text-textAlt'>Select A Session</h1>
+                <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
               </div>
             </div>
           )}
