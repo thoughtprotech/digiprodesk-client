@@ -56,7 +56,7 @@ const callMapping: {
   };
 } = {
   pending: {
-    text: "Call Pending",
+    text: "Call Initiated",
     bg: "bg-orange-500/30",
     color: "text-orange-500"
   },
