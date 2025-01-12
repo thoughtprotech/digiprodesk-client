@@ -793,12 +793,12 @@ export default function Index() {
             <div className="w-full h-full flex flex-col space-y-4 justify-start items-center px-2">
               <div className="w-full h-fit flex flex-col space-y-2 border-b-2 border-b-border pb-2">
                 <Tooltip tooltip="All Calls" position="left">
-                  <div className="w-full h-fit bg-green-500/30 hover:bg-green-500/50 duration-300 p-2 rounded-md flex space-x-1 justify-center items-center cursor-pointer" onClick={() => {
+                  <div className="w-full h-fit bg-sky-500/30 hover:bg-sky-500/50 duration-300 p-2 rounded-md flex space-x-1 justify-center items-center cursor-pointer" onClick={() => {
                     setRightPanelCollapsed(false);
                     handleFilterChange("all");
                   }}>
-                    <Phone className="w-5 h-5 text-green-500" />
-                    <h1 className="font-bold text-xl">12</h1>
+                    <Phone className="w-5 h-5 text-sky-500" />
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold" || call.status === "pending").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="On Hold" position="left">
@@ -807,7 +807,7 @@ export default function Index() {
                     handleFilterChange("onHold");
                   }}>
                     <Pause className="w-5 h-5 text-indigo-500" />
-                    <h1 className="font-bold text-xl">6</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="Incoming" position="left">
@@ -816,7 +816,7 @@ export default function Index() {
                     handleFilterChange("incoming");
                   }}>
                     <PhoneIncoming className="w-5 h-5 text-orange-500" />
-                    <h1 className="font-bold text-xl">6</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.status === "incoming").length}</h1>
                   </div>
                 </Tooltip>
               </div>
