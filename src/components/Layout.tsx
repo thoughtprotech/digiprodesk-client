@@ -55,7 +55,7 @@ export default function Index({
     //   return toggleTheme();
     // }
     if (id === 'settings') {
-      return router.push('/admin/dashboard');
+      return router.push('/admin/users');
     }
     if (id === 'watchCenter') {
       return router.push('/watchCenter');
