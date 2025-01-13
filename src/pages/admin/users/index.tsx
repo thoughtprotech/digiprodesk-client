@@ -4,7 +4,7 @@ import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
 import { Role, User } from '@/utils/types'
-import { Plus, Users } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import UserCard from './_components/UserCard'
 
@@ -137,11 +137,11 @@ export default function Index() {
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
-        <div>
-          <Users />
+        <div className="border-r border-r-border pr-2">
+          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-2xl'>USERS</h1>
+          <h1 className='font-bold text-xl'>USERS</h1>
         </div>
       </div>
     }>

@@ -1,5 +1,4 @@
 import Layout from '@/components/Layout'
-import { MapPin } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Location, LocationGroup, LocationGroupMapping } from '@/utils/types'
 import Locations from './_components/Locations'
@@ -145,11 +144,11 @@ export default function Index() {
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
-        <div>
-          <MapPin />
+        <div className="border-r border-r-border pr-2">
+          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-2xl'>LOCATIONS</h1>
+          <h1 className='font-bold text-xl'>LOCATIONS</h1>
         </div>
       </div>
     }>

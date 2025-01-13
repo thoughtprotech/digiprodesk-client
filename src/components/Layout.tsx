@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
 import { destroyCookie } from "nookies";
+import Image from "next/image";
 
 
 
@@ -71,7 +72,18 @@ export default function Index({
   return (
     <div className="w-full h-screen overflow-hidden flex flex-col space-y-2">
       <div className="w-full border-b-2 border-b-border py-2 flex justify-between items-center px-2 bg-foreground p-2">
-        {headerTitle}
+        <div className="flex items-center space-x-2">
+          <div className="border-r border-r-border pr-2">
+            <Image
+              src="/images/logo.png"
+              alt="Logo"
+              width={1000}
+              height={1000}
+              className="w-20"
+            />
+          </div>
+          {headerTitle}
+        </div>
         <div className="flex items-center space-x-2 pr-4">
           {header}
           {router.pathname.includes("/admin") && (

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
-import { FilePlus2, Headset, MapPin, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
+import { FilePlus2, MapPin, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
 import ScreenshotComponent from "@/components/ui/Screenshotcomponent";
@@ -516,14 +516,11 @@ export default function Index() {
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
-        <div>
-          <Headset />
+        <div className="border-r border-r-border pr-2">
+          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold'>CHECK-IN HUB</h1>
-        </div>
-        <div>
-          <h1 className='font-bold text-2xl border-l pl-2 border-l-border'>OLIVE HEAD OFFICE</h1>
+          <h1 className='font-bold text-xl'>CHECK IN HUB</h1>
         </div>
       </div>
     } header={

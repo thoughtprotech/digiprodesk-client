@@ -59,12 +59,12 @@ const Dropdown = ({
   });
 
   const dropdownClass = classNames(
-    'absolute bg-background w-max max-h-64 overflow-y-auto rounded shadow-md z-10',
+    'absolute border border-border bg-background w-max max-h-64 overflow-y-auto rounded shadow-md z-10',
     {
-      'top-full right-0 mt-2': position === 'bottom-right',
-      'top-full left-0 mt-2': position === 'bottom-left',
-      'bottom-full right-0 mb-2': position === 'top-right',
-      'bottom-full left-0 mb-2': position === 'top-left',
+      'top-full right-0 mt-4': position === 'bottom-right',
+      'top-full left-0 mt-4': position === 'bottom-left',
+      'bottom-full right-0 mb-4': position === 'top-right',
+      'bottom-full left-0 mb-4': position === 'top-left',
     }
   );
 

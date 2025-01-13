@@ -1,6 +1,6 @@
 import Layout from '@/components/Layout'
 import Input from '@/components/ui/Input';
-import { Backpack, Phone } from 'lucide-react'
+import { Phone } from 'lucide-react'
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Select from '@/components/ui/Select'
@@ -61,11 +61,11 @@ export default function Index() {
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
-        <div>
-          <Backpack />
+        <div className="border-r border-r-border pr-2">
+          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-2xl'>Check In</h1>
+          <h1 className='font-bold text-xl'>Check In</h1>
         </div>
       </div>
     }>
