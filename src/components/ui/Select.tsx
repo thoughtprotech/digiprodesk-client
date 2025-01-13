@@ -40,11 +40,19 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
     <div className="w-full relative inline-block min-w-44">
       {/* Selected Option */}
       <div
-        className="outline-none rounded-md bg-background border-2 border-border p-2 cursor-pointer"
+        className="w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <h1 className="font-bold text-text text-sm">
-          {selectedOption ? selectedOption.label : placeholder ? placeholder : "Select an Option"}
+        <h1 className={`"font-bold text-textAlt text-sm"`}>
+          {selectedOption ?
+            <span className="text-text font-bold text-sm">
+              {selectedOption.label}
+            </span>
+            : placeholder ?
+              <span className="text-textAlt text-sm font-bold">
+                {placeholder}
+              </span>
+              : "Select an Option"}
         </h1>
       </div>
 

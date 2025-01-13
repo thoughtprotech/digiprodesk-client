@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
-import { FilePlus2, Headset, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
+import { FilePlus2, Headset, MapPin, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
 import ScreenshotComponent from "@/components/ui/Screenshotcomponent";
@@ -527,7 +527,12 @@ export default function Index() {
         </div>
       </div>
     } header={
-      <div>
+      <div className="flex gap-2">
+        <Tooltip tooltip="Preferred Locations" position="bottom">
+          <div>
+            <MapPin />
+          </div>
+        </Tooltip>
         {
           !isRightPanelCollapsed ? (
             <Tooltip tooltip="Close Panel" position="bottom">

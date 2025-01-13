@@ -45,6 +45,10 @@ const colorClasses = {
     base: 'bg-zinc-500/20 border-zinc-500 hover:bg-zinc-500',
     dark: 'dark:bg-zinc-500/30 dark:border-zinc-500 dark:hover:bg-zinc-500',
   },
+  foreground: {
+    base: 'bg-background border-2 border-border hover:bg-foreground',
+    dark: 'dark:bg-foreground/30 dark:border-foreground dark:hover:bg-foreground',
+  },
   // Add more colors as needed
 };
 
@@ -70,13 +74,13 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={className ? className : `w-full ${selectedColor.base} ${selectedColor.dark} border rounded-md px-4 py-2 flex items-center justify-center space-x-1 duration-300 cursor-pointer`}
+      className={className ? className : `w-full ${selectedColor.base} ${selectedColor.dark} border rounded-md px-2 py-1 flex items-center justify-center space-x-1 duration-300 cursor-pointer`}
       onClick={onClick}
       type={type}
     >
       <div className="flex items-center justify-center space-x-2">
         {icon && icon}
-        {text && <h1 className="text-text font-bold whitespace-nowrap">{text}</h1>}
+        {text && <h1 className="text-text font-bold text-sm whitespace-nowrap">{text}</h1>}
       </div>
     </button>
   );

@@ -1,4 +1,4 @@
-import { Backpack, Cctv, Headset, LayoutDashboard, LogOut, MapPin, Menu, Settings, Users } from "lucide-react";
+import { Backpack, Cctv, Headset, LogOut, MapPin, Menu, Settings, Users } from "lucide-react";
 import Dropdown from "./ui/DropDown";
 import { ReactNode } from "react";
 // import { ThemeContext } from "@/context/ThemeContext";
@@ -22,15 +22,10 @@ export default function Index({
 
 
   const dropdownItems = [
-    ...(router.pathname !== "/settings" ? [{
+    ...(!router.pathname.includes("/admin") ? [{
       "id": "settings",
       "name": "Settings",
       "icon": <Settings className="w-5 h-5" />
-    }] : []),
-    ...(!router.pathname.includes("/admin") ? [{
-      "id": "dashboard",
-      "name": "Dashboard",
-      "icon": <LayoutDashboard className="w-5 h-5" />
     }] : []),
     ...(router.pathname !== "/checkInHub" ? [{
       "id": "checkInHub",
@@ -59,9 +54,6 @@ export default function Index({
     //   return toggleTheme();
     // }
     if (id === 'settings') {
-      return router.push('/settings');
-    }
-    if (id === 'dashboard') {
       return router.push('/admin/dashboard');
     }
     if (id === 'watchCenter') {
@@ -109,15 +101,6 @@ export default function Index({
               >
                 <Tooltip tooltip="Users" position="bottom">
                   <Users className="w-5 h-5" />
-                </Tooltip>
-              </div>
-              <div className={
-                `${router.pathname === '/admin/dashboard' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-              }
-                onClick={() => router.push('/admin/dashboard')}
-              >
-                <Tooltip tooltip="Dashboard" position="bottom">
-                  <LayoutDashboard className="w-5 h-5" />
                 </Tooltip>
               </div>
             </div>

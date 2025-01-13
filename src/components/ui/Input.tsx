@@ -24,7 +24,6 @@ const Input: React.FC<InputProps> = ({
 }) => {
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
@@ -46,9 +45,6 @@ const Input: React.FC<InputProps> = ({
     if (uploadedFile) {
       setFile(uploadedFile);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setFilePreview(reader.result as string);
-      };
       reader.readAsDataURL(uploadedFile);
 
       if (onChange) {
@@ -62,7 +58,6 @@ const Input: React.FC<InputProps> = ({
 
   const handleRemoveFile = () => {
     setFile(null);
-    setFilePreview(null);
     if (onChange) {
       const syntheticEvent = {
         target: { name, value: null }
@@ -74,29 +69,32 @@ const Input: React.FC<InputProps> = ({
   if (type === 'file') {
     return (
       <div
-        className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md text-sm focus:outline-none ${dragging ? 'border-indigo-500' : 'border-border'} ${className}`}
+        className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm ${dragging ? 'border-indigo-500' : 'border-border'} ${className}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        <label className="cursor-pointer w-full h-full flex items-center rounded-md p-2">
+        <label className="cursor-pointer w-full h-full flex items-center rounded-md relative">
           <input
             type="file"
             name={name}
             onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
             className="hidden"
             accept="image/*, .pdf, .doc, .docx, .txt"
+            value={value} // Controlled input
+            required={required}
           />
           {file ? (
-            <div className="relative">
-              <div className="mb-2">
-                {filePreview && filePreview.startsWith('data:image') ? (
+            <div className="w-64">
+              <div className="w-full">
+                {/* {filePreview && filePreview.startsWith('data:image') ? (
                   <img src={filePreview} alt="file-preview" className="w-32 h-32 object-cover rounded-md" />
                 ) : (
                   <div className="w-32 h-32 text-center flex items-center justify-center rounded-md">
                     <p>File Preview</p>
                   </div>
-                )}
+                )} */}
+                <h1 className='truncateText'>{file.name}</h1>
               </div>
               <div className='absolute top-0 right-0'>
                 <Button
@@ -112,7 +110,7 @@ const Input: React.FC<InputProps> = ({
               </div>
             </div>
           ) : (
-            <div className="text-center text-textAlt text-xs">
+            <div className="text-center text-textAlt text-sm">
               {dragging ? (
                 <p>Drop the file here</p>
               ) : (

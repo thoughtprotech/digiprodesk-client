@@ -44,8 +44,8 @@ input[type="checkbox"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 2.45rem;
-  height: 2.45rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border: 2px solid var(--border-color);
   border-radius: 0.25rem;
   outline: none;
@@ -66,7 +66,13 @@ input[type="checkbox"]:checked::before {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.5rem; /* Adjust the size of the checkmark */
+  font-size: 1rem; /* Adjust the size of the checkmark */
   color: var(--text-color); /* Set the color of the checkmark */
   font-weight: bold;
+}
+
+.truncateText {
+  overflow: hidden;        /* Prevents text from overflowing the container */
+  text-overflow: ellipsis; /* Adds "..." to indicate truncated text */
+  white-space: nowrap;     /* Prevents the text from wrapping to a new line */
 }

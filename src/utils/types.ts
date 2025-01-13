@@ -5,12 +5,12 @@ export interface User {
   Password: string;
   DisplayName: string;
   RoleID: number;
-  Language: string;
-  Region: string;
-  TimeZone: string;
-  "24HourFormat": boolean;
-  Calendar: string;
-  DateFormat: string;
+  Language?: string;
+  Region?: string;
+  TimeZone?: string;
+  "24HourFormat"?: boolean;
+  Calendar?: string;
+  DateFormat?: string;
   IsActive: boolean;
   CreatedBy: number;
   CreatedOn: Date;
@@ -108,9 +108,18 @@ export interface Location {
 }
 
 export interface LocationGroup {
-  LocationGroupID: number;
+  LocationGroupID?: number;
   LocatonGroupName: string;
-  LocationID: string[];
+  isActive: boolean;
+  CreatedBy?: number;
+  CreatedOn?: Date;
+  ModifiedBy?: number;
+  ModifiedOn?: Date;
+}
+
+export interface LocationGroupMapping {
+  LocationGroupID: number;
+  LocationID: number[];
 }
 
 export interface UserLocationGroup {

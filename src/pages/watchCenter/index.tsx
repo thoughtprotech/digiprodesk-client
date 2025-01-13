@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import MockCardData from "../../../mock/watchListMock.json";
-import { Cctv, MapPinPlus } from "lucide-react";
+import { Cctv, MapPin, MapPinPlus } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
 import WatchCard from "./_components/WatchCard";
@@ -23,9 +23,9 @@ export default function Index() {
       </div>
     } header={
       <div>
-        <Tooltip tooltip="Add Location" position="bottom">
+        <Tooltip tooltip="Preferred Locations" position="bottom">
           <div>
-            <MapPinPlus />
+            <MapPin />
           </div>
         </Tooltip>
       </div>}>

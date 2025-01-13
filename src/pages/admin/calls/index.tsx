@@ -2,7 +2,7 @@ import Layout from '@/components/Layout'
 import Input from '@/components/ui/Input';
 import { Backpack, Phone } from 'lucide-react'
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Select from '@/components/ui/Select'
 
 const mockCardData: {
@@ -33,6 +33,10 @@ const mockCardData: {
 
 export default function Index() {
   const [searchParam, setSearchParam] = useState<string>('')
+  const [checkInList, setCheckInList] = useState<{
+    location: string;
+    calls: number;
+  }[]>([])
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setSearchParam(event.target.value)
@@ -43,6 +47,16 @@ export default function Index() {
   const handleCallClick = () => {
     router.push(`/admin/calls/call/1234`)
   }
+
+  const handleSearchCall = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const filteredData = mockCardData.filter((data) => data.location.toLowerCase().includes(event.target.value.toLowerCase()));
+    setCheckInList(filteredData);
+    console.log(event.target.value)
+  }
+
+  useEffect(() => {
+    setCheckInList(mockCardData);
+  }, [])
 
   return (
     <Layout headerTitle={
@@ -59,7 +73,9 @@ export default function Index() {
         <div className='w-full flex gap-2 items-end'>
         </div>
         <div className='flex items-center justify-between'>
-          <h1 className='font-bold text-2xl'>Locations</h1>
+          <div className='w52'>
+            <Input type='text' placeholder='Search Call Logs' onChange={handleSearchCall} />
+          </div>
           <div className='flex gap-2'>
             <div>
               <Input type='date' placeholder='Search Call Logs' value={searchParam} onChange={handleSearchChange} />
@@ -68,36 +84,37 @@ export default function Index() {
               <Select options={[
                 {
                   label: "Today",
-                  value: "olive-indiranagar"
+                  value: "toady"
                 },
                 {
                   label: "Last 7 Days",
-                  value: "olive-koramangala"
+                  value: "sevenDays"
                 },
                 {
                   label: "Last 15 Days",
-                  value: "olive-hsr-layout"
+                  value: "fifteenDays"
                 },
                 {
                   label: "Last 30 Days",
-                  value: "olive-whitefield"
+                  value: "thirtyDays"
                 },
                 {
                   label: "Last 60 Days",
-                  value: "olive-jayanagar"
+                  value: "sixtyDays"
                 },
                 {
                   label: "Custom",
-                  value: "olive-jayanagar"
+                  value: "custom"
                 },
               ]}
-                placeholder="Select Location" onChange={(value) => console.log(value)}
+                placeholder="Select Range" onChange={(value) => console.log(value)}
+                defaultValue='toady'
               />
             </div>
           </div>
         </div>
         <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
-          {mockCardData.map((data, index) => (
+          {checkInList.map((data, index) => (
             <div key={index} onClick={handleCallClick}>
               <div className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer'>
                 <div>
