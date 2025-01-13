@@ -46,9 +46,9 @@ export default function UserCard({ user }: {
           {user.DisplayName.split(' ').map(name => name[0]).join('')}
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-text">{user.DisplayName}</h2>
-          <p className="text-sm text-textAlt font-semibold">{roles.find(role => role.ID === user.RoleID)?.Name}</p>
-          <p className="text-sm text-textAlt font-semibold">{user.UserName}</p>
+          <h2 className="text-xl font-semibold text-text">{user?.DisplayName}</h2>
+          <p className="text-sm text-textAlt font-semibold">{roles?.find(role => role?.ID === user?.RoleID)?.Name}</p>
+          <p className="text-sm text-textAlt font-semibold">{user?.UserName}</p>
           <div className="mt-2 flex items-center gap-2">
             {
               user.IsActive ? (

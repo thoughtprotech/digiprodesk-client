@@ -110,7 +110,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
         {/* Create a grid to display locationGroups in cards */}
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {
-            locationGroupMappingData.map((group, index) => (
+            locationGroupMappingData?.map((group, index) => (
               <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationGroupModal.bind(null, locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)!)}>
                 <div>
                   <div>
@@ -176,7 +176,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                         placeholder='Select Locations'
                         options={locationData.filter(
                           location => !createLocationGroupFormData.LocationID.includes(location.LocationID!)
-                        ).map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)}
+                        )?.map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)}
                         onChange={(e) => {
                           setCreateLocationGroupFormData({
                             ...createLocationGroupFormData,
@@ -194,7 +194,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                         createLocationGroupFormData.LocationID.length > 0 && (
                           <div className='w-full flex flex-wrap gap-2'>
                             {
-                              createLocationGroupFormData.LocationID.map((locationId, index) => (
+                              createLocationGroupFormData.LocationID?.map((locationId, index) => (
                                 <div key={index} className='w-fit flex items-center gap-2 bg-background px-2 rounded-md'>
                                   <h1 className='font-bold text-sm'>
                                     {
@@ -261,7 +261,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                         placeholder='Select Locations'
                         options={locationData.filter(
                           location => !selectedLocationGroup.LocationID.includes(location.LocationID!)
-                        ).map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)}
+                        )?.map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)}
                         onChange={(e) => {
                           setSelectedLocationGroup({
                             ...selectedLocationGroup,
@@ -275,7 +275,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                         defaultValue={
                           locationData.filter(
                             location => !selectedLocationGroup.LocationID.includes(location.LocationID!)
-                          ).map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)[0]?.value
+                          )?.map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)[0]?.value
                         }
                       />
                     </div>
@@ -284,7 +284,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                         selectedLocationGroup.LocationID.length > 0 && (
                           <div className='w-full flex flex-wrap gap-2'>
                             {
-                              selectedLocationGroup.LocationID.map((locationId, index) => (
+                              selectedLocationGroup.LocationID?.map((locationId, index) => (
                                 <div key={index} className='w-fit flex items-center gap-2 bg-background px-2 rounded-md'>
                                   <h1 className='font-bold text-sm'>
                                     {
