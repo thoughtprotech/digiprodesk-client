@@ -89,11 +89,11 @@ export default function Locations({ locationData, setLocationData, locationOptio
         <div className="w-full h-fit grid grid-cols-3 gap-2">
 
           {
-            locationData.map((location, index) => (
+            locationData?.map((location, index) => (
               <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
                 <div>
                   <div>
-                    <h1 className='font-bold text-xl'>{location.LocatonName}</h1>
+                    <h1 className='font-bold text-xl'>{location?.LocatonName}</h1>
                   </div>
                   <div className='w-full flex justify-between'>
                     <div className='flex justify-between items-center gap-2'>
@@ -101,20 +101,20 @@ export default function Locations({ locationData, setLocationData, locationOptio
                         <div className='w-full flex gap-1 items-center'>
                           <h1 className='font-bold text-sm text-textAlt'>Code</h1>
                           <h1 className='font-bold text-sm text-text'>
-                            {location.LocationCode}
+                            {location?.LocationCode}
                           </h1>
                         </div>
                         <div className='w-full flex gap-1 items-center'>
                           <h1 className='font-bold text-sm text-textAlt'>Type</h1>
                           <h1 className='font-bold text-sm text-text'>
-                            {location.LocationType}
+                            {location?.LocationType}
                           </h1>
                         </div>
                       </div>
                     </div>
                     <div>
                       {
-                        location.IsActive ? (
+                        location?.IsActive ? (
                           <span
                             className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
                           >

@@ -115,7 +115,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                 <div>
                   <div>
                     <h1 className='font-bold text-xl'>{
-                      locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)?.LocatonGroupName
+                      locationGroupData?.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)?.LocatonGroupName
                     }</h1>
                   </div>
                   <div className='w-full flex justify-between'>
@@ -124,13 +124,13 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                         <div className='w-full flex gap-1 items-center'>
                           <h1 className='font-bold text-sm text-textAlt'>Locations</h1>
                           <h1 className='font-bold text-sm text-text'>
-                            {group.LocationID.length}
+                            {group?.LocationID?.length}
                           </h1>
                         </div>
                       </div>
                       <div>
                         {
-                          locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)?.isActive ? (
+                          locationGroupData?.find(locationGroup => locationGroup?.LocationGroupID === group?.LocationGroupID)?.isActive ? (
                             <span
                               className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
                             >
