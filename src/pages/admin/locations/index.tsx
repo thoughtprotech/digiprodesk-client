@@ -122,9 +122,6 @@ export default function Index() {
       <div className='w-full h-screen pb-20 overflow-auto flex items-center gap-2 bg-background p-2'>
         <div className='w-1/2 min-w-96 h-full flex flex-col gap-2 p-2 bg-foreground rounded-md'>
           <div className='border-b border-b-border pb-2 flex flex-col gap-1'>
-            <div>
-              <h1 className='font-bold text-2xl'>Create Location</h1>
-            </div>
             <form className='w-full flex flex-col gap-2' onSubmit={handleFormSubmit}>
               <div className='w-full flex gap-2 items-start'>
                 <div>
@@ -215,11 +212,8 @@ export default function Index() {
         </div>
         <div className='w-1/2 min-w-96 h-full flex flex-col gap-2 p-2 bg-foreground rounded-md'>
           <div className='border-b border-b-border pb-2 flex flex-col gap-1'>
-            <div>
-              <h1 className='font-bold text-2xl'>Create Location Group</h1>
-            </div>
             <form className='w-full flex flex-col justify-between gap-2' onSubmit={handleLocationGroupFormSubmit}>
-              <div className='w-full flex gap-2 items-end'>
+              <div className='w-full flex flex-col gap-2 items-start'>
                 <div className='w-full flex gap-2 items-end'>
                   <div>
                     <h1 className='font-bold'>Location Group Name</h1>
@@ -235,7 +229,7 @@ export default function Index() {
                     />
                   </div>
                   <div>
-                    <Button className='w-full bg-background duration-300 rounded-md px-4 py-2 hover:bg-zinc-500/30' type='submit' text='Create Location' />
+                    <Button className='w-full bg-background duration-300 rounded-md px-4 py-2 hover:bg-zinc-500/30' type='submit' text='Create Location Group' />
                   </div>
                 </div>
                 <div className='flex gap-2 items-center flex-wrap'>
@@ -255,9 +249,6 @@ export default function Index() {
             </form>
           </div>
           <div>
-            <div>
-              <h1 className='font-bold text-2xl'>Location Groups</h1>
-            </div>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
               {locationGroups.map((locationGroup, index) => (
                 <div key={index} className='bg-background p-2 rounded-md flex flex-col gap-2'>

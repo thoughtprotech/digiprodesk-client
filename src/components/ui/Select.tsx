@@ -10,7 +10,7 @@ interface CustomSelectProps {
   defaultValue?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
-  name: string;
+  name?: string;
 }
 
 const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, placeholder, name }) => {
