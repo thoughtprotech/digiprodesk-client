@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface Option {
   label: string;
@@ -8,11 +8,12 @@ interface Option {
 interface CustomSelectProps {
   options: Option[];
   defaultValue?: string;
-  onChange?: (value: string) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
+  name: string;
 }
 
-const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, placeholder }) => {
+const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, placeholder, name }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<Option | null>(
     options.find((option) => option.value === defaultValue) || null
@@ -21,7 +22,18 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
   const handleOptionClick = (option: Option) => {
     setSelectedOption(option);
     setIsOpen(false);
-    if (onChange) onChange(option.value);
+
+    if (onChange) {
+      // Create a synthetic event to mimic React.ChangeEvent<HTMLInputElement>
+      const event = {
+        target: {
+          name,
+          value: option.value,
+        },
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+      onChange(event);
+    }
   };
 
   return (
@@ -42,12 +54,11 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
           {options.map((option, index) => (
             <div
               key={option.value}
-              className={`px-4 py-2 cursor-pointer hover:bg-foreground whitespace-nowrap text-textAlt text-sm hover:text-text duration-500 ${index === options.length - 1 ? "" : "border-b border-b-border"} `}
+              className={`px-4 py-2 cursor-pointer hover:bg-foreground whitespace-nowrap text-textAlt text-sm hover:text-text duration-500 ${index === options.length - 1 ? "" : "border-b border-b-border"
+                }`}
               onClick={() => handleOptionClick(option)}
             >
-              <h1 className="font-bold">
-                {option.label}
-              </h1>
+              <h1 className="font-bold">{option.label}</h1>
             </div>
           ))}
         </div>

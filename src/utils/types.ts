@@ -95,7 +95,7 @@ export interface Location {
   LocationCode: string;
   LocationParentID?: number;
   LocationType: string;
-  LocationTheme: string;
+  LocationTheme?: string;
   LocationImage: string;
   LocationBanner: string;
   LocationVideoFeed?: string;
@@ -110,7 +110,7 @@ export interface Location {
 export interface LocationGroup {
   LocationGroupID: number;
   LocatonGroupName: string;
-  LocationID: number;
+  LocationID: string[];
 }
 
 export interface UserLocationGroup {

@@ -112,7 +112,7 @@ const Input: React.FC<InputProps> = ({
               </div>
             </div>
           ) : (
-            <div className="text-center text-textAlt">
+            <div className="text-center text-textAlt text-xs">
               {dragging ? (
                 <p>Drop the file here</p>
               ) : (
@@ -131,7 +131,7 @@ const Input: React.FC<InputProps> = ({
         placeholder={placeholder}
         onChange={onChange}
         value={value} // Controlled input
-        className={`w-full h-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 ${className}`}
+        className={`w-full h-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none ${className}`}
         name={name}
       />
     );
@@ -154,7 +154,7 @@ const Input: React.FC<InputProps> = ({
       placeholder={placeholder || 'Enter text'}
       onChange={onChange}
       value={value} // Controlled input
-      className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none focus:border-indigo-500 ${className}`}
+      className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none ${className}`}
       required={required}
       name={name}
     />
