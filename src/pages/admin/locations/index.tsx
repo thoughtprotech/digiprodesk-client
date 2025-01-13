@@ -587,7 +587,7 @@ export default function Index() {
             )
           }
         </div>
-        <div className='w-1/2 h-full overflow-y-auto flex flex-col gap-2 relative'>
+        <div className='w-1/2 h-full overflow-y-auto flex flex-col relative'>
           <div className='flex items-center justify-between sticky top-0 bg-background p-2 border-b border-b-border'>
             <div>
               <Input placeholder='Search Location Groups' onChange={handleSearchGroup} />
@@ -609,7 +609,7 @@ export default function Index() {
                         }</h1>
                       </div>
                       <div className='w-full flex justify-between'>
-                        <div className='flex justify-between items-center gap-2'>
+                        <div className='w-full flex justify-between items-center gap-2'>
                           <div className='w-full'>
                             <div className='w-full flex gap-1 items-center'>
                               <h1 className='font-bold text-sm text-textAlt'>Locations</h1>
@@ -618,21 +618,23 @@ export default function Index() {
                               </h1>
                             </div>
                           </div>
-                          {
-                            locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)?.isActive ? (
-                              <span
-                                className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
-                              >
-                                Active
-                              </span>
-                            ) : (
-                              <span
-                                className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/30 text-red-500"
-                              >
-                                Inactive
-                              </span>
-                            )
-                          }
+                          <div>
+                            {
+                              locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)?.isActive ? (
+                                <span
+                                  className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
+                                >
+                                  Active
+                                </span>
+                              ) : (
+                                <span
+                                  className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/30 text-red-500"
+                                >
+                                  Inactive
+                                </span>
+                              )
+                            }
+                          </div>
                         </div>
                       </div>
                     </div>
