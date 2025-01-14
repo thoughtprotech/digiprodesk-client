@@ -240,7 +240,8 @@ export default function Locations({ locationData, setLocationData, locationOptio
                   </h1>
                 </div>
                 <div className='flex justify-end gap-2'>
-                  <Button text='Create Location' color='foreground' type='submit' />
+                  <Button text='Save' color='foreground' type='submit' />
+                  <Button text='Cancel' color='foreground' onClick={handleCloseCreateLocationModal} />
                 </div>
               </div>
             </form>
@@ -354,6 +355,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
 
                 <div className='flex justify-end gap-2'>
                   <Button text='Create Location' color='foreground' type='submit' />
+                  <Button text='Cancel' color='foreground' onClick={handleCloseEditLocationModal} />
                 </div>
               </div>
             </form>

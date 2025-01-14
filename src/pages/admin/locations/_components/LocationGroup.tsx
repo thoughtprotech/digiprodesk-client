@@ -246,8 +246,8 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                     </h1>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button text='Save' color='indigo' type='submit' />
-                    <Button text='Cancel' color='red' type='button' onClick={handleCloseCreateLocationGroupModal} />
+                    <Button text='Save' color='foreground' type='submit' />
+                    <Button text='Cancel' color='foreground' type='button' onClick={handleCloseCreateLocationGroupModal} />
                   </div>
                 </div>
               </form>
@@ -334,8 +334,8 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                     </h1>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button text='Save' color='indigo' type='submit' />
-                    <Button text='Cancel' color='red' type='button' onClick={handleCloseEditLocationGroupModal} />
+                    <Button text='Save' color='foreground' type='submit' />
+                    <Button text='Cancel' color='foreground' type='button' onClick={handleCloseEditLocationGroupModal} />
                   </div>
                 </div>
               </form>

@@ -46,7 +46,7 @@ const colorClasses = {
     dark: 'dark:bg-zinc-500/30 dark:border-zinc-500 dark:hover:bg-zinc-500',
   },
   foreground: {
-    base: 'bg-background border-2 border-border hover:bg-foreground',
+    base: 'bg-background border-2 border-border hover:bg-highlight',
     dark: 'dark:bg-foreground/30 dark:border-foreground dark:hover:bg-foreground',
   },
   // Add more colors as needed

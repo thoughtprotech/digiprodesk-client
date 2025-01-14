@@ -198,8 +198,8 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
-                <Button color="indigo" text='Save' type='submit' />
-                <Button color="red" text='Cancel' type='button' onClick={setCreateUserModal.bind(null, false)} />
+                <Button color="foreground" text='Save' type='submit' />
+                <Button color="foreground" text='Cancel' type='button' onClick={setCreateUserModal.bind(null, false)} />
               </div>
             </div>
           </form>
@@ -240,8 +240,8 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
-                <Button color="indigo" text='Save' type='submit' />
-                <Button color="red" text='Cancel' type='button' onClick={setEditUserModal.bind(null, false)} />
+                <Button color="foreground" text='Save' type='submit' />
+                <Button color="foreground" text='Cancel' type='button' onClick={setEditUserModal.bind(null, false)} />
               </div>
             </div>
           </form>

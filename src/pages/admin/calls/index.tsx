@@ -32,15 +32,15 @@ const mockCardData: {
   ]
 
 export default function Index() {
-  const [searchParam, setSearchParam] = useState<string>('')
+  // const [searchParam, setSearchParam] = useState<string>('')
   const [checkInList, setCheckInList] = useState<{
     location: string;
     calls: number;
   }[]>([])
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setSearchParam(event.target.value)
-  }
+  // const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  //   setSearchParam(event.target.value)
+  // }
 
   const router = useRouter();
 
@@ -77,9 +77,9 @@ export default function Index() {
             <Input type='text' placeholder='Search Call Logs' onChange={handleSearchCall} />
           </div>
           <div className='flex gap-2'>
-            <div>
+            {/* <div>
               <Input type='date' placeholder='Search Call Logs' value={searchParam} onChange={handleSearchChange} />
-            </div>
+            </div> */}
             <div>
               <Select options={[
                 {
