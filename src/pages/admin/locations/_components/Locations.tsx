@@ -215,7 +215,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                   </div>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Receptionist Photo
+                      Receptionist Photo
                     </h1>
                     <Input
                       placeholder='Receptionist Photo'
@@ -328,7 +328,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                   </div>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Receptionist Photo
+                      Receptionist Photo
                     </h1>
                     <Input
                       placeholder='Receptionist Photo'

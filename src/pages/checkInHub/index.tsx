@@ -395,10 +395,10 @@ export default function Index() {
   }
 
   const handleCallEnd = async () => {
-    if (bookingId === "") {
-      document.getElementById("bookingId")?.focus();
-      return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
-    }
+    // if (bookingId === "") {
+    //   document.getElementById("bookingId")?.focus();
+    //   return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
+    // }
 
     if (mediaConnectionRef.current) {
       mediaConnectionRef.current.close();
@@ -526,20 +526,20 @@ export default function Index() {
       <div className="flex gap-2">
         <Tooltip tooltip="Preferred Locations" position="bottom">
           <div>
-            <MapPin />
+            <MapPin className="w-5 h-5" />
           </div>
         </Tooltip>
         {
           !isRightPanelCollapsed ? (
             <Tooltip tooltip="Close Panel" position="bottom">
               <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer" onClick={() => setRightPanelCollapsed(true)}>
-                <PanelRightClose className="w-6 h-6" />
+                <PanelRightClose className="w-5 h-5" />
               </div>
             </Tooltip>
           ) : (
             <Tooltip tooltip="Open Panel" position="bottom">
               <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer" onClick={() => setRightPanelCollapsed(false)}>
-                <PanelRightOpen className="w-6 h-6" />
+                <PanelRightOpen className="w-5 h-5" />
               </div>
             </Tooltip>
           )

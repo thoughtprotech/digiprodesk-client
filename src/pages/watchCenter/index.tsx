@@ -25,7 +25,7 @@ export default function Index() {
       <div>
         <Tooltip tooltip="Preferred Locations" position="bottom">
           <div>
-            <MapPin />
+            <MapPin className="w-5 h-5" />
           </div>
         </Tooltip>
       </div>}>
