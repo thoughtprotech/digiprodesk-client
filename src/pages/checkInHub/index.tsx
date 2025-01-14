@@ -280,7 +280,7 @@ export default function Index() {
             mediaConnectionRef.current = call;
 
             // Recording Start
-            const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp8,opus' });
+            const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9,opus' });
 
             // Create an array to hold the data chunks
             const chunkQueue: Blob[] = [];

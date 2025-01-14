@@ -45,7 +45,7 @@ export default function Index() {
         }
 
         // Recording Start
-        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp8,opus' });
+        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9,opus' });
 
         // Queue for storing chunks to upload
         const chunkQueue: Blob[] = [];
