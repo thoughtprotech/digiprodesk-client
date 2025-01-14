@@ -1,9 +1,10 @@
 import Layout from '@/components/Layout'
-import { Backpack, Calendar, Clock, FilePlus2, Ticket, Timer } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, FilePlus2, Ticket, Timer } from 'lucide-react';
 import CallCard from '../_components/CallCard';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 
 interface Call {
   roomId: string;
@@ -156,6 +157,8 @@ export default function Index() {
   }[]>([]);
   const [currentCall, setCurrentCall] = useState<Call | null>(null);
 
+  const router = useRouter();
+
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setBookingId(event.target.value);
     console.log(event.target.value)
@@ -186,11 +189,11 @@ export default function Index() {
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
-        <div>
-          <Backpack />
+        <div className="border-r border-r-border pr-2">
+          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-2xl'>Check In</h1>
+          <h1 className='font-bold text-lg'>CHECK IN</h1>
         </div>
       </div>
     }>
@@ -298,9 +301,9 @@ export default function Index() {
                   <h1 className='text-2xl font-bold'>Documents</h1>
                 </div>
               </div>
-              {!currentCall && (
+              {currentCall && (
                 <div>
-                  <Button text='Add Document' icon={<FilePlus2 className='w-5 h-5' />} color="zinc" onClick={() => console.log('Add Document')} />
+                  <Button text='Document' icon={<FilePlus2 className='w-5 h-5' />} color="zinc" onClick={() => console.log('Add Document')} />
                 </div>
               )}
             </div>
@@ -328,8 +331,15 @@ export default function Index() {
           <div className='w-1/4 h-full rounded-md bg-foreground flex flex-col overflow-auto relative'>
             <div className='w-full h-full flex flex-col space-y-2'>
               <div className='w-full flex flex-col gap-1 sticky top-0 border-b border-b-border  z-50 bg-foreground p-2'>
-                <div className='w-full flex  items-center justify-between'>
-                  <h1 className='text-2xl font-bold'>Olive Indiranagar</h1>
+                <div className='w-full flex  items-center gap-2'>
+                  <div>
+                    <ArrowLeft className='w-5 h-5 cursor-pointer' onClick={() => {
+                      router.push('/admin/calls')
+                    }} />
+                  </div>
+                  <div>
+                    <h1 className='text-2xl font-bold'>Olive Indiranagar</h1>
+                  </div>
                   {/* <div className="flex items-center gap-1">
                     <Phone className="w-4 text-textAlt" />
                     <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">7 Calls</h1>

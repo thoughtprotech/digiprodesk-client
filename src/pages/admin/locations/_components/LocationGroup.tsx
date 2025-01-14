@@ -89,6 +89,17 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
     handleCloseCreateLocationGroupModal();
   }
 
+  const handleEditLocationGroupSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log(selectedLocationGroup);
+    setSelectedLocationGroup({
+      LocatonGroupName: '',
+      isActive: false,
+      LocationID: []
+    });
+    handleCloseEditLocationGroupModal();
+  }
+
   const handleSearchGroup = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value;
     // Search by name of locationGroupId name
@@ -160,7 +171,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                 <div className='w-full flex flex-col gap-4'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Group Details
+                      Location Group Name
                     </h1>
                     <Input
                       placeholder='Location Group Name'
@@ -171,23 +182,28 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                     />
                   </div>
                   <div className='w-full flex flex-col gap-2'>
-                    <div>
-                      <Select
-                        placeholder='Select Locations'
-                        options={locationData.filter(
-                          location => !createLocationGroupFormData.LocationID.includes(location.LocationID!)
-                        )?.map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)}
-                        onChange={(e) => {
-                          setCreateLocationGroupFormData({
-                            ...createLocationGroupFormData,
-                            LocationID: [
-                              ...createLocationGroupFormData.LocationID,
-                              Number(e.target.value)
-                            ]
-                          });
-                        }}
-                        name='LocationID'
-                      />
+                    <div className='w-full'>
+                      <h1 className='font-bold text-sm'>
+                        Locations
+                      </h1>
+                      <div>
+                        <Select
+                          placeholder='Select Locations'
+                          options={locationData.filter(
+                            location => !createLocationGroupFormData.LocationID.includes(location.LocationID!)
+                          )?.map(location => location.LocationID !== undefined ? ({ value: location.LocationID.toString(), label: location.LocatonName }) : null).filter(option => option !== null)}
+                          onChange={(e) => {
+                            setCreateLocationGroupFormData({
+                              ...createLocationGroupFormData,
+                              LocationID: [
+                                ...createLocationGroupFormData.LocationID,
+                                Number(e.target.value)
+                              ]
+                            });
+                          }}
+                          name='LocationID'
+                        />
+                      </div>
                     </div>
                     <div>
                       {
@@ -230,7 +246,8 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                     </h1>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button text='Create Location Group' color='foreground' type='submit' />
+                    <Button text='Save' color='indigo' type='submit' />
+                    <Button text='Cancel' color='red' type='button' onClick={handleCloseCreateLocationGroupModal} />
                   </div>
                 </div>
               </form>
@@ -241,7 +258,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
         {
           editLocationGroupModal && (
             <Modal title='Edit Location Group' onClose={handleCloseEditLocationGroupModal}>
-              <form className='w-full' onSubmit={handleCreateLocationGroupSubmit}>
+              <form className='w-full' onSubmit={handleEditLocationGroupSubmit}>
                 <div className='w-full flex flex-col gap-4'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
@@ -256,7 +273,10 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                     />
                   </div>
                   <div className='w-full flex flex-col gap-2'>
-                    <div>
+                    <div className="w-full">
+                      <h1 className='font-bold text-sm'>
+                        Locations
+                      </h1>
                       <Select
                         placeholder='Select Locations'
                         options={locationData.filter(
@@ -314,7 +334,8 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
                     </h1>
                   </div>
                   <div className='w-full flex justify-end gap-2'>
-                    <Button text='Create Location Group' color='foreground' type='submit' />
+                    <Button text='Save' color='indigo' type='submit' />
+                    <Button text='Cancel' color='red' type='button' onClick={handleCloseEditLocationGroupModal} />
                   </div>
                 </div>
               </form>

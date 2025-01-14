@@ -45,7 +45,7 @@ export default function Index({
     // },
     {
       "id": "logout",
-      "name": "Logout",
+      "name": "Log Out",
       "icon": <LogOut className="w-5 h-5 text-red-500" />
     }
   ];

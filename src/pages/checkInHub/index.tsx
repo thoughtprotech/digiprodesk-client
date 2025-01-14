@@ -457,11 +457,10 @@ export default function Index() {
   }
 
   const handleConfirmEndCall = (callId: string, roomId: string) => {
-    if (bookingId === "") {
-      document.getElementById("bookingId")?.focus();
-      return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
-    }
-
+    // if (bookingId === "") {
+    //   document.getElementById("bookingId")?.focus();
+    //   return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
+    // }
     setScreenshotImage([]);
     setTakeScreenshot(false);
     setBookingId("");
@@ -520,7 +519,7 @@ export default function Index() {
           <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-xl'>CHECK IN HUB</h1>
+          <h1 className='font-bold text-lg'>CHECK IN HUB</h1>
         </div>
       </div>
     } header={

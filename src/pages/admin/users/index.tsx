@@ -141,7 +141,7 @@ export default function Index() {
           <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-xl'>USERS</h1>
+          <h1 className='font-bold text-lg'>USERS</h1>
         </div>
       </div>
     }>
@@ -149,10 +149,10 @@ export default function Index() {
         {/* Create a grid to display user cards */}
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w-64 flex'>
-            <Input placeholder='Search users' onChange={filterUserList} />
+            <Input placeholder='Search Users' onChange={filterUserList} />
           </div>
           <div>
-            <Button color="foreground" icon={<Plus className='w-5' />} text='Create User' onClick={setCreateUserModal.bind(null, true)} />
+            <Button color="foreground" icon={<Plus className='w-5' />} text='User' onClick={setCreateUserModal.bind(null, true)} />
           </div>
         </div>
         <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
@@ -164,7 +164,7 @@ export default function Index() {
         </div>
       </div>
       {createUserModal && (
-        <Modal title="Create User" onClose={setCreateUserModal.bind(null, false)}>
+        <Modal title="New User" onClose={setCreateUserModal.bind(null, false)}>
           <form onSubmit={handleCreateUserSubmit}>
             <div className="w-full h-full flex flex-col gap-4 justify-center">
               <div className='w-full flex gap-2 justify-between'>
@@ -197,7 +197,10 @@ export default function Index() {
                   <h1 className='font-bold text-sm'>Active</h1>
                 </div>
               </div>
-              <Button color="foreground" text='Save' type='submit' />
+              <div className='w-full flex items-center gap-2'>
+                <Button color="indigo" text='Save' type='submit' />
+                <Button color="red" text='Cancel' type='button' onClick={setCreateUserModal.bind(null, false)} />
+              </div>
             </div>
           </form>
         </Modal>
@@ -236,7 +239,10 @@ export default function Index() {
                   <h1 className='font-bold text-sm'>Active</h1>
                 </div>
               </div>
-              <Button color="foreground" text='Save' type='submit' />
+              <div className='w-full flex items-center gap-2'>
+                <Button color="indigo" text='Save' type='submit' />
+                <Button color="red" text='Cancel' type='button' onClick={setEditUserModal.bind(null, false)} />
+              </div>
             </div>
           </form>
         </Modal>

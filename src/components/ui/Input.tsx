@@ -85,7 +85,7 @@ const Input: React.FC<InputProps> = ({
             required={required}
           />
           {file ? (
-            <div className="w-64">
+            <div className="w-36">
               <div className="w-full">
                 {/* {filePreview && filePreview.startsWith('data:image') ? (
                   <img src={filePreview} alt="file-preview" className="w-32 h-32 object-cover rounded-md" />

@@ -146,7 +146,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Details
+                      Location Name
                     </h1>
                     <Input
                       placeholder='Location Name'
@@ -192,7 +192,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Location Image'
                       name='LocationImage'
-                      value={createLocationFormData.LocationImage}
+                      // value={createLocationFormData.LocationImage}
                       onChange={handleCreateLocationChange}
                       type="file"
                       required
@@ -207,7 +207,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Location Banner'
                       name='LocationBanner'
-                      value={createLocationFormData.LocationBanner}
+                      // value={createLocationFormData.LocationBanner}
                       onChange={handleCreateLocationChange}
                       type="file"
                       required
@@ -220,17 +220,14 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Receptionist Photo'
                       name='LocationReceptionistPhoto'
-                      value={createLocationFormData.LocationReceptionistPhoto}
+                      // value={createLocationFormData.LocationReceptionistPhoto}
                       onChange={handleCreateLocationChange}
                       type="file"
                       required
                     />
                   </div>
                 </div>
-                <div className='w-full'>
-                  <h1 className='font-bold text-sm'>
-                    Is Active
-                  </h1>
+                <div className='w-full flex items-center gap-2'>
                   <Input
                     type='checkBox'
                     name='IsActive'
@@ -238,8 +235,10 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked })}
                     required
                   />
+                  <h1 className='font-bold text-sm'>
+                    Is Active
+                  </h1>
                 </div>
-
                 <div className='flex justify-end gap-2'>
                   <Button text='Create Location' color='foreground' type='submit' />
                 </div>
@@ -258,7 +257,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Details
+                      Location Name
                     </h1>
                     <Input
                       placeholder='Location Name'
@@ -305,7 +304,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Location Image'
                       name='LocationImage'
-                      value={selectedLocation!.LocationImage}
+                      // value={selectedLocation!.LocationImage}
                       onChange={handleEditLocationChange}
                       type="file"
                       required
@@ -320,7 +319,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Location Banner'
                       name='LocationBanner'
-                      value={selectedLocation!.LocationBanner}
+                      // value={selectedLocation!.LocationBanner}
                       onChange={handleEditLocationChange}
                       type="file"
                       required
@@ -333,17 +332,14 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Receptionist Photo'
                       name='LocationReceptionistPhoto'
-                      value={selectedLocation!.LocationReceptionistPhoto}
+                      // value={selectedLocation!.LocationReceptionistPhoto}
                       onChange={handleEditLocationChange}
                       type="file"
                       required
                     />
                   </div>
                 </div>
-                <div className='w-full'>
-                  <h1 className='font-bold text-sm'>
-                    Is Active
-                  </h1>
+                <div className='w-full flex gap-2 items-center'>
                   <Input
                     type='checkBox'
                     name='IsActive'
@@ -351,6 +347,9 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     onChange={(e) => setSelectedLocation({ ...selectedLocation!, IsActive: (e.target as HTMLInputElement).checked })}
                     required
                   />
+                  <h1 className='font-bold text-sm'>
+                    Is Active
+                  </h1>
                 </div>
 
                 <div className='flex justify-end gap-2'>

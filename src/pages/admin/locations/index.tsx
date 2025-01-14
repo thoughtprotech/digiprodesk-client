@@ -145,10 +145,10 @@ export default function Index() {
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
         <div className="border-r border-r-border pr-2">
-          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
+          <h1 className="font-bold text-lg">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-xl'>LOCATIONS</h1>
+          <h1 className='font-bold text-lg'>LOCATIONS</h1>
         </div>
       </div>
     }>
