@@ -1,10 +1,13 @@
 import Layout from '@/components/Layout'
-import { ArrowLeft, Calendar, Clock, FilePlus2, Ticket, Timer } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, FilePlus2, Ticket, Timer, Trash } from 'lucide-react';
 import CallCard from '../_components/CallCard';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Image from 'next/image';
+import ImageViewer from '@/components/ui/ImageViewer';
+import Tooltip from '@/components/ui/ToolTip';
 
 interface Call {
   roomId: string;
@@ -294,7 +297,7 @@ export default function Index() {
             </div>
           </div>
           {/* Documents */}
-          <div className='w-1/2 h-full rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
+          <div className='w-1/2 h-full rounded-md bg-foreground flex flex-col gap-2 overflow-auto overflow-x-hidden relative'>
             <div className='w-full flex items-center bg-foreground justify-between border-b border-b-border pb-2 p-2 sticky top-0'>
               <div className='w-full'>
                 <div>
@@ -313,8 +316,22 @@ export default function Index() {
                 <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
                   {
                     Array.from({ length: 10 }, (_, i) => (
-                      <div key={i} className='w-full h-32 rounded-md flex flex-col gap-2 bg-black'>
-
+                      <div key={i} className='w-full h-fit rounded-md flex flex-col gap-2 bg-black relative'>
+                        <ImageViewer src={"/images/doc.png"}>
+                          <Image
+                            src="/images/doc.png"
+                            alt="Logo"
+                            width={1000}
+                            height={1000}
+                            className="w-full object-fill"
+                          />
+                        </ImageViewer>
+                        <Button
+                          className="bg-red-500/60 border border-red-500 hover:bg-red-500 duration-300 rounded-md px-1 p-1 absolute top-0 right-0" color="red" icon={
+                            <Tooltip tooltip="Delete Document" position="top">
+                              <Trash className="w-3 h-3 text-text" />
+                            </Tooltip>
+                          } />
                       </div>
                     ))
                   }
@@ -330,7 +347,7 @@ export default function Index() {
         <div className='w-full h-1/2 max-h-[44vh] bg-background rounded-md flex gap-2'>
           <div className='w-1/4 h-full rounded-md bg-foreground flex flex-col overflow-auto relative'>
             <div className='w-full h-full flex flex-col space-y-2'>
-              <div className='w-full flex flex-col gap-1 sticky top-0 border-b border-b-border  z-50 bg-foreground p-2'>
+              <div className='w-full flex flex-col gap-1 sticky top-0 border-b border-b-border z-30 bg-foreground p-2'>
                 <div className='w-full flex  items-center gap-2'>
                   <div>
                     <ArrowLeft className='w-5 h-5 cursor-pointer' onClick={() => {

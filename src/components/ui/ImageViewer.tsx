@@ -40,7 +40,7 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ children, src }) => {
           <div className="w-fit flex flex-col gap-2 relative bg-background p-4 rounded-md">
             <div className="w-full flex justify-between items-center border-b-2 border-b-border pb-2">
               <div>
-                <h1 className="text-xl font-bold">Image Viewer</h1>
+                <h1 className="text-xl font-bold">Document Viewer</h1>
               </div>
               <button
                 onClick={togglePopup}
