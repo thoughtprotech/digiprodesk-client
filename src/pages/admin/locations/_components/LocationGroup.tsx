@@ -122,7 +122,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {
             locationGroupMappingData?.map((group, index) => (
-              <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationGroupModal.bind(null, locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)!)}>
+              <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationGroupModal.bind(null, locationGroupData.find(locationGroup => locationGroup.LocationGroupID === group.LocationGroupID)!)}>
                 <div>
                   <div>
                     <h1 className='font-bold text-xl'>{

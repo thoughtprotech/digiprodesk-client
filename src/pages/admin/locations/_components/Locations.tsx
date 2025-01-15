@@ -90,7 +90,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {
             locationData?.map((location, index) => (
-              <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
+              <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
                 <div>
                   <div>
                     <h1 className='font-bold text-xl'>{location?.LocatonName}</h1>

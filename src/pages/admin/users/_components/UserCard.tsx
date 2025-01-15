@@ -12,26 +12,36 @@ export default function UserCard({ user }: {
             user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
           }
         </div>
-        <div>
-          <h2 className="text-xl font-semibold text-text">{user?.DisplayName}</h2>
-          <p className="text-sm text-textAlt font-semibold">{user?.Role}</p>
-          <p className="text-sm text-textAlt font-semibold">{user?.UserName}</p>
-          <div className="mt-2 flex items-center gap-2">
-            {
-              user?.IsActive ? (
-                <span
-                  className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
-                >
-                  Active
-                </span>
-              ) : (
-                <span
-                  className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/30 text-red-500"
-                >
-                  Inactive
-                </span>
-              )
-            }
+        <div className="flex flex-col gap-2">
+          <div>
+            <h1 className="text-xl font-semibold text-text">{user?.DisplayName}</h1>
+            <h1 className="text-sm text-textAlt font-semibold">{user?.UserName}</h1>
+          </div>
+          <div className="w-full flex items-center gap-2">
+            <div>
+              <span
+                className="px-3 py-1 text-xs font-semibold rounded-full bg-background text-textAlt"
+              >
+                {user?.Role}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {
+                user?.IsActive ? (
+                  <span
+                    className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
+                  >
+                    Active
+                  </span>
+                ) : (
+                  <span
+                    className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/30 text-red-500"
+                  >
+                    Inactive
+                  </span>
+                )
+              }
+            </div>
           </div>
         </div>
       </div>
