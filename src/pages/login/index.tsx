@@ -3,8 +3,8 @@ import Button from "@/components/ui/Button";
 import Toast from "@/components/ui/Toast";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { setCookie } from "nookies";
-import { useState } from "react";
+import { parseCookies, setCookie } from "nookies";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import jwt from "jsonwebtoken";
 
@@ -58,6 +58,30 @@ export default function Login() {
       return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
     }
   }
+
+  useEffect(() => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      if (userToken) {
+        const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
+
+        const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
+
+        if (decoded.exp > currentTime) {
+          if (decoded.role === "Guest") {
+            router.push('/guest');
+          } else {
+            router.push('/checkInHub');
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      router.push("/");  // Redirect to login on error
+    }
+  }, []);
 
   return (
     <div className="flex h-screen">
