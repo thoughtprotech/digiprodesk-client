@@ -137,14 +137,27 @@ const Input: React.FC<InputProps> = ({
 
   if (type === 'checkBox') {
     return (
-      <input
-        type="checkbox"
-        onChange={onChange}
-        checked={value === 'true'} // Convert string 'true' to boolean
-        name={name}
-      />
+      <label className="inline-flex items-center cursor-pointer">
+        {/* <span className="mr-2">{name}</span> */}
+        <div className="relative">
+          <input
+            type="checkbox"
+            onChange={onChange}
+            checked={value === 'true'} // Convert string 'true' to boolean
+            name={name}
+            className="hidden sr-only"
+          />
+          <div className="toggle-background w-12 h-fit bg-background rounded-full transition duration-300 ease-in-out">
+            <div
+              className={`toggle-dot w-6 h-6 rounded-full shadow-md transform transition-all duration-300 ease-in-out ${value === 'true' ? 'translate-x-6 bg-white' : ' bg-highlight'
+                }`}
+            />
+          </div>
+        </div>
+      </label>
     );
   }
+
 
   return (
     <input

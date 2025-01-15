@@ -1,10 +1,13 @@
 import { Backpack, Cctv, Headset, LogOut, MapPinPlus, Users } from "lucide-react";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 // import { ThemeContext } from "@/context/ThemeContext";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
 import { destroyCookie } from "nookies";
 import Image from "next/image";
+import Input from "./ui/Input";
+import toast from "react-hot-toast";
+import Toast from "./ui/Toast";
 
 
 
@@ -19,6 +22,15 @@ export default function Index({
 }) {
   // const { theme, toggleTheme } = useContext(ThemeContext);
   const router = useRouter();
+  const [userOnline, setUserOnline] = useState(true);
+
+  const toggleUserAway = () => {
+    setUserOnline(!userOnline);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return toast.custom((t: any) => (<Toast t={t} type="info" content={
+      userOnline ? 'You Are Now Away' : 'You Are Now Online'
+    } />));
+  }
 
   const handleUserLogout = () => {
     destroyCookie(null, 'userToken');
@@ -70,15 +82,6 @@ export default function Index({
               </Tooltip>
             </div>
             <div className={
-              `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-            }
-              onClick={() => router.push('/checkInHub')}
-            >
-              <Tooltip tooltip="Check-In Hub" position="bottom">
-                <Headset className="w-5 h-5" />
-              </Tooltip>
-            </div>
-            <div className={
               `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
             }
               onClick={() => router.push('/watchCenter')}
@@ -87,9 +90,18 @@ export default function Index({
                 <Cctv className="w-5 h-5" />
               </Tooltip>
             </div>
+            <div className={
+              `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+            }
+              onClick={() => router.push('/checkInHub')}
+            >
+              <Tooltip tooltip="Check-In Hub" position="bottom">
+                <Headset className="w-5 h-5" />
+              </Tooltip>
+            </div>
+            {header}
           </div>
           <div className="border-l-2 border-l-border pl-2 flex items-center gap-2">
-            {header}
             {/* <div>
               <Dropdown
                 id='person'
@@ -108,6 +120,22 @@ export default function Index({
                 onSelect={handleSelect}
               />
             </div> */}
+            <div className="h-full flex items-center gap-1">
+              <div className="flex items-center">
+                <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
+              </div>
+              <h1 className="text-sm font-bold">
+                {userOnline ? 'Online' : 'Away'}
+              </h1>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-6 h-6 flex items-center justify-center bg-gray-300 rounded-full">
+                <h1 className="text-textAlt font-bold">U</h1>
+              </div>
+              <div>
+                <h1 className="text-sm font-bold">User</h1>
+              </div>
+            </div>
             <div
               onClick={handleUserLogout}
             >
