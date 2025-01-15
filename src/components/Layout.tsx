@@ -58,6 +58,9 @@ export default function Index({
         response.json().then((data) => {
           setUser(data);
         });
+      } else if (response.status === 401) {
+        destroyCookie(null, 'userToken');
+        router.push('/');
       } else {
         return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
       }
@@ -66,6 +69,30 @@ export default function Index({
       return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
     }
   }
+
+  useEffect(() => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      if (!userToken) {
+        router.push("/");  // Redirect if token doesn't exist
+      } else {
+        const decoded = jwt.decode(userToken) as { userName: string, exp: number };
+        console.log({ decoded });
+
+        const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
+        if (decoded.exp < currentTime) {
+          toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
+          console.error("Token has expired");
+          handleUserLogout();  // Log out if token has expired
+        }
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      router.push("/");  // Redirect to login on error
+    }
+  }, []);
 
   useEffect(() => {
     fetchUserDetails();

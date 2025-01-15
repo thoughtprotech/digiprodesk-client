@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { toTitleCase } from "@/utils/stringFunctions";
 import { LogOut } from "lucide-react";
 import Image from "next/image";
@@ -7,6 +8,8 @@ import Peer, { MediaConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import jwt from "jsonwebtoken";
+import toast from "react-hot-toast";
+import Toast from "@/components/ui/Toast";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -121,14 +124,29 @@ export default function Index() {
     const cookies = parseCookies();
     const { userToken } = cookies;
 
-    if (!userToken) {
-      router.push("/");
-    } else {
-      const decoded = jwt.decode(userToken);
-      const { userName } = decoded as { userName: string };
-      setUserId(userName);
+    try {
+      if (!userToken) {
+        router.push("/");  // Redirect if token doesn't exist
+      } else {
+        const decoded = jwt.decode(userToken) as { userName: string, exp: number };
+        console.log({ decoded });
+
+        const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
+        if (decoded.exp < currentTime) {
+          toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
+          console.error("Token has expired");
+          handleLogOut();  // Log out if token has expired
+        } else {
+          const { userName } = decoded;
+          setUserId(userName);  // Set userId from token if valid
+        }
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error);
+      router.push("/");  // Redirect to login on error
     }
   }, []);
+
 
   useEffect(() => {
     if (userId !== "") {
