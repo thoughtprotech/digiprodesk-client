@@ -380,7 +380,7 @@ export default function Index() {
       {
         callStatus === 'onHold' && (
           <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">Call on hold</h1>
+            <h1 className="font-bold text-xl">Call On Hold, Thank you for your patience. We&apos;ll be with you shortly.</h1>
           </div>
         )
       }
