@@ -45,8 +45,8 @@ export default function Login() {
 
         const decoded = jwt.decode(data.token);
         console.log({ decoded });
-        const { role } = decoded as { role: number };
-        if (role === 3) {
+        const { role } = decoded as { role: string };
+        if (role === "Guest") {
           router.push('/guest');
         } else {
           router.push('/checkInHub');

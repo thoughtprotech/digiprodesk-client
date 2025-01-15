@@ -57,6 +57,7 @@ export default function Index({
       if (response.status === 200) {
         response.json().then((data) => {
           setUser(data);
+          console.log({ user });
         });
       } else if (response.status === 401) {
         destroyCookie(null, 'userToken');
@@ -115,7 +116,7 @@ export default function Index({
         </div>
         <div className="flex items-center space-x-2 pr-4">
           <div className="flex items-center gap-2">
-            {user?.RoleID === 1 && (
+            {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
               <>
                 <div className={
                   `${router.pathname === '/admin/calls' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`

@@ -4,7 +4,7 @@ export interface User {
   UserName: string;
   Password: string;
   DisplayName: string;
-  RoleID: number;
+  Role: string;
   Language?: string;
   Region?: string;
   TimeZone?: string;

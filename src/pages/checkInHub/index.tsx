@@ -142,9 +142,14 @@ export default function Index() {
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
+    const {role} = jwt.decode(userToken) as {role: string};
+
+    console.log(role)
 
     if (!userToken) {
       router.push("/");
+    } else if (role === "Guest") {
+      router.push("/guest");
     } else {
       const decoded = jwt.decode(userToken);
       const { userName } = decoded as { userName: string };
