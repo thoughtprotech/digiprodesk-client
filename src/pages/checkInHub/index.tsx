@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
-import { FilePlus2, MapPin, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
+import { FilePlus2, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
 import ScreenshotComponent from "@/components/ui/Screenshotcomponent";
@@ -65,6 +65,7 @@ export default function Index() {
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Initialize the audio element
@@ -107,6 +108,11 @@ export default function Index() {
     if (currentUserVideoRef.current) {
       currentUserVideoRef.current.srcObject = null;
     }
+
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current); // Clear the interval
+      recordingIntervalRef.current = null;
+    }
   }
 
   const holdCall = (roomId: string) => {
@@ -121,6 +127,10 @@ export default function Index() {
     // Close current video streams
     if (currentUserVideoRef.current) {
       currentUserVideoRef.current.srcObject = null;
+    }
+    if (recordingIntervalRef.current) {
+      clearInterval(recordingIntervalRef.current); // Clear the interval
+      recordingIntervalRef.current = null;
     }
   }
 
@@ -322,7 +332,7 @@ export default function Index() {
             // Start recording, then stop every 2 seconds to prepare for the next chunk
             mediaRecorder.start();
 
-            setInterval(() => {
+            recordingIntervalRef.current = setInterval(() => {
               if (mediaRecorder.state === "recording") {
                 mediaRecorder.stop();  // Stop to trigger ondataavailable event
                 mediaRecorder.start(); // Start again for the next chunk
@@ -524,11 +534,6 @@ export default function Index() {
       </div>
     } header={
       <div className="flex gap-2">
-        <Tooltip tooltip="Preferred Locations" position="bottom">
-          <div>
-            <MapPin className="w-5 h-5" />
-          </div>
-        </Tooltip>
         {
           !isRightPanelCollapsed ? (
             <Tooltip tooltip="Close Panel" position="bottom">

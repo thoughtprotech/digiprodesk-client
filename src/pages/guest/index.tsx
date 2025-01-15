@@ -20,6 +20,7 @@ export default function Index() {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const router = useRouter();
 
@@ -87,7 +88,7 @@ export default function Index() {
         // Start recording, then stop every 2 seconds to prepare for the next chunk
         mediaRecorder.start();
 
-        setInterval(() => {
+        recordingIntervalRef.current = setInterval(() => {
           if (mediaRecorder.state === "recording") {
             mediaRecorder.stop();  // Stop to trigger ondataavailable event
             mediaRecorder.start(); // Start again for the next chunk
@@ -100,8 +101,6 @@ export default function Index() {
         console.error("Error accessing media devices.", err);
       });
   };
-
-
 
   const initiateCall = () => {
     const roomId = `room-${Math.floor(Math.random() * 1000)}`;
@@ -245,6 +244,10 @@ export default function Index() {
           if (mediaRecorderRef.current) {
             mediaRecorderRef.current.stop(); // Stop recording
             mediaRecorderRef.current = null;
+          }
+          if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current); // Clear the interval
+            recordingIntervalRef.current = null;
           }
           setInCall(false);
           setCallStatus("notInCall");

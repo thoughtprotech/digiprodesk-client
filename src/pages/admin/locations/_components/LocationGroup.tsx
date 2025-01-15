@@ -257,7 +257,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
         {/* Edit Location Group Modal */}
         {
           editLocationGroupModal && (
-            <Modal title='Edit Location Group' onClose={handleCloseEditLocationGroupModal}>
+            <Modal className="max-w-2xl h-1/2" title='Edit Location Group' onClose={handleCloseEditLocationGroupModal}>
               <form className='w-full' onSubmit={handleEditLocationGroupSubmit}>
                 <div className='w-full flex flex-col gap-4'>
                   <div className='w-full'>

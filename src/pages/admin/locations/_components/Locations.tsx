@@ -18,6 +18,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
     LocatonName: '',
     LocationCode: '',
     LocationType: '',
+    LocationParentID: 0,
     LocationImage: '',
     LocationBanner: '',
     LocationReceptionistPhoto: '',
@@ -87,7 +88,6 @@ export default function Locations({ locationData, setLocationData, locationOptio
       <div className='w-full h-full p-2'>
         {/* Create a grid to display locationOptions in cards */}
         <div className="w-full h-fit grid grid-cols-3 gap-2">
-
           {
             locationData?.map((location, index) => (
               <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
@@ -140,9 +140,9 @@ export default function Locations({ locationData, setLocationData, locationOptio
       {/* Create Location Modal */}
       {
         createLocationModal && (
-          <Modal title='Create Location' onClose={handleCloseCreateLocationModal}>
-            <form onSubmit={handleCreateLocationSubmit}>
-              <div className='flex flex-col gap-2'>
+          <Modal className="w-1/2" title='Create Location' onClose={handleCloseCreateLocationModal}>
+            <form className="w-full h-full" onSubmit={handleCreateLocationSubmit}>
+              <div className='w-full h-full flex flex-col gap-4 justify-between'>
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
@@ -185,6 +185,19 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationType: e.target.value })}
                     />
                   </div>
+                  {createLocationFormData.LocationType === "Property" &&
+                    (<div className='w-full'>
+                      <h1 className='font-bold text-sm'>
+                        Choose Control
+                      </h1>
+                      <Select
+                        options={
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocatonName, label: location.LocatonName }))
+                        }
+                        placeholder='Assign Control'
+                        onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
+                      />
+                    </div>)}
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
                       Location Image
@@ -227,17 +240,22 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     />
                   </div>
                 </div>
-                <div className='w-full flex items-center gap-2'>
-                  <Input
-                    type='checkBox'
-                    name='IsActive'
-                    value={createLocationFormData.IsActive.toString()}
-                    onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked })}
-                    required
-                  />
-                  <h1 className='font-bold text-sm'>
-                    Is Active
-                  </h1>
+                <div className="w-full flex justify-between">
+                  <div className='w-full flex items-center gap-2'>
+                    <Input
+                      type='checkBox'
+                      name='IsActive'
+                      value={createLocationFormData.IsActive.toString()}
+                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked })}
+                      required
+                    />
+                    <h1 className='font-bold text-sm'>
+                      Is Active
+                    </h1>
+                  </div>
+                  <div>
+                    <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
+                  </div>
                 </div>
                 <div className='flex justify-end gap-2'>
                   <Button text='Save' color='foreground' type='submit' />
@@ -252,7 +270,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
       {/* Edit Location Modal */}
       {
         editLocationModal && (
-          <Modal title='Edit Location' onClose={handleCloseEditLocationModal}>
+          <Modal className="w-1/2" title='Edit Location' onClose={handleCloseEditLocationModal}>
             <form onSubmit={handleEditLocationSubmit}>
               <div className='flex flex-col gap-2'>
                 <div className='w-full flex justify-between gap-2'>
@@ -298,6 +316,20 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       defaultValue={selectedLocation!.LocationType}
                     />
                   </div>
+                  {selectedLocation!.LocationType === "Property" &&
+                    (<div className='w-full'>
+                      <h1 className='font-bold text-sm'>
+                        Choose Control
+                      </h1>
+                      <Select
+                        options={
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocatonName, label: location.LocatonName }))
+                        }
+                        placeholder='Assign Control'
+                        onChange={(e) => setSelectedLocation({ ...selectedLocation!, LocationParentID: Number(e.target.value) })}
+                        defaultValue={locationData.find(location => location.LocationID === selectedLocation!.LocationParentID)?.LocatonName}
+                      />
+                    </div>)}
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
                       Location Image
@@ -340,19 +372,23 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     />
                   </div>
                 </div>
-                <div className='w-full flex gap-2 items-center'>
-                  <Input
-                    type='checkBox'
-                    name='IsActive'
-                    value={selectedLocation!.IsActive.toString()}
-                    onChange={(e) => setSelectedLocation({ ...selectedLocation!, IsActive: (e.target as HTMLInputElement).checked })}
-                    required
-                  />
-                  <h1 className='font-bold text-sm'>
-                    Is Active
-                  </h1>
+                <div className="w-full flex justify-between">
+                  <div className='w-full flex gap-2 items-center'>
+                    <Input
+                      type='checkBox'
+                      name='IsActive'
+                      value={selectedLocation!.IsActive.toString()}
+                      onChange={(e) => setSelectedLocation({ ...selectedLocation!, IsActive: (e.target as HTMLInputElement).checked })}
+                      required
+                    />
+                    <h1 className='font-bold text-sm'>
+                      Is Active
+                    </h1>
+                  </div>
+                  <div>
+                    <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
+                  </div>
                 </div>
-
                 <div className='flex justify-end gap-2'>
                   <Button text='Create Location' color='foreground' type='submit' />
                   <Button text='Cancel' color='foreground' onClick={handleCloseEditLocationModal} />
