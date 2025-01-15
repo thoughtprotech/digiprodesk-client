@@ -6,10 +6,10 @@ import { destroyCookie, parseCookies } from "nookies";
 import Peer, { MediaConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
+import jwt from "jsonwebtoken";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
-  const [, setPeerId] = useState<string>('');
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerInstance = useRef<Peer | null>(null);
@@ -124,7 +124,9 @@ export default function Index() {
     if (!userToken) {
       router.push("/");
     } else {
-      setUserId(userToken);
+      const decoded = jwt.decode(userToken);
+      const { userName } = decoded as { userName: string };
+      setUserId(userName);
     }
   }, []);
 
@@ -266,10 +268,6 @@ export default function Index() {
           //   console.error("Error merging video:", error);
           // }
         }
-      });
-
-      peer.on("open", (id: string) => {
-        setPeerId(id);
       });
 
       peer.on("call", (call: MediaConnection) => {

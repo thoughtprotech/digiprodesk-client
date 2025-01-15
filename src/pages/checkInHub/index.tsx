@@ -17,6 +17,7 @@ import { io } from "socket.io-client";
 import { parseCookies } from "nookies";
 import { useRouter } from "next/router";
 import { toTitleCase } from "@/utils/stringFunctions";
+import jwt from "jsonwebtoken";
 
 
 
@@ -48,7 +49,7 @@ export default function Index() {
     roomId: ""
   });
 
-  const [userId] = useState<string>(`Host-${Math.floor(Math.random() * 1000)}`);
+  const [userId, setUserId] = useState<string>();
   const [, setPeerId] = useState<string>('');
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -140,226 +141,233 @@ export default function Index() {
 
   useEffect(() => {
     const cookies = parseCookies();
-
     const { userToken } = cookies;
 
     if (!userToken) {
       router.push("/");
-    } else if (userToken !== "host") {
-      router.push("/guest");
     } else {
-      const peer = new Peer(userId, {
-        config: {
-          iceServers: [
-            {
-              urls: "turn:relay1.expressturn.com:80",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay1.expressturn.com:443",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay1.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay2.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay3.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay4.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay5.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay6.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay7.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay8.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay9.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay10.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-            {
-              urls: "turn:relay11.expressturn.com:3478",
-              username: "efE34XGFPG52SHEMJJ",
-              credential: "sI43EOvU8Z3d0hFk"
-            },
-          ]
-        }
-      });
-
-      socket.emit("get-call-list");
-      socket.on("call-list-update", (data) => {
-        console.log(data);
-
-        // Identify new "pending" calls
-        const newPendingCalls = data.filter(
-          (call: {
-            from: string; roomId: string; status: string; to: string | null;
-          }) =>
-            call.status === "pending" &&
-            !callList.some((existingCall) => existingCall.roomId === call.roomId)
-        );
-
-        // Log or handle the new pending calls if needed
-        console.log("New pending calls:", newPendingCalls);
-
-        if (newPendingCalls.length > 0) {
-          // Handle new pending calls here, e.g., show a notification
-          if (audioRef.current) {
-            audioRef.current.play().catch((error) => {
-              console.error('Error playing audio:', error);
-            });
-          }
-          newPendingCalls.map((call: { from: string; roomId: string; status: string; to: string | null; }) => {
-            toast.custom((t: any) => (
-              <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md absolute top-[3.6rem] ${t.visible ? 'animate-enter' : 'animate-leave'
-                }`}>
-                <div className="w-full p-2 bg-orange-700/40 flex items-center gap-2">
-                  <PhoneIncoming className="w-5 h-5 text-orange-500" />
-                  <h1 className="font-bold">
-                    Incoming Call From {toTitleCase(call.from)}</h1>
-                </div>
-              </div>
-            ), {
-              position: "top-left",
-              duration: 10000,
-            });
-          })
-        }
-
-        // Update the call list state
-        setCallList(data);
-      });
-
-
-      peer.on('open', (id: string) => {
-        setPeerId(id);
-      });
-
-      peer.on('call', (call: MediaConnection) => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-          .then((mediaStream: MediaStream) => {
-            if (currentUserVideoRef.current) {
-              currentUserVideoRef.current.srcObject = mediaStream;
-              currentUserVideoRef.current.play();
-            }
-
-            videoCallRef.current = mediaStream.getVideoTracks()[0];
-
-            call.answer(mediaStream);
-            call.on('stream', (remoteStream: MediaStream) => {
-              if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = remoteStream;
-                remoteVideoRef.current.play();
-              }
-            });
-
-            mediaConnectionRef.current = call;
-
-            // Recording Start
-            const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9,opus' });
-
-            // Create an array to hold the data chunks
-            const chunkQueue: Blob[] = [];
-            let isUploading = false;
-
-            const uploadChunk = async () => {
-              if (chunkQueue.length === 0 || isUploading) return;
-
-              isUploading = true;
-              const chunk = chunkQueue.shift(); // Remove the first chunk from the queue
-
-              const formData = new FormData();
-              formData.append("videoChunk", chunk!, "chunk.webm");
-              formData.append("sessionId", currentRoomId.current);
-              formData.append("user", "host");
-
-              try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
-                  method: "POST",
-                  body: formData,
-                });
-                const result = await response.json();
-                uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
-              } catch (error) {
-                console.error("Error uploading chunk:", error);
-              } finally {
-                isUploading = false;
-                uploadChunk(); // Check for the next chunk in the queue
-              }
-            };
-
-            mediaRecorder.ondataavailable = (event) => {
-              if (event.data.size > 0) {
-                chunkQueue.push(event.data); // Add the chunk to the queue
-                uploadChunk(); // Start the upload process
-              }
-            };
-
-            // Start recording, then stop every 2 seconds to prepare for the next chunk
-            mediaRecorder.start();
-
-            recordingIntervalRef.current = setInterval(() => {
-              if (mediaRecorder.state === "recording") {
-                mediaRecorder.stop();  // Stop to trigger ondataavailable event
-                mediaRecorder.start(); // Start again for the next chunk
-              }
-            }, 2000); // Send video chunks every 2 seconds
-
-            mediaRecorderRef.current = mediaRecorder;
-          })
-          .catch((err) => {
-            console.error("Error accessing media devices.", err);
-          });
-      });
-
-
-      peerInstance.current = peer;
-
-
-      return () => {
-        peerInstance.current?.destroy();
-      };
+      const decoded = jwt.decode(userToken);
+      const { userName } = decoded as { userName: string };
+      setUserId(userName);
     }
   }, []);
 
   useEffect(() => {
-    // If callList gets updated with new calls, console log only those new calls
+    try {
+      console.log({ userId })
+      if (userId !== "") {
+        const peer = new Peer(userId!, {
+          config: {
+            iceServers: [
+              {
+                urls: "turn:relay1.expressturn.com:80",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay1.expressturn.com:443",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay1.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay2.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay3.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay4.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay5.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay6.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay7.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay8.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay9.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay10.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+              {
+                urls: "turn:relay11.expressturn.com:3478",
+                username: "efE34XGFPG52SHEMJJ",
+                credential: "sI43EOvU8Z3d0hFk"
+              },
+            ]
+          }
+        });
 
-  }, [callList])
+        socket.emit("get-call-list");
+        socket.on("call-list-update", (data) => {
+          console.log(data);
+
+          // Identify new "pending" calls
+          const newPendingCalls = data.filter(
+            (call: {
+              from: string; roomId: string; status: string; to: string | null;
+            }) =>
+              call.status === "pending" &&
+              !callList.some((existingCall) => existingCall.roomId === call.roomId)
+          );
+
+          // Log or handle the new pending calls if needed
+          console.log("New pending calls:", newPendingCalls);
+
+          if (newPendingCalls.length > 0) {
+            // Handle new pending calls here, e.g., show a notification
+            if (audioRef.current) {
+              audioRef.current.play().catch((error) => {
+                console.error('Error playing audio:', error);
+              });
+            }
+            newPendingCalls.map((call: { from: string; roomId: string; status: string; to: string | null; }) => {
+              toast.custom((t: any) => (
+                <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md absolute top-[3.6rem] ${t.visible ? 'animate-enter' : 'animate-leave'
+                  }`}>
+                  <div className="w-full p-2 bg-orange-700/40 flex items-center gap-2">
+                    <PhoneIncoming className="w-5 h-5 text-orange-500" />
+                    <h1 className="font-bold">
+                      Incoming Call From {toTitleCase(call.from)}</h1>
+                  </div>
+                </div>
+              ), {
+                position: "top-left",
+                duration: 10000,
+              });
+            })
+          }
+
+          // Update the call list state
+          setCallList(data);
+        });
+
+
+        peer.on('open', (id: string) => {
+          setPeerId(id);
+        });
+
+        peer.on('call', (call: MediaConnection) => {
+          console.log({ call });
+          navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((mediaStream: MediaStream) => {
+              if (currentUserVideoRef.current) {
+                currentUserVideoRef.current.srcObject = mediaStream;
+                currentUserVideoRef.current.play();
+              }
+
+              videoCallRef.current = mediaStream.getVideoTracks()[0];
+
+              call.answer(mediaStream);
+              call.on('stream', (remoteStream: MediaStream) => {
+                if (remoteVideoRef.current) {
+                  remoteVideoRef.current.srcObject = remoteStream;
+                  remoteVideoRef.current.play();
+                }
+              });
+
+              mediaConnectionRef.current = call;
+
+              // Recording Start
+              const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9,opus' });
+
+              // Create an array to hold the data chunks
+              const chunkQueue: Blob[] = [];
+              let isUploading = false;
+
+              const uploadChunk = async () => {
+                if (chunkQueue.length === 0 || isUploading) return;
+
+                isUploading = true;
+                const chunk = chunkQueue.shift(); // Remove the first chunk from the queue
+
+                const formData = new FormData();
+                formData.append("videoChunk", chunk!, "chunk.webm");
+                formData.append("sessionId", currentRoomId.current);
+                formData.append("user", "host");
+
+                try {
+                  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
+                    method: "POST",
+                    body: formData,
+                  });
+                  const result = await response.json();
+                  uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
+                } catch (error) {
+                  console.error("Error uploading chunk:", error);
+                } finally {
+                  isUploading = false;
+                  uploadChunk(); // Check for the next chunk in the queue
+                }
+              };
+
+              mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                  chunkQueue.push(event.data); // Add the chunk to the queue
+                  uploadChunk(); // Start the upload process
+                }
+              };
+
+              // Start recording, then stop every 2 seconds to prepare for the next chunk
+              mediaRecorder.start();
+
+              recordingIntervalRef.current = setInterval(() => {
+                if (mediaRecorder.state === "recording") {
+                  mediaRecorder.stop();  // Stop to trigger ondataavailable event
+                  mediaRecorder.start(); // Start again for the next chunk
+                }
+              }, 2000); // Send video chunks every 2 seconds
+
+              mediaRecorderRef.current = mediaRecorder;
+            })
+            .catch((err) => {
+              console.error("Error accessing media devices.", err);
+            });
+        });
+
+
+        peerInstance.current = peer;
+
+
+        return () => {
+          peerInstance.current?.destroy();
+        };
+
+      }
+    } catch (error) {
+      console.error("Invalid or expired token", error);
+    }
+  }, [userId]);
 
   const handleToggleCamera = () => {
     console.log(mediaConnectionRef.current?.localStream.getVideoTracks());
@@ -374,7 +382,6 @@ export default function Index() {
     audioTracks![0].enabled = !audioTracks![0].enabled;
     setMicMuted(!micMuted);
   }
-
 
   const handleFilterChange = (status: string) => {
     setFilter(status);
