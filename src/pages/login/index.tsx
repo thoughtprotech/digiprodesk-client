@@ -114,34 +114,36 @@ export default function Login() {
                 </span>
               </h1>
             </div>
-            <div className="w-full">
-              <input
-                type="text"
-                placeholder="Username"
-                value={formData.userName}
-                onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-                className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
-              />
-            </div>
-            <div className="w-full">
-              <input
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
-              />
-            </div>
-            <div className="w-full">
-              <Button
-                color="indigo"
-                onClick={handleLogIn}
-                text="Log In To Virtual Assistance"
-              />
-            </div>
+            <form onSubmit={handleLogIn} className="w-full flex flex-col space-y-4">
+              <div className="w-full">
+                <input
+                  type="text"
+                  placeholder="Username"
+                  value={formData.userName}
+                  onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                  className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
+                />
+              </div>
+              <div className="w-full">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
+                />
+              </div>
+              <div className="w-full">
+                <Button
+                  color="indigo"
+                  text="Log In To Virtual Assistance"
+                  type="submit"
+                />
+              </div>
+            </form>
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }
