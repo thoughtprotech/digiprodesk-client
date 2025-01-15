@@ -195,15 +195,15 @@ export default function Index({
                     }</h1>
                   </div>
                   <div>
-                    <h1 className="font-bold">{user?.DisplayName}</h1>
+                    <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
                   </div>
                 </div>
-                <div className="w-20 h-full flex items-center gap-1">
+                <div className="w-[5.6rem] h-full flex items-center gap-1">
                   <div className="flex items-center">
                     <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
                   </div>
-                  <h1 className="text-sm font-bold">
-                    {userOnline ? 'Online' : 'Away'}
+                  <h1 className="text-xs font-bold">
+                    {userOnline ? 'Available' : 'Away'}
                   </h1>
                 </div>
               </div>

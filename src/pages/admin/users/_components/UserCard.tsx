@@ -6,14 +6,14 @@ export default function UserCard({ user }: {
 }) {
   return (
     <div className="max-w-sm mx-auto p-2 bg-foreground hover:bg-highlight duration-300 rounded-md border border-border flex justify-between items-start">
-      <div className="flex items-center gap-4 pb-2">
+      <div className="flex items-center gap-2">
         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-textAlt text-2xl font-bold">
           {
             user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
           }
         </div>
-        <div className="flex flex-col gap-2">
-          <div>
+        <div className="flex flex-col gap-1 border-l-2 border-l-border pl-2">
+          <div className="flex flex-col">
             <h1 className="text-xl font-semibold text-text">{user?.DisplayName}</h1>
             <h1 className="text-sm text-textAlt font-semibold">{user?.UserName}</h1>
           </div>
@@ -25,7 +25,7 @@ export default function UserCard({ user }: {
                 {user?.Role}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div>
               {
                 user?.IsActive ? (
                   <span
