@@ -5,17 +5,17 @@ export interface User {
   Password: string;
   DisplayName: string;
   Role: string;
-  Language?: string;
-  Region?: string;
-  TimeZone?: string;
-  "24HourFormat"?: boolean;
-  Calendar?: string;
-  DateFormat?: string;
-  IsActive: boolean;
-  CreatedBy: number;
-  CreatedOn: Date;
-  ModifiedBy: number;
-  ModifiedOn: Date;
+  Language?: string | null;
+  Region?: string | null;
+  TimeZone?: string | null;
+  "24HourFormat"?: boolean | null;
+  Calendar?: string | null;
+  DateFormat?: string | null;
+  IsActive: number;
+  CreatedBy?: number;
+  CreatedOn?: Date;
+  ModifiedBy?: number;
+  ModifiedOn?: Date;
 }
 
 export interface Role {

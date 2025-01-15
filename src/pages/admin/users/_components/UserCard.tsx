@@ -1,37 +1,5 @@
-import { Role, User } from "@/utils/types";
+import { User } from "@/utils/types";
 
-const roles: Role[] = [
-  {
-    Name: 'Admin',
-    SuperAdmin: true,
-    Language: 'en',
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-  {
-    Name: 'Host',
-    SuperAdmin: false,
-    Language: 'en',
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-  {
-    Name: 'Guest',
-    SuperAdmin: false,
-    Language: 'en',
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  }
-]
 
 export default function UserCard({ user }: {
   user: User;
@@ -40,11 +8,13 @@ export default function UserCard({ user }: {
     <div className="max-w-sm mx-auto p-2 bg-foreground hover:bg-highlight duration-300 rounded-md border border-border flex justify-between items-start">
       <div className="flex items-center gap-4 pb-2">
         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-textAlt text-2xl font-bold">
-          {user?.DisplayName?.split(' ')?.map(name => name[0])?.join('')}
+          {
+            user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
+          }
         </div>
         <div>
           <h2 className="text-xl font-semibold text-text">{user?.DisplayName}</h2>
-          <p className="text-sm text-textAlt font-semibold">{roles?.find(role => role?.Name === user?.Role)?.Name}</p>
+          <p className="text-sm text-textAlt font-semibold">{user?.Role}</p>
           <p className="text-sm text-textAlt font-semibold">{user?.UserName}</p>
           <div className="mt-2 flex items-center gap-2">
             {

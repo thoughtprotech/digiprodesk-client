@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from '@/components/Layout'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -7,92 +8,27 @@ import { Role, User } from '@/utils/types'
 import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import UserCard from './_components/UserCard'
+import { parseCookies } from 'nookies'
+import toast from 'react-hot-toast'
+import Toast from '@/components/ui/Toast'
 
-const userList: User[] = [
-  {
-    UserName: 'JohnDoe',
-    Password: 'password',
-    DisplayName: 'John Doe',
-    Role: "Admin",
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-  {
-    UserName: 'DeepakVasudeva',
-    Password: 'password',
-    DisplayName: 'Deepak Vasudeva',
-    Role: "Admin",
-    IsActive: false,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-  {
-    UserName: 'OliveIndiranagar',
-    Password: 'password',
-    DisplayName: 'Olive Indiranagar',
-    Role: "Admin",
-    IsActive: false,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-]
-
-const roles: Role[] = [
-  {
-    ID: 1,
-    Name: 'Admin',
-    SuperAdmin: true,
-    Language: 'en',
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-  {
-    ID: 2,
-    Name: 'Host',
-    SuperAdmin: false,
-    Language: 'en',
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  },
-  {
-    ID: 3,
-    Name: 'Guest',
-    SuperAdmin: false,
-    Language: 'en',
-    IsActive: true,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
-  }
-]
 
 export default function Index() {
   const [userListData, setUserListData] = useState<User[]>([]);
+  const [rolesListData, setRolesListData] = useState<Role[]>([]);
   const [createUserModal, setCreateUserModal] = useState<boolean>(false);
   const [createUserFormData, setCreateUserFormData] = useState<User>({
     UserName: '',
     Password: '',
     DisplayName: '',
     Role: "",
-    IsActive: false,
-    CreatedBy: 1,
-    CreatedOn: new Date(),
-    ModifiedBy: 1,
-    ModifiedOn: new Date()
+    IsActive: 0,
+    Language: null,
+    Region: null,
+    TimeZone: null,
+    '24HourFormat': null,
+    Calendar: null,
+    DateFormat: null,
   });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
@@ -104,34 +40,150 @@ export default function Index() {
 
   const filterUserList = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value
-    const filteredUserList = userList.filter(user => user.DisplayName.toLowerCase().includes(searchValue.toLowerCase()))
+    const filteredUserList = userListData.filter(user => user.DisplayName.toLowerCase().includes(searchValue.toLowerCase()))
     setUserListData(filteredUserList)
   }
 
-  const handleCreateUserSubmit = (e: { preventDefault: () => void }) => {
+  const handleCreateUserSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    console.log(createUserFormData)
-    setCreateUserFormData({
-      UserName: '',
-      Password: '',
-      DisplayName: '',
-      Role: "",
-      IsActive: false,
-      CreatedBy: 1,
-      CreatedOn: new Date(),
-      ModifiedBy: 1,
-      ModifiedOn: new Date()
-    });
+    if (createUserFormData.Role === "") {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please select a role' type='warning' />
+      ))
+    }
+
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify(createUserFormData),
+      });
+
+      if (response.status === 201) {
+        setCreateUserFormData({
+          UserName: '',
+          Password: '',
+          DisplayName: '',
+          Role: "",
+          IsActive: 0,
+          Language: "ENGLISH",
+          Region: null,
+          TimeZone: null,
+          '24HourFormat': null,
+          Calendar: null,
+          DateFormat: null,
+        });
+        setCreateUserModal(false);
+        fetchUserListData();
+        return toast.custom((t: any) => (
+          <Toast t={t} content='User Created Successfully' type='success' />
+        ))
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='An error occurred' type='error' />
+      ))
+    }
   }
 
-  const handleEditUser = (e: { preventDefault: () => void }) => {
+  const handleEditUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    console.log(selectedUser)
-    setEditUserModal(false);
+    if (selectedUser!.Role === "") {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please select a role' type='warning' />
+      ))
+    }
+
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify(selectedUser),
+      });
+
+      if (response.status === 200) {
+        setSelectedUser({
+          UserName: '',
+          Password: '',
+          DisplayName: '',
+          Role: "",
+          IsActive: 0,
+          Language: "ENGLISH",
+          Region: null,
+          TimeZone: null,
+          '24HourFormat': null,
+          Calendar: null,
+          DateFormat: null,
+        });
+        setEditUserModal(false);
+        fetchUserListData();
+        return toast.custom((t: any) => (
+          <Toast t={t} content='User Updated Successfully' type='success' />
+        ))
+      }
+    } catch (error: any) {
+      console.log({ error });
+      return toast.custom((t: any) => (
+        <Toast t={t} content='An error occurred' type='error' />
+      ))
+    }
+  }
+
+  const fetchUserListData = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      const data: User[] = await response.json();
+      console.log(data);
+      setUserListData(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const fetchRoleListData = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/role`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      const data: Role[] = await response.json();
+      console.log(data);
+      setRolesListData(data);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   useEffect(() => {
-    setUserListData(userList);
+    fetchUserListData();
+    fetchRoleListData();
   }, [])
 
   return (
@@ -185,7 +237,7 @@ export default function Index() {
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Role</h1>
                   <Select
-                    options={roles.map(role => ({ value: role.Name, label: role.Name }))}
+                    options={rolesListData.map(role => ({ value: role.Name, label: role.Name }))}
                     onChange={(e) => setCreateUserFormData({ ...createUserFormData, Role: e.target.value })}
                     placeholder='Select Role'
                   />
@@ -193,7 +245,7 @@ export default function Index() {
               </div>
               <div className='w-full flex items-center gap-2'>
                 <div className='flex items-center gap-2'>
-                  <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive.toString()} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked })} />
+                  <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
                   <h1 className='font-bold text-sm'>Active</h1>
                 </div>
               </div>
@@ -227,15 +279,16 @@ export default function Index() {
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Role</h1>
                   <Select
-                    options={roles.map(role => ({ value: role.Name, label: role.Name }))}
+                    options={rolesListData.map(role => ({ value: role.Name, label: role.Name }))}
                     onChange={(e) => setSelectedUser({ ...selectedUser!, Role: e.target.value })}
                     placeholder='Select Role'
+                    defaultValue={selectedUser!.Role}
                   />
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
                 <div className='flex items-center gap-2'>
-                  <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive.toString()} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked })} />
+                  <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
                   <h1 className='font-bold text-sm'>Active</h1>
                 </div>
               </div>

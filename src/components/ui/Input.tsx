@@ -7,7 +7,7 @@ interface InputProps {
   placeholder?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'date' | 'textArea' | 'file' | 'checkBox'; // Default type is text
-  value?: string; // Optional value for controlled input
+  value?: string | number; // Optional value for controlled input
   className?: string; // Optional Tailwind CSS class for further customization
   required?: boolean;
   name?: string;
@@ -143,7 +143,7 @@ const Input: React.FC<InputProps> = ({
           <input
             type="checkbox"
             onChange={onChange}
-            checked={value === 'true'} // Convert string 'true' to boolean
+            checked={value === 'true' || value === 1} // Convert string 'true' to boolean
             name={name}
             className="hidden sr-only"
           />
