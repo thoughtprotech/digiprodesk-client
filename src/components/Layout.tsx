@@ -11,8 +11,6 @@ import Toast from "./ui/Toast";
 import jwt from "jsonwebtoken";
 import { User } from "@/utils/types";
 
-
-
 export default function Index({
   header,
   headerTitle,
@@ -74,24 +72,25 @@ export default function Index({
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
+    const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
+    console.log({ decoded });
 
     try {
       if (!userToken) {
-        router.push("/");  // Redirect if token doesn't exist
+        router.push("/");
+      } else if (decoded.role === "Guest") {
+        router.push("/guest");
       } else {
-        const decoded = jwt.decode(userToken) as { userName: string, exp: number };
-        console.log({ decoded });
-
-        const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
+        const currentTime = Math.floor(Date.now() / 1000);
         if (decoded.exp < currentTime) {
           toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
           console.error("Token has expired");
-          handleUserLogout();  // Log out if token has expired
+          handleUserLogout(); 
         }
       }
     } catch (error) {
       console.error("Error verifying token:", error);
-      router.push("/");  // Redirect to login on error
+      router.push("/"); 
     }
   }, []);
 
@@ -99,77 +98,78 @@ export default function Index({
     fetchUserDetails();
   }, []);
 
-  return (
-    <div className="w-full h-screen overflow-hidden flex flex-col space-y-2">
-      <div className="w-full border-b-2 border-b-border py-2 flex justify-between items-center px-2 bg-foreground p-2">
-        <div className="flex items-center space-x-2">
-          <div className="border-r border-r-border pr-2">
-            <Image
-              src="/images/logo.png"
-              alt="Logo"
-              width={1000}
-              height={1000}
-              className="w-20"
-            />
-          </div>
-          {headerTitle}
-        </div>
-        <div className="flex items-center space-x-2 pr-4">
-          <div className="flex items-center gap-2">
-            {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
-              <>
-                <div className={
-                  `${router.pathname === '/admin/calls' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                }
-                  onClick={() => router.push('/admin/calls')}
-                >
-                  <Tooltip tooltip="Check Ins" position="bottom">
-                    <Backpack className="w-5 h-5" />
-                  </Tooltip>
-                </div>
-                <div className={
-                  `${router.pathname === '/admin/locations' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                }
-                  onClick={() => router.push('/admin/locations')}
-                >
-                  <Tooltip tooltip="Locations" position="bottom">
-                    <MapPinPlus className="w-5 h-5" />
-                  </Tooltip>
-                </div>
-                <div className={
-                  `${router.pathname === '/admin/users' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                }
-                  onClick={() => router.push('/admin/users')}
-                >
-                  <Tooltip tooltip="Users" position="bottom">
-                    <Users className="w-5 h-5" />
-                  </Tooltip>
-                </div>
-              </>
-            )
-            }
-            <div className={
-              `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-            }
-              onClick={() => router.push('/watchCenter')}
-            >
-              <Tooltip tooltip="Watch Center" position="bottom">
-                <Cctv className="w-5 h-5" />
-              </Tooltip>
+  if (user) {
+    return (
+      <div className="w-full h-screen overflow-hidden flex flex-col space-y-2">
+        <div className="w-full border-b-2 border-b-border py-2 flex justify-between items-center px-2 bg-foreground p-2">
+          <div className="flex items-center space-x-2">
+            <div className="border-r border-r-border pr-2">
+              <Image
+                src="/images/logo.png"
+                alt="Logo"
+                width={1000}
+                height={1000}
+                className="w-20"
+              />
             </div>
-            <div className={
-              `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-            }
-              onClick={() => router.push('/checkInHub')}
-            >
-              <Tooltip tooltip="Check-In Hub" position="bottom">
-                <Headset className="w-5 h-5" />
-              </Tooltip>
-            </div>
-            {header}
+            {headerTitle}
           </div>
-          <div className="border-l-2 border-l-border pl-2 flex items-center gap-2">
-            {/* <div>
+          <div className="flex items-center space-x-2 pr-4">
+            <div className="flex items-center gap-2">
+              {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
+                <>
+                  <div className={
+                    `${router.pathname === '/admin/calls' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                  }
+                    onClick={() => router.push('/admin/calls')}
+                  >
+                    <Tooltip tooltip="Check Ins" position="bottom">
+                      <Backpack className="w-5 h-5" />
+                    </Tooltip>
+                  </div>
+                  <div className={
+                    `${router.pathname === '/admin/locations' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                  }
+                    onClick={() => router.push('/admin/locations')}
+                  >
+                    <Tooltip tooltip="Locations" position="bottom">
+                      <MapPinPlus className="w-5 h-5" />
+                    </Tooltip>
+                  </div>
+                  <div className={
+                    `${router.pathname === '/admin/users' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                  }
+                    onClick={() => router.push('/admin/users')}
+                  >
+                    <Tooltip tooltip="Users" position="bottom">
+                      <Users className="w-5 h-5" />
+                    </Tooltip>
+                  </div>
+                </>
+              )
+              }
+              <div className={
+                `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+              }
+                onClick={() => router.push('/watchCenter')}
+              >
+                <Tooltip tooltip="Watch Center" position="bottom">
+                  <Cctv className="w-5 h-5" />
+                </Tooltip>
+              </div>
+              <div className={
+                `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+              }
+                onClick={() => router.push('/checkInHub')}
+              >
+                <Tooltip tooltip="Check-In Hub" position="bottom">
+                  <Headset className="w-5 h-5" />
+                </Tooltip>
+              </div>
+              {header}
+            </div>
+            <div className="border-l-2 border-l-border pl-2 flex items-center gap-2">
+              {/* <div>
               <Dropdown
                 id='person'
                 title={
@@ -187,37 +187,38 @@ export default function Index({
                 onSelect={handleSelect}
               />
             </div> */}
-            <div className="flex items-center gap-1">
-              <div className="w-6 h-6 flex items-center justify-center bg-gray-300 rounded-full">
-                <h1 className="text-textAlt font-bold">{
-                  user?.DisplayName.slice(0, 1)
-                }</h1>
+              <div className="flex items-center gap-1">
+                <div className="w-6 h-6 flex items-center justify-center bg-gray-300 rounded-full">
+                  <h1 className="text-textAlt font-bold">{
+                    user?.DisplayName.slice(0, 1)
+                  }</h1>
+                </div>
+                <div>
+                  <h1 className="text-sm font-bold">{user?.DisplayName}</h1>
+                </div>
               </div>
-              <div>
-                <h1 className="text-sm font-bold">{user?.DisplayName}</h1>
+              <div className="h-full flex items-center gap-1">
+                <div className="flex items-center">
+                  <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
+                </div>
+                <h1 className="text-sm font-bold">
+                  {userOnline ? 'Online' : 'Away'}
+                </h1>
               </div>
-            </div>
-            <div className="h-full flex items-center gap-1">
-              <div className="flex items-center">
-                <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
+              <div
+                onClick={handleUserLogout}
+              >
+                <Tooltip tooltip="Log Out" position="bottom">
+                  <LogOut className="w-5 h-5 text-red-500" />
+                </Tooltip>
               </div>
-              <h1 className="text-sm font-bold">
-                {userOnline ? 'Online' : 'Away'}
-              </h1>
-            </div>
-            <div
-              onClick={handleUserLogout}
-            >
-              <Tooltip tooltip="Log Out" position="bottom">
-                <LogOut className="w-5 h-5 text-red-500" />
-              </Tooltip>
             </div>
           </div>
         </div>
+        <div className="p-2">
+          {children}
+        </div>
       </div>
-      <div className="p-2">
-        {children}
-      </div>
-    </div>
-  )
+    )
+  }
 }

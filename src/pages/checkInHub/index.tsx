@@ -15,7 +15,6 @@ import Button from "@/components/ui/Button";
 import Peer, { MediaConnection } from "peerjs";
 import { io } from "socket.io-client";
 import { parseCookies } from "nookies";
-import { useRouter } from "next/router";
 import { toTitleCase } from "@/utils/stringFunctions";
 import jwt from "jsonwebtoken";
 
@@ -82,8 +81,6 @@ export default function Index() {
     };
   }, []);
 
-  const router = useRouter();
-
   const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
     query: {
       userId,
@@ -142,19 +139,9 @@ export default function Index() {
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
-    const {role} = jwt.decode(userToken) as {role: string};
-
-    console.log(role)
-
-    if (!userToken) {
-      router.push("/");
-    } else if (role === "Guest") {
-      router.push("/guest");
-    } else {
-      const decoded = jwt.decode(userToken);
-      const { userName } = decoded as { userName: string };
-      setUserId(userName);
-    }
+    const decoded = jwt.decode(userToken);
+    const { userName } = decoded as { userName: string };
+    setUserId(userName);
   }, []);
 
   useEffect(() => {
@@ -277,7 +264,6 @@ export default function Index() {
           setCallList(data);
         });
 
-
         peer.on('open', (id: string) => {
           setPeerId(id);
         });
@@ -360,9 +346,7 @@ export default function Index() {
             });
         });
 
-
         peerInstance.current = peer;
-
 
         return () => {
           peerInstance.current?.destroy();
