@@ -152,7 +152,7 @@ export default function Index() {
         </div>
       </div>
     }>
-      <div className='w-full h-[90vh] overflow-hidden flex'>
+      <div className='w-full h-[90vh] overflow-hidden flex px-2'>
         {/* Locations */}
         <Locations
           locationData={locationData}

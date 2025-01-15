@@ -533,13 +533,13 @@ export default function Index() {
         {
           !isRightPanelCollapsed ? (
             <Tooltip tooltip="Close Panel" position="bottom">
-              <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer" onClick={() => setRightPanelCollapsed(true)}>
+              <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer hover:bg-highlight p-1" onClick={() => setRightPanelCollapsed(true)}>
                 <PanelRightClose className="w-5 h-5" />
               </div>
             </Tooltip>
           ) : (
             <Tooltip tooltip="Open Panel" position="bottom">
-              <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer" onClick={() => setRightPanelCollapsed(false)}>
+              <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer hover:bg-highlight p-1" onClick={() => setRightPanelCollapsed(false)}>
                 <PanelRightOpen className="w-5 h-5" />
               </div>
             </Tooltip>

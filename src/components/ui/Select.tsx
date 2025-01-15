@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import useOutsideClick from "@/hooks/useOutsideClick";
+import React, { useRef, useState } from "react";
 
 interface Option {
   label: string;
@@ -18,6 +19,11 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
   const [selectedOption, setSelectedOption] = useState<Option | null>(
     options.find((option) => option.value === defaultValue) || null
   );
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useOutsideClick({
+    ref: dropdownRef,
+    handler: () => setIsOpen(false),
+  });
 
   const handleOptionClick = (option: Option) => {
     setSelectedOption(option);
@@ -37,7 +43,7 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
   };
 
   return (
-    <div className="w-full relative inline-block min-w-44">
+    <div ref={dropdownRef} className="w-full relative inline-block min-w-44">
       {/* Selected Option */}
       <div
         className="w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none cursor-pointer"

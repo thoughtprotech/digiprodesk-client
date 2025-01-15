@@ -109,7 +109,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
 
   return (
     <div className='w-1/2 h-full overflow-y-auto flex flex-col relative'>
-      <div className='flex items-center justify-between sticky top-0 bg-background p-2 border-b border-b-border'>
+      <div className='flex items-center justify-between sticky top-0 bg-background pb-2 pl-2 border-b border-b-border'>
         <div>
           <Input placeholder='Search Location Groups' onChange={handleSearchGroup} />
         </div>
@@ -117,7 +117,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
           <Button color='foreground' icon={<Plus />} text='Location Group' onClick={handleOpenCreateLocationGroupModal} />
         </div>
       </div>
-      <div className='w-full h-full p-2'>
+      <div className='w-full h-full pt-2 pb-2 pl-2'>
         {/* Create a grid to display locationGroups in cards */}
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {

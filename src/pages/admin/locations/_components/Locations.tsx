@@ -77,7 +77,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
 
   return (
     <div className='w-1/2 h-full overflow-y-auto border-r border-r-border flex flex-col relative'>
-      <div className='flex items-center justify-between sticky top-0 bg-background p-2 border-b border-b-border'>
+      <div className='flex items-center justify-between sticky top-0 bg-background pb-2 pr-2 border-b border-b-border'>
         <div>
           <Input placeholder='Search Locations' onChange={handleSearchLocation} />
         </div>
@@ -85,7 +85,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
           <Button color='foreground' icon={<Plus />} text='Location' onClick={handleOpenCreateLocationModal} />
         </div>
       </div>
-      <div className='w-full h-full p-2'>
+      <div className='w-full h-full pt-2 pb-2 pr-2'>
         {/* Create a grid to display locationOptions in cards */}
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {

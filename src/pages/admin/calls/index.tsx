@@ -69,10 +69,8 @@ export default function Index() {
         </div>
       </div>
     }>
-      <div className='w-full h-full flex flex-col gap-2'>
-        <div className='w-full flex gap-2 items-end'>
-        </div>
-        <div className='flex items-center justify-between'>
+      <div className='w-full h-full flex flex-col gap-2 bg-background px-2'>
+        <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w52'>
             <Input type='text' placeholder='Search Call Logs' onChange={handleSearchCall} />
           </div>
@@ -116,7 +114,7 @@ export default function Index() {
         <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
           {checkInList.map((data, index) => (
             <div key={index} onClick={handleCallClick}>
-              <div className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-background duration-300 p-2 cursor-pointer'>
+              <div className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer'>
                 <div>
                   <h1 className='font-bold text-xl'>{data.location}</h1>
                 </div>

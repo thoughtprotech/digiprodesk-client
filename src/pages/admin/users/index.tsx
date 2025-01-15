@@ -246,7 +246,11 @@ export default function Index() {
               <div className='w-full flex items-center gap-2'>
                 <div className='flex items-center gap-2'>
                   <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
-                  <h1 className='font-bold text-sm'>Active</h1>
+                  <h1 className='font-bold text-sm'>
+                    {
+                      createUserFormData.IsActive ? 'Active' : 'Inactive'
+                    }
+                  </h1>
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
@@ -289,7 +293,11 @@ export default function Index() {
               <div className='w-full flex items-center gap-2'>
                 <div className='flex items-center gap-2'>
                   <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
-                  <h1 className='font-bold text-sm'>Active</h1>
+                  <h1 className='font-bold text-sm'>
+                    {
+                      selectedUser!.IsActive ? 'Active' : 'Inactive'
+                    }
+                  </h1>
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>

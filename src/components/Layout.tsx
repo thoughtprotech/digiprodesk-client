@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Backpack, Cctv, Headset, LogOut, MapPinPlus, Users } from "lucide-react";
+import { Backpack, Cctv, KeyRound, LogOut, MapPinPlus, Users } from "lucide-react";
 import { ReactNode, useEffect, useState } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
@@ -85,12 +85,12 @@ export default function Index({
         if (decoded.exp < currentTime) {
           toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
           console.error("Token has expired");
-          handleUserLogout(); 
+          handleUserLogout();
         }
       }
     } catch (error) {
       console.error("Error verifying token:", error);
-      router.push("/"); 
+      router.push("/");
     }
   }, []);
 
@@ -114,7 +114,7 @@ export default function Index({
             </div>
             {headerTitle}
           </div>
-          <div className="flex items-center space-x-2 pr-4">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center gap-2">
               {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
                 <>
@@ -163,7 +163,7 @@ export default function Index({
                 onClick={() => router.push('/checkInHub')}
               >
                 <Tooltip tooltip="Check-In Hub" position="bottom">
-                  <Headset className="w-5 h-5" />
+                  <KeyRound className="w-5 h-5" />
                 </Tooltip>
               </div>
               {header}
@@ -187,23 +187,25 @@ export default function Index({
                 onSelect={handleSelect}
               />
             </div> */}
-              <div className="flex items-center gap-1">
-                <div className="w-6 h-6 flex items-center justify-center bg-gray-300 rounded-full">
-                  <h1 className="text-textAlt font-bold">{
-                    user?.DisplayName.slice(0, 1)
-                  }</h1>
+              <div className="flex items-center gap-2 border-r-2 border-r-border pr-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
+                    <h1 className="text-textAlt font-bold">{
+                      user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
+                    }</h1>
+                  </div>
+                  <div>
+                    <h1 className="font-bold">{user?.DisplayName}</h1>
+                  </div>
                 </div>
-                <div>
-                  <h1 className="text-sm font-bold">{user?.DisplayName}</h1>
+                <div className="w-20 h-full flex items-center gap-1">
+                  <div className="flex items-center">
+                    <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
+                  </div>
+                  <h1 className="text-sm font-bold">
+                    {userOnline ? 'Online' : 'Away'}
+                  </h1>
                 </div>
-              </div>
-              <div className="h-full flex items-center gap-1">
-                <div className="flex items-center">
-                  <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
-                </div>
-                <h1 className="text-sm font-bold">
-                  {userOnline ? 'Online' : 'Away'}
-                </h1>
               </div>
               <div
                 onClick={handleUserLogout}
