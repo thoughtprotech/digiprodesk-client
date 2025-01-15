@@ -19,7 +19,7 @@ export interface User {
 }
 
 export interface Role {
-  ID: number;
+  ID?: number;
   Name: string;
   SuperAdmin: boolean;
   Language: string;

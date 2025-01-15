@@ -2,7 +2,6 @@ import { Role, User } from "@/utils/types";
 
 const roles: Role[] = [
   {
-    ID: 1,
     Name: 'Admin',
     SuperAdmin: true,
     Language: 'en',
@@ -13,7 +12,6 @@ const roles: Role[] = [
     ModifiedOn: new Date()
   },
   {
-    ID: 2,
     Name: 'Host',
     SuperAdmin: false,
     Language: 'en',
@@ -24,7 +22,6 @@ const roles: Role[] = [
     ModifiedOn: new Date()
   },
   {
-    ID: 3,
     Name: 'Guest',
     SuperAdmin: false,
     Language: 'en',
@@ -47,7 +44,7 @@ export default function UserCard({ user }: {
         </div>
         <div>
           <h2 className="text-xl font-semibold text-text">{user?.DisplayName}</h2>
-          <p className="text-sm text-textAlt font-semibold">{roles?.find(role => role?.ID === user?.RoleID)?.Name}</p>
+          <p className="text-sm text-textAlt font-semibold">{roles?.find(role => role?.Name === user?.Role)?.Name}</p>
           <p className="text-sm text-textAlt font-semibold">{user?.UserName}</p>
           <div className="mt-2 flex items-center gap-2">
             {

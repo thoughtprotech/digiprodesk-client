@@ -13,7 +13,7 @@ const userList: User[] = [
     UserName: 'JohnDoe',
     Password: 'password',
     DisplayName: 'John Doe',
-    RoleID: 2,
+    Role: "Admin",
     IsActive: true,
     CreatedBy: 1,
     CreatedOn: new Date(),
@@ -24,7 +24,7 @@ const userList: User[] = [
     UserName: 'DeepakVasudeva',
     Password: 'password',
     DisplayName: 'Deepak Vasudeva',
-    RoleID: 1,
+    Role: "Admin",
     IsActive: false,
     CreatedBy: 1,
     CreatedOn: new Date(),
@@ -35,7 +35,7 @@ const userList: User[] = [
     UserName: 'OliveIndiranagar',
     Password: 'password',
     DisplayName: 'Olive Indiranagar',
-    RoleID: 3,
+    Role: "Admin",
     IsActive: false,
     CreatedBy: 1,
     CreatedOn: new Date(),
@@ -87,7 +87,7 @@ export default function Index() {
     UserName: '',
     Password: '',
     DisplayName: '',
-    RoleID: 0,
+    Role: "",
     IsActive: false,
     CreatedBy: 1,
     CreatedOn: new Date(),
@@ -115,7 +115,7 @@ export default function Index() {
       UserName: '',
       Password: '',
       DisplayName: '',
-      RoleID: 0,
+      Role: "",
       IsActive: false,
       CreatedBy: 1,
       CreatedOn: new Date(),
@@ -185,8 +185,8 @@ export default function Index() {
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Role</h1>
                   <Select
-                    options={roles.map(role => ({ value: role.ID.toString(), label: role.Name }))}
-                    onChange={(e) => setCreateUserFormData({ ...createUserFormData, RoleID: Number(e.target.value) })}
+                    options={roles.map(role => ({ value: role.Name, label: role.Name }))}
+                    onChange={(e) => setCreateUserFormData({ ...createUserFormData, Role: e.target.value })}
                     placeholder='Select Role'
                   />
                 </div>
@@ -227,8 +227,8 @@ export default function Index() {
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Role</h1>
                   <Select
-                    options={roles.map(role => ({ value: role.ID.toString(), label: role.Name }))}
-                    onChange={(e) => setSelectedUser({ ...selectedUser!, RoleID: Number(e.target.value) })}
+                    options={roles.map(role => ({ value: role.Name, label: role.Name }))}
+                    onChange={(e) => setSelectedUser({ ...selectedUser!, Role: e.target.value })}
                     placeholder='Select Role'
                   />
                 </div>
