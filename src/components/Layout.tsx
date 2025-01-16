@@ -306,7 +306,7 @@ export default function Index({
                       <Input type="password" name="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                     <div className="flex gap-2">
-                      <Button text="Yes" color="foreground" type="submit" />
+                      <Button text="Submit" color="foreground" type="submit" />
                       <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmToggleModal} />
                     </div>
                   </form>
@@ -326,7 +326,7 @@ export default function Index({
                       <Input type="password" name="password" placeholder="Password" value={logOutPassword} onChange={(e) => setLogOutPassword(e.target.value)} />
                     </div>
                     <div className="flex gap-2">
-                      <Button text="Yes" color="foreground" type="submit" />
+                      <Button text="Submit" color="foreground" type="submit" />
                       <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
                     </div>
                   </form>
