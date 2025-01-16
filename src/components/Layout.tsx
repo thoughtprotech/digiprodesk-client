@@ -10,6 +10,8 @@ import toast from "react-hot-toast";
 import Toast from "./ui/Toast";
 import jwt from "jsonwebtoken";
 import { User } from "@/utils/types";
+import Modal from "./ui/Modal";
+import Button from "./ui/Button";
 
 export default function Index({
   header,
@@ -24,18 +26,94 @@ export default function Index({
   const router = useRouter();
   const [userOnline, setUserOnline] = useState(true);
   const [user, setUser] = useState<User>();
+  const [confirmToggleModal, setConfirmToggleModal] = useState(false);
+  const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
+  const [password, setPassword] = useState('');
+  const [logOutPassword, setLogOutPassword] = useState('');
 
-  const toggleUserAway = () => {
-    setUserOnline(!userOnline);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return toast.custom((t: any) => (<Toast t={t} type="info" content={
-      userOnline ? 'You Are Now Away' : 'You Are Now Online'
-    } />));
+  const handleLogOutToggle = () => {
+    setConfirmLogoutModal(true);
   }
 
-  const handleUserLogout = () => {
+  const logOut = () => {
     destroyCookie(null, 'userToken');
     router.push('/');
+  }
+
+  const toggleUserAway = () => {
+    setConfirmToggleModal(true);
+  }
+
+  const handleCloseConfirmToggleModal = async () => {
+    setConfirmToggleModal(false);
+  }
+
+  const handleCloseConfirmLogoutModal = async () => {
+    setConfirmLogoutModal(false);
+  }
+
+  const handleToggleUser = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+    const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
+    const { userName } = decoded;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/verifyUser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify({ userName, password })
+      });
+
+      if (response.status === 200) {
+        setUserOnline(!userOnline);
+        setPassword('');
+        setConfirmToggleModal(false);
+        return toast.custom((t: any) => (<Toast t={t} type="info" content={
+          userOnline ? 'You Are Now Away' : 'You Are Now Online'
+        } />));
+      } else {
+        return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
+      }
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating User Status" />));
+    }
+  }
+
+  const handleUserLogout = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+    const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
+    const { userName } = decoded;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/verifyUser`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify({ userName, password: logOutPassword })
+      });
+
+      if (response.status === 200) {
+        setLogOutPassword('');
+        setConfirmLogoutModal(false);
+        logOut();
+        return toast.custom((t: any) => (<Toast t={t} type="info" content={"Logged Out"} />));
+      } else {
+        return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
+      }
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating User Status" />));
+    }
   }
 
   const fetchUserDetails = async () => {
@@ -85,7 +163,7 @@ export default function Index({
         if (decoded.exp < currentTime) {
           toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
           console.error("Token has expired");
-          handleUserLogout();
+          logOut();
         }
       }
     } catch (error) {
@@ -208,7 +286,7 @@ export default function Index({
                 </div>
               </div>
               <div
-                onClick={handleUserLogout}
+                onClick={handleLogOutToggle}
               >
                 <Tooltip tooltip="Log Out" position="bottom">
                   <LogOut className="w-5 h-5 text-red-500" />
@@ -216,6 +294,46 @@ export default function Index({
               </div>
             </div>
           </div>
+          {
+            confirmToggleModal && (
+              <Modal onClose={handleCloseConfirmToggleModal} title="Confirm Status Change">
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <h1 className="font-bold">Enter Current User Password</h1>
+                  </div>
+                  <form className="flex flex-col gap-2" onSubmit={handleToggleUser}>
+                    <div>
+                      <Input type="password" name="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button text="Yes" color="foreground" type="submit" />
+                      <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmToggleModal} />
+                    </div>
+                  </form>
+                </div>
+              </Modal>
+            )
+          }
+          {
+            confirmLogoutModal && (
+              <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
+                <div className="flex flex-col gap-2">
+                  <div>
+                    <h1 className="font-bold">Enter Current User Password</h1>
+                  </div>
+                  <form className="flex flex-col gap-2" onSubmit={handleUserLogout}>
+                    <div>
+                      <Input type="password" name="password" placeholder="Password" value={logOutPassword} onChange={(e) => setLogOutPassword(e.target.value)} />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button text="Yes" color="foreground" type="submit" />
+                      <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
+                    </div>
+                  </form>
+                </div>
+              </Modal>
+            )
+          }
         </div>
         <div className="p-2">
           {children}
