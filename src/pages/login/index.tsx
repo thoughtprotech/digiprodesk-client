@@ -16,7 +16,8 @@ export default function Login() {
 
   const router = useRouter();
 
-  const handleLogIn = async () => {
+  const handleLogIn = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (formData.userName === "") {
       return toast.custom((t: any) => <Toast content="Username is required." type="warning" t={t} />);
     }
