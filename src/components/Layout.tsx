@@ -288,7 +288,7 @@ export default function Index({
               <div
                 onClick={handleLogOutToggle}
               >
-                <Tooltip tooltip="Log Out" position="bottom">
+                <Tooltip className="transform -translate-x-12" tooltip="Log Out" position="bottom">
                   <LogOut className="w-5 h-5 text-red-500" />
                 </Tooltip>
               </div>
@@ -299,11 +299,11 @@ export default function Index({
               <Modal onClose={handleCloseConfirmToggleModal} title="Confirm Status Change">
                 <div className="flex flex-col gap-2">
                   <div>
-                    <h1 className="font-bold">Enter Current User Password</h1>
+                    <h1 className="font-bold">Password</h1>
                   </div>
                   <form className="flex flex-col gap-2" onSubmit={handleToggleUser}>
                     <div>
-                      <Input type="password" name="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <Input type="password" name="togglePassword" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                     <div className="flex gap-2">
                       <Button text="Submit" color="foreground" type="submit" />
@@ -319,7 +319,7 @@ export default function Index({
               <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
                 <div className="flex flex-col gap-2">
                   <div>
-                    <h1 className="font-bold">Enter Current User Password</h1>
+                    <h1 className="font-bold">Password</h1>
                   </div>
                   <form className="flex flex-col gap-2" onSubmit={handleUserLogout}>
                     <div>

@@ -4,12 +4,14 @@ interface TooltipProps {
   tooltip: string;
   position?: "top" | "bottom" | "left" | "right"; // Tooltip position (default is "top")
   children: React.ReactNode;
+  className?: string;
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
   tooltip,
   position = "top",
   children,
+  className = "",
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -34,7 +36,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         <div
           className={`absolute z-50 px-2 py-1 text-xs text-text font-bold bg-background border-2 border-border rounded-md ${positionClasses[position]
             } transition-opacity duration-500 ease-in-out ${isVisible ? "opacity-100" : "opacity-0"
-            }`}
+            } ${className}`}
           style={{ whiteSpace: "nowrap" }}
         >
           {tooltip}

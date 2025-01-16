@@ -147,9 +147,9 @@ const Input: React.FC<InputProps> = ({
             name={name}
             className="hidden sr-only"
           />
-          <div className="toggle-background w-8 h-fit bg-background rounded-full transition duration-300 ease-in-out">
+          <div className={`w-8 h-fit ${value === "true" ? "bg-green-600" : "bg-red-600"} rounded-full transition duration-300 ease-in-out`}>
             <div
-              className={`toggle-dot w-4 h-4 rounded-full shadow-md transform transition-all duration-300 ease-in-out ${value === 'true' ? 'translate-x-4 bg-white' : ' bg-highlight'
+              className={`toggle-dot w-4 h-4 rounded-full shadow-md transform transition-all duration-300 ease-in-out bg-white ${value === 'true' ? 'translate-x-4' : ' bg-highlight'
                 }`}
             />
           </div>

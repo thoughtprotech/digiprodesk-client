@@ -123,6 +123,7 @@ export default function Login() {
                   value={formData.userName}
                   onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
+                  name="userName"
                 />
               </div>
               <div className="w-full">
@@ -132,6 +133,7 @@ export default function Login() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
+                  name="password"
                 />
               </div>
               <div className="w-full">

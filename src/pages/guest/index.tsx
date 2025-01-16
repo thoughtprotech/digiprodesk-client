@@ -440,7 +440,7 @@ export default function Index() {
           <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Logout">
             <div className="flex flex-col gap-2">
               <div>
-                <h1 className="font-bold">Enter Current User Password</h1>
+                <h1 className="font-bold">Password</h1>
               </div>
               <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
                 <div>
