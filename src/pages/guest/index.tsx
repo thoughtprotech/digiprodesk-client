@@ -10,6 +10,9 @@ import { io } from "socket.io-client";
 import jwt from "jsonwebtoken";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
+import Modal from "@/components/ui/Modal";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -24,6 +27,11 @@ export default function Index() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
+  const [formData, setFormData] = useState({
+    password: ''
+  });
 
   const router = useRouter();
 
@@ -115,9 +123,49 @@ export default function Index() {
     }
   };
 
-  const handleLogOut = () => {
+  const handleLogOut = async (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log({ formData });
+
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    const decoded = jwt.decode(userToken) as { userName: string };
+    const { userName } = decoded;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/verifyUser`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${userToken}`
+        },
+        body: JSON.stringify({ userName, password: formData.password })
+      });
+
+      if (response.status === 200) {
+        destroyCookie(null, "userToken");
+        router.push("/");
+        return toast.custom((t: any) => <Toast content="Logged Out Successfully" type="success" t={t} />);
+      } else {
+        return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
+      }
+    } catch {
+      return toast.custom((t: any) => <Toast content="Something Went Wrong" type="error" t={t} />);
+    }
+  }
+
+  const logOut = () => {
     destroyCookie(null, "userToken");
-    return router.push("/");
+    router.push("/");
+  }
+
+  const handleOpenConfirmLogoutModal = () => {
+    setConfirmLogoutModal(true);
+  }
+
+  const handleCloseConfirmLogoutModal = () => {
+    setConfirmLogoutModal(false);
   }
 
   useEffect(() => {
@@ -135,7 +183,7 @@ export default function Index() {
         if (decoded.exp < currentTime) {
           toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
           console.error("Token has expired");
-          handleLogOut();  // Log out if token has expired
+          logOut();  // Log out if token has expired
         } else {
           const { userName } = decoded;
           setUserId(userName);  // Set userId from token if valid
@@ -385,8 +433,28 @@ export default function Index() {
         )
       }
       <div className="absolute top-4 right-2 z-50 flex items-center">
-        <LogOut className="cursor-pointer" color="red" onClick={handleLogOut} />
+        <LogOut className="cursor-pointer" color="red" onClick={handleOpenConfirmLogoutModal} />
       </div>
+      {
+        confirmLogoutModal && (
+          <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Logout">
+            <div className="flex flex-col gap-2">
+              <div>
+                <h1 className="font-bold">Enter Current User Password To Log Out</h1>
+              </div>
+              <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
+                <div>
+                  <Input type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                </div>
+                <div className="flex gap-2">
+                  <Button text="Yes" color="foreground" type="submit" />
+                  <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
+                </div>
+              </form>
+            </div>
+          </Modal>
+        )
+      }
     </div>
   )
 }
