@@ -1,6 +1,7 @@
 import MockCardData from "../../../mock/watchListMock.json";
 import Layout from "@/components/Layout";
 import WatchCard from "./_components/WatchCard";
+import VideoViewer from "@/components/ui/videoViewer";
 
 export default function Index() {
   return (
@@ -16,7 +17,9 @@ export default function Index() {
     }>
       <div className="w-full h-full overflow-y-auto overflow-x-hidden pb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 items-stretch">
         {MockCardData.map((card, index) => (
-          <WatchCard key={index} title={card.title} src="/videos/placeholder.mp4" />
+          <VideoViewer key={index} title={card.title} src="/videos/placeholder.mp4">
+            <WatchCard title={card.title} src="/videos/placeholder.mp4" />
+          </VideoViewer>
         ))}
       </div>
     </Layout>

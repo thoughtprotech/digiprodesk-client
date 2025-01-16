@@ -72,7 +72,7 @@ export default function Index() {
       <div className='w-full h-full flex flex-col gap-2 bg-background px-2'>
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w52'>
-            <Input type='text' placeholder='Search Call Logs' onChange={handleSearchCall} />
+            <Input type='text' placeholder='Locations' onChange={handleSearchCall} />
           </div>
           <div className='flex gap-2'>
             {/* <div>

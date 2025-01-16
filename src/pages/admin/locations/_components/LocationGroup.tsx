@@ -111,7 +111,7 @@ export default function LocationGroups({ locationGroupMappingData, setLocationGr
     <div className='w-1/2 h-full overflow-y-auto flex flex-col relative'>
       <div className='flex items-center justify-between sticky top-0 bg-background pb-2 pl-2 border-b border-b-border'>
         <div>
-          <Input placeholder='Search Location Groups' onChange={handleSearchGroup} />
+          <Input placeholder='Location Groups' onChange={handleSearchGroup} />
         </div>
         <div>
           <Button color='foreground' icon={<Plus />} text='Location Group' onClick={handleOpenCreateLocationGroupModal} />

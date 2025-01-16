@@ -266,24 +266,28 @@ export default function Index({
               />
             </div> */}
               <div className="flex items-center gap-2 border-r-2 border-r-border pr-2">
-                <div className="flex items-center gap-1">
-                  <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
-                    <h1 className="text-textAlt font-bold">{
-                      user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
-                    }</h1>
+                <Tooltip className="transform -translate-x-9  " tooltip="User Name" position="bottom">
+                  <div className="flex items-center gap-1">
+                    <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
+                      <h1 className="text-textAlt font-bold">{
+                        user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
+                      }</h1>
+                    </div>
+                    <div>
+                      <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+                </Tooltip>
+                <Tooltip className="transform -translate-x-12" tooltip="Toggle Status" position="bottom">
+                  <div className="w-[5.6rem] h-full flex items-center gap-1">
+                    <div className="flex items-center">
+                      <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
+                    </div>
+                    <h1 className="text-xs font-bold">
+                      {userOnline ? 'Available' : 'Away'}
+                    </h1>
                   </div>
-                </div>
-                <div className="w-[5.6rem] h-full flex items-center gap-1">
-                  <div className="flex items-center">
-                    <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
-                  </div>
-                  <h1 className="text-xs font-bold">
-                    {userOnline ? 'Available' : 'Away'}
-                  </h1>
-                </div>
+                </Tooltip>
               </div>
               <div
                 onClick={handleLogOutToggle}
@@ -297,7 +301,7 @@ export default function Index({
           {
             confirmToggleModal && (
               <Modal onClose={handleCloseConfirmToggleModal} title="Confirm Status Change">
-                <div className="flex flex-col gap-2">
+                <div className="h-full flex flex-col gap-2 p-2">
                   <div>
                     <h1 className="font-bold">Password</h1>
                   </div>
@@ -317,7 +321,7 @@ export default function Index({
           {
             confirmLogoutModal && (
               <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 p-2">
                   <div>
                     <h1 className="font-bold">Password</h1>
                   </div>
@@ -338,7 +342,7 @@ export default function Index({
         <div className="p-2">
           {children}
         </div>
-      </div>
+      </div >
     )
   }
 }

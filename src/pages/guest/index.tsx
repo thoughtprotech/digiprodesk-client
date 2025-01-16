@@ -438,7 +438,7 @@ export default function Index() {
       {
         confirmLogoutModal && (
           <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Logout">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 p-2">
               <div>
                 <h1 className="font-bold">Password</h1>
               </div>

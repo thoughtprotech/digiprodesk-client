@@ -79,7 +79,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
     <div className='w-1/2 h-full overflow-y-auto border-r border-r-border flex flex-col relative'>
       <div className='flex items-center justify-between sticky top-0 bg-background pb-2 pr-2 border-b border-b-border'>
         <div>
-          <Input placeholder='Search Locations' onChange={handleSearchLocation} />
+          <Input placeholder='Locations' onChange={handleSearchLocation} />
         </div>
         <div>
           <Button color='foreground' icon={<Plus />} text='Location' onClick={handleOpenCreateLocationModal} />

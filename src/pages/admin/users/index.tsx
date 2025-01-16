@@ -201,7 +201,7 @@ export default function Index() {
         {/* Create a grid to display user cards */}
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w-64 flex'>
-            <Input placeholder='Search Users' onChange={filterUserList} />
+            <Input placeholder='Users' onChange={filterUserList} />
           </div>
           <div>
             <Button color="foreground" icon={<Plus className='w-5' />} text='User' onClick={setCreateUserModal.bind(null, true)} />

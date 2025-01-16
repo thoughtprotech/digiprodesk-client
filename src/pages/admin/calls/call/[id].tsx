@@ -279,11 +279,11 @@ export default function Index() {
                         <Input type='text' placeholder='Enter Booking ID' />
                       </div>
                     </div>
-                    <div>
+                    <div className='w-full h-full'>
                       <div>
                         <h1 className='font-bold text-xl'>Notes</h1>
                       </div>
-                      <div className='w-full h-full'>
+                      <div className='w-full h-5/6'>
                         <Input type='textArea' placeholder='Enter Notes' />
                       </div>
                     </div>
