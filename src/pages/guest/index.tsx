@@ -362,7 +362,7 @@ export default function Index() {
       )}
       {inCall && callStatus === "inProgress" && (
         <div className="w-full h-full relative">
-          <div className="flex flex-col items-center absolute bottom-5 right-5">
+          <div className="flex flex-col items-center absolute bottom-2 right-2">
             <video ref={currentUserVideoRef} autoPlay muted className="rounded-lg shadow-lg w-64 h-48 object-cover" />
           </div>
           <div>

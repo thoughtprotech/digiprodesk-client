@@ -560,6 +560,9 @@ export default function Index() {
                   ref={remoteVideoRef}
                 />
               </div>
+              <div className="flex flex-col items-center absolute bottom-2 right-2">
+                <video ref={currentUserVideoRef} autoPlay muted className="rounded-lg shadow-lg w-64 h-48 object-cover" />
+              </div>
 
               {/* Screenshot Component */}
               {takeScreenshot && (
