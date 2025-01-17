@@ -4,9 +4,6 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
 import Toast from "@/components/ui/Toast";
-import Tooltip from "@/components/ui/ToolTip";
-// import Select from "@/components/ui/Select";
-// import Tooltip from "@/components/ui/ToolTip";
 import { Location, LocationGroup, LocationGroupMapping } from "@/utils/types";
 import { Plus, X } from "lucide-react";
 import { parseCookies } from "nookies";
@@ -293,14 +290,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                                       location?.LocationName
                                     }
                                   </h1>
-                                  <Tooltip tooltip='Remove Location' position='bottom'>
-                                    <X className='w-4 cursor-pointer' onClick={() => {
-                                      setCreateLocationGroupFormData({
-                                        ...createLocationGroupFormData,
-                                        Locations: createLocationGroupFormData.Locations!.filter(loc => loc.LocationID !== location.LocationID)
-                                      });
-                                    }} />
-                                  </Tooltip>
+                                  <X className='w-4 cursor-pointer' onClick={() => {
+                                    setCreateLocationGroupFormData({
+                                      ...createLocationGroupFormData,
+                                      Locations: createLocationGroupFormData.Locations!.filter(loc => loc.LocationID !== location.LocationID)
+                                    });
+                                  }} />
                                 </div>
                               ))
                             }
@@ -384,14 +379,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                                   <h1 className='font-bold text-sm'>
                                     {location.LocationName}
                                   </h1>
-                                  <Tooltip tooltip='Remove Location' position='bottom'>
-                                    <X className='w-4 cursor-pointer' onClick={() => {
-                                      setSelectedLocationGroup({
-                                        ...selectedLocationGroup,
-                                        Locations: selectedLocationGroup.Locations!.filter(loc => loc.LocationID !== location.LocationID)
-                                      });
-                                    }} />
-                                  </Tooltip>
+                                  <X className='w-4 cursor-pointer' onClick={() => {
+                                    setSelectedLocationGroup({
+                                      ...selectedLocationGroup,
+                                      Locations: selectedLocationGroup.Locations!.filter(loc => loc.LocationID !== location.LocationID)
+                                    });
+                                  }} />
                                 </div>
                               ))
                             }
