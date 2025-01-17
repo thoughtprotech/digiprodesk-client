@@ -113,11 +113,11 @@ const Input: React.FC<InputProps> = ({
               </div>
             </div>
           ) : (
-            <div className="text-center text-textAlt text-sm">
+            <div className="text-center text-zinc-600 text-sm">
               {dragging ? (
                 <p>Drop the file here</p>
               ) : (
-                <p>{placeholder || 'Drag and drop a file or click to select'}</p>
+                <p>{placeholder || 'Click To Upload'}</p>
               )}
             </div>
           )}

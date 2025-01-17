@@ -232,7 +232,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Name
                     </h1>
                     <Input
-                      placeholder='Location Name'
                       name='LocationName'
                       value={createLocationFormData.LocationName}
                       onChange={handleCreateLocationChange}
@@ -244,7 +243,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Code
                     </h1>
                     <Input
-                      placeholder='Location Code'
                       name='LocationCode'
                       value={createLocationFormData.LocationCode}
                       onChange={handleCreateLocationChange}
@@ -286,7 +284,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Image
                     </h1>
                     <Input
-                      placeholder='Location Image'
                       name='LocationImage'
                       // value={createLocationFormData.LocationImage}
                       onChange={handleCreateLocationChange}
@@ -301,7 +298,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Banner
                     </h1>
                     <Input
-                      placeholder='Location Banner'
                       name='LocationBanner'
                       // value={createLocationFormData.LocationBanner}
                       onChange={handleCreateLocationChange}
@@ -314,7 +310,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Receptionist Photo
                     </h1>
                     <Input
-                      placeholder='Receptionist Photo'
                       name='LocationReceptionistPhoto'
                       // value={createLocationFormData.LocationReceptionistPhoto}
                       onChange={handleCreateLocationChange}
@@ -361,7 +356,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Name
                     </h1>
                     <Input
-                      placeholder='Location Name'
                       name='LocationName'
                       value={selectedLocation!.LocationName}
                       onChange={handleEditLocationChange}
@@ -373,7 +367,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Code
                     </h1>
                     <Input
-                      placeholder='Location Code'
                       name='LocationCode'
                       value={selectedLocation!.LocationCode}
                       onChange={handleEditLocationChange}
@@ -417,7 +410,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Image
                     </h1>
                     <Input
-                      placeholder='Location Image'
                       name='LocationImage'
                       // value={selectedLocation!.LocationImage}
                       onChange={handleEditLocationChange}
@@ -432,7 +424,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Banner
                     </h1>
                     <Input
-                      placeholder='Location Banner'
                       name='LocationBanner'
                       // value={selectedLocation!.LocationBanner}
                       onChange={handleEditLocationChange}
@@ -445,7 +436,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Receptionist Photo
                     </h1>
                     <Input
-                      placeholder='Receptionist Photo'
                       name='LocationReceptionistPhoto'
                       // value={selectedLocation!.LocationReceptionistPhoto}
                       onChange={handleEditLocationChange}

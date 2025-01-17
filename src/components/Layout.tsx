@@ -323,7 +323,7 @@ export default function Index({
                     <div>
                       <Input ref={passwordRef} type="password" name="togglePassword" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center justify-center">
                       <Button text={
                         userOnline ? 'Away' : 'Available'
                       } color="foreground" type="submit" />
@@ -345,7 +345,7 @@ export default function Index({
                     <div>
                       <Input ref={logOutPasswordRef} type="password" name="password" placeholder="Password" value={logOutPassword} onChange={(e) => setLogOutPassword(e.target.value)} />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 items-center justify-center">
                       <Button text="Submit" color="foreground" type="submit" />
                       <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
                     </div>
