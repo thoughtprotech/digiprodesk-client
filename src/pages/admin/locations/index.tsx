@@ -1,144 +1,73 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from '@/components/Layout'
 import { useEffect, useState } from 'react'
 import { Location, LocationGroup, LocationGroupMapping } from '@/utils/types'
 import Locations from './_components/Locations'
 import LocationGroups from './_components/LocationGroup'
-
-const locationOptions: Location[] = [
-  {
-    LocationID: 1,
-    LocatonName: 'Olive Indiranagar',
-    LocationCode: 'OP',
-    LocationType: 'Property',
-    LocationParentID: 4,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 2,
-    LocatonName: 'Olive HSR',
-    LocationCode: 'OO',
-    LocationType: 'Property',
-    LocationParentID: 5,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: false,
-  },
-  {
-    LocationID: 3,
-    LocatonName: 'Olive Whitefield',
-    LocationCode: 'OR',
-    LocationType: 'Property',
-    LocationParentID: 4,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 4,
-    LocatonName: 'Head Office',
-    LocationCode: 'HO',
-    LocationType: 'Control',
-    LocationParentID: 0,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 5,
-    LocatonName: 'Regional Office',
-    LocationCode: 'RO',
-    LocationType: 'Control',
-    LocationParentID: 0,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: false,
-  },
-  {
-    LocationID: 6,
-    LocatonName: 'Olive Koramangala',
-    LocationCode: 'OK',
-    LocationType: 'Property',
-    LocationParentID: 5,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 7,
-    LocatonName: 'Olive Jayanagar',
-    LocationCode: 'OJ',
-    LocationType: 'Property',
-    LocationParentID: 5,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 8,
-    LocatonName: 'Olive BTM',
-    LocationCode: 'OB',
-    LocationType: 'Property',
-    LocationParentID: 5,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 9,
-    LocatonName: 'Olive Marathahalli',
-    LocationCode: 'OM',
-    LocationType: 'Property',
-    LocationParentID: 5,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  },
-  {
-    LocationID: 10,
-    LocatonName: 'Olive Sarjapur',
-    LocationCode: 'OS',
-    LocationType: 'Property',
-    LocationParentID: 5,
-    LocationImage: '',
-    LocationBanner: '',
-    LocationReceptionistPhoto: '',
-    IsActive: true,
-  }
-
-]
-
-const locationGroups: LocationGroup[] = [
-  { LocationGroupID: 1, LocatonGroupName: "Olive Properties", isActive: true },
-  { LocationGroupID: 2, LocatonGroupName: "Olive Offices", isActive: false },
-  { LocationGroupID: 3, LocatonGroupName: "Olive Residential", isActive: true },
-]
-
-const locationGroupMapping: LocationGroupMapping[] = [
-  { LocationGroupID: 1, LocationID: [1, 2, 3, 6, 7, 8, 9, 10] },
-  { LocationGroupID: 2, LocationID: [4, 5] },
-  { LocationGroupID: 3, LocationID: [1, 2, 3, 6, 7, 8, 9, 10] },
-]
+import toast from 'react-hot-toast'
+import Toast from '@/components/ui/Toast'
+import { parseCookies } from 'nookies'
 
 export default function Index() {
   const [locationData, setLocationData] = useState<Location[]>([]);
   const [locationGroupData, setLocationGroupData] = useState<LocationGroup[]>([]);
   const [locationGroupMappingData, setLocationGroupMappingData] = useState<LocationGroupMapping[]>([]);
 
+  const fetchLocationData = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      const data = await response.json();
+      if (response.status === 200) {
+        setLocationData(data);
+      } else {
+        throw new Error('Failed to fetch location data');
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to fetch location data' t={t} />
+      ))
+    }
+  }
+
+  const fetchLocationGroupData = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/locationGroup`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      const data = await response.json();
+      if (response.status === 200) {
+        setLocationGroupData(data);
+      } else {
+        throw new Error('Failed to fetch location group data');
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to fetch location group data' t={t} />
+      ))
+    }
+  }
+
   useEffect(() => {
-    setLocationData(locationOptions);
-    setLocationGroupData(locationGroups);
-    setLocationGroupMappingData(locationGroupMapping);
+    // setLocationData(locationOptions);
+    fetchLocationData();
+    fetchLocationGroupData();
+
+    // setLocationGroupData(locationGroups);
+    // setLocationGroupMappingData(locationGroupMapping);
   }, [])
 
   return (
@@ -157,7 +86,8 @@ export default function Index() {
         <Locations
           locationData={locationData}
           setLocationData={setLocationData}
-          locationOptions={locationOptions}
+          locationOptions={locationData}
+          fetchLocationData={fetchLocationData}
         />
         {/* Location Groups */}
         <LocationGroups
@@ -165,7 +95,7 @@ export default function Index() {
           locationGroupData={locationGroupData}
           locationGroupMappingData={locationGroupMappingData}
           setLocationGroupMappingData={setLocationGroupMappingData}
-          locationGroupMapping={locationGroupMapping}
+          fetchLocationGroupData={fetchLocationGroupData}
         />
       </div>
     </Layout>

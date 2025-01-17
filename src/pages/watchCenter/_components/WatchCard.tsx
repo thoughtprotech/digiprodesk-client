@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Tooltip from "@/components/ui/ToolTip";
-import { Minus, PhoneOutgoing } from "lucide-react";
+import { PhoneOutgoing } from "lucide-react";
 import { useRouter } from "next/router";
 
 export default function Index({ title, src }: { title: string; src?: any }) {
@@ -36,13 +36,6 @@ export default function Index({ title, src }: { title: string; src?: any }) {
                 onClick={() => router.push("/checkInHub")}
               >
                 <PhoneOutgoing className="w-4 h-4 font-bold text-text" />
-              </div>
-            </Tooltip>
-            <Tooltip tooltip="Remove Location" position="bottom">
-              <div
-                className="bg-red-500/50 hover:bg-red-500 border-2 border-red-500 duration-300 w-fit h-fit rounded-md py-1 px-3 flex items-center cursor-pointer"
-              >
-                <Minus className="w-4 h-4 font-bold text-text" />
               </div>
             </Tooltip>
           </div>

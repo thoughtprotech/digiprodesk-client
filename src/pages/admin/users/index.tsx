@@ -217,22 +217,22 @@ export default function Index() {
       </div>
       {createUserModal && (
         <Modal title="New User" onClose={setCreateUserModal.bind(null, false)}>
-          <form onSubmit={handleCreateUserSubmit}>
+          <form className='mt-4' onSubmit={handleCreateUserSubmit}>
             <div className="w-full h-full flex flex-col gap-4 justify-center">
               <div className='w-full flex gap-2 justify-between'>
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>User Name</h1>
-                  <Input required placeholder='Enter Username' type='text' value={createUserFormData.UserName} onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserName: e.target.value })} />
+                  <Input required type='text' value={createUserFormData.UserName} onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserName: e.target.value })} />
                 </div>
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Password</h1>
-                  <Input required placeholder='Enter Password' type='password' value={createUserFormData.Password} onChange={(e) => setCreateUserFormData({ ...createUserFormData, Password: e.target.value })} />
+                  <Input required type='password' value={createUserFormData.Password} onChange={(e) => setCreateUserFormData({ ...createUserFormData, Password: e.target.value })} />
                 </div>
               </div>
               <div className='w-full flex gap-2 justify-between'>
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Display Name</h1>
-                  <Input required placeholder='Enter Display Name' type='text' value={createUserFormData.DisplayName} onChange={(e) => setCreateUserFormData({ ...createUserFormData, DisplayName: e.target.value })} />
+                  <Input required type='text' value={createUserFormData.DisplayName} onChange={(e) => setCreateUserFormData({ ...createUserFormData, DisplayName: e.target.value })} />
                 </div>
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>Role</h1>
@@ -244,7 +244,15 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
-                <div className='flex items-center gap-2'>
+                <div className='w-1/2'>
+                  <h1 className='font-bold text-sm'>Location Group</h1>
+                  <Select
+                    options={rolesListData.map(role => ({ value: role.Name, label: role.Name }))}
+                    onChange={(e) => setCreateUserFormData({ ...createUserFormData, Role: e.target.value })}
+                    placeholder='Select Location Group'
+                  />
+                </div>
+                <div className='h-full flex items-center gap-2'>
                   <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
                   <h1 className='font-bold text-sm'>
                     {
@@ -253,7 +261,7 @@ export default function Index() {
                   </h1>
                 </div>
               </div>
-              <div className='w-full flex items-center gap-2'>
+              <div className='w-full flex items-center justify-center gap-2 mt-2'>
                 <Button color="foreground" text='Save' type='submit' />
                 <Button color="foreground" text='Cancel' type='button' onClick={setCreateUserModal.bind(null, false)} />
               </div>
@@ -263,7 +271,7 @@ export default function Index() {
       )}
       {editUserModal && (
         <Modal title="Edit User" onClose={setEditUserModal.bind(null, false)}>
-          <form onSubmit={handleEditUser}>
+          <form className='mt-2' onSubmit={handleEditUser}>
             <div className="w-full h-full flex flex-col gap-4 justify-center">
               <div className='w-full flex gap-2 justify-between'>
                 <div className='w-full'>

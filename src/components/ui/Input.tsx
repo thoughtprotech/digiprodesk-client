@@ -11,6 +11,7 @@ interface InputProps {
   className?: string; // Optional Tailwind CSS class for further customization
   required?: boolean;
   name?: string;
+  ref?: React.RefObject<HTMLInputElement | null>;
 }
 
 const Input: React.FC<InputProps> = ({
@@ -21,6 +22,7 @@ const Input: React.FC<InputProps> = ({
   className = '',
   required = false,
   name,
+  ref
 }) => {
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -83,6 +85,7 @@ const Input: React.FC<InputProps> = ({
             accept="image/*, .pdf, .doc, .docx, .txt"
             value={value} // Controlled input
             required={required}
+            ref={ref}
           />
           {file ? (
             <div className="w-36">
@@ -146,6 +149,7 @@ const Input: React.FC<InputProps> = ({
             checked={value === 'true' || value === 1} // Convert string 'true' to boolean
             name={name}
             className="hidden sr-only"
+            ref={ref}
           />
           <div className={`w-8 h-fit ${value === "true" ? "bg-green-600" : "bg-red-600"} rounded-full transition duration-300 ease-in-out`}>
             <div
@@ -162,12 +166,13 @@ const Input: React.FC<InputProps> = ({
   return (
     <input
       type={type}
-      placeholder={placeholder || 'Enter text'}
+      placeholder={placeholder || ''}
       onChange={onChange}
       value={value} // Controlled input
       className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none ${className}`}
       required={required}
       name={name}
+      ref={ref}
     />
   );
 };

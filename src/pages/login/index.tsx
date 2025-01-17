@@ -4,7 +4,7 @@ import Toast from "@/components/ui/Toast";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import { parseCookies, setCookie } from "nookies";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import jwt from "jsonwebtoken";
 
@@ -13,6 +13,7 @@ export default function Login() {
     userName: '',
     password: ''
   });
+  const userNameInputRef = useRef<HTMLInputElement>(null);
 
   const router = useRouter();
 
@@ -59,6 +60,10 @@ export default function Login() {
       return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
     }
   }
+
+  useEffect(() => {
+    userNameInputRef.current?.focus();
+  }, []);
 
   useEffect(() => {
     const cookies = parseCookies();
@@ -124,6 +129,7 @@ export default function Login() {
                   onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
                   name="userName"
+                  ref={userNameInputRef}
                 />
               </div>
               <div className="w-full">

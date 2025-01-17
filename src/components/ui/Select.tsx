@@ -19,6 +19,8 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
   const [selectedOption, setSelectedOption] = useState<Option | null>(
     options.find((option) => option.value === defaultValue) || null
   );
+  console.log({ options });
+  console.log({ defaultValue });
   const dropdownRef = useRef<HTMLDivElement>(null);
   useOutsideClick({
     ref: dropdownRef,
@@ -55,7 +57,7 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
               {selectedOption.label}
             </span>
             : placeholder ?
-              <span className="text-textAlt text-sm font-bold">
+              <span className="text-zinc-600 text-sm font-bold">
                 {placeholder}
               </span>
               : "Select an Option"}

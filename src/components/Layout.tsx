@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Backpack, Cctv, KeyRound, LogOut, MapPinPlus, Users } from "lucide-react";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
 import { destroyCookie, parseCookies } from "nookies";
@@ -30,6 +30,18 @@ export default function Index({
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [password, setPassword] = useState('');
   const [logOutPassword, setLogOutPassword] = useState('');
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const logOutPasswordRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (confirmToggleModal) {
+      passwordRef.current?.focus();
+    }
+    if (confirmLogoutModal) {
+      logOutPasswordRef.current?.focus();
+    }
+  },
+    [confirmToggleModal, confirmLogoutModal]);
 
   const handleLogOutToggle = () => {
     setConfirmLogoutModal(true);
@@ -46,10 +58,12 @@ export default function Index({
 
   const handleCloseConfirmToggleModal = async () => {
     setConfirmToggleModal(false);
+    setPassword('');
   }
 
   const handleCloseConfirmLogoutModal = async () => {
     setConfirmLogoutModal(false);
+    setLogOutPassword('');
   }
 
   const handleToggleUser = async (event: React.FormEvent) => {
@@ -278,10 +292,10 @@ export default function Index({
                     </div>
                   </div>
                 </Tooltip>
-                <Tooltip className="transform -translate-x-12" tooltip="Toggle Status" position="bottom">
-                  <div className="w-[5.6rem] h-full flex items-center gap-1">
+                <Tooltip className="transform -translate-x-6" tooltip="Status" position="bottom">
+                  <div className="w-[5.6rem] h-full flex items-center gap-1" onClick={toggleUserAway}>
                     <div className="flex items-center">
-                      <Input type="checkBox" name="Status" onChange={toggleUserAway} value={userOnline.toString()} />
+                      <Input type="checkBox" name="Status" value={userOnline.toString()} />
                     </div>
                     <h1 className="text-xs font-bold">
                       {userOnline ? 'Available' : 'Away'}
@@ -300,17 +314,19 @@ export default function Index({
           </div>
           {
             confirmToggleModal && (
-              <Modal onClose={handleCloseConfirmToggleModal} title="Confirm Status Change">
+              <Modal onClose={handleCloseConfirmToggleModal} title={`Confirm Status Change To ${userOnline ? 'Away' : 'Available  '}`}>
                 <div className="h-full flex flex-col gap-2 p-2">
                   <div>
                     <h1 className="font-bold">Password</h1>
                   </div>
                   <form className="flex flex-col gap-2" onSubmit={handleToggleUser}>
                     <div>
-                      <Input type="password" name="togglePassword" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                      <Input ref={passwordRef} type="password" name="togglePassword" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                     <div className="flex gap-2">
-                      <Button text="Submit" color="foreground" type="submit" />
+                      <Button text={
+                        userOnline ? 'Away' : 'Available'
+                      } color="foreground" type="submit" />
                       <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmToggleModal} />
                     </div>
                   </form>
@@ -327,7 +343,7 @@ export default function Index({
                   </div>
                   <form className="flex flex-col gap-2" onSubmit={handleUserLogout}>
                     <div>
-                      <Input type="password" name="password" placeholder="Password" value={logOutPassword} onChange={(e) => setLogOutPassword(e.target.value)} />
+                      <Input ref={logOutPasswordRef} type="password" name="password" placeholder="Password" value={logOutPassword} onChange={(e) => setLogOutPassword(e.target.value)} />
                     </div>
                     <div className="flex gap-2">
                       <Button text="Submit" color="foreground" type="submit" />

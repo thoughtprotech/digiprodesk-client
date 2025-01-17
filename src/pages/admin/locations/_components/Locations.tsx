@@ -1,28 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
+import Toast from "@/components/ui/Toast";
 import { Location } from "@/utils/types";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { parseCookies } from "nookies";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-export default function Locations({ locationData, setLocationData, locationOptions }: {
+export default function Locations({ locationData, setLocationData, locationOptions, fetchLocationData }: {
   locationData: Location[];
   setLocationData: React.Dispatch<React.SetStateAction<Location[]>>;
   locationOptions: Location[];
+  fetchLocationData: () => void;
 }) {
   const [createLocationModal, setCreateLocationModal] = useState<boolean>(false);
   const [editLocationModal, setEditLocationModal] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [createLocationFormData, setCreateLocationFormData] = useState<Location>({
-    LocatonName: '',
+    LocationName: '',
     LocationCode: '',
     LocationType: '',
     LocationParentID: 0,
     LocationImage: '',
     LocationBanner: '',
     LocationReceptionistPhoto: '',
-    IsActive: false,
+    IsActive: 0,
   });
 
 
@@ -64,16 +69,53 @@ export default function Locations({ locationData, setLocationData, locationOptio
     console.log(createLocationFormData);
   }
 
-  const handleEditLocationSubmit = (event: React.FormEvent) => {
+  const handleEditLocationSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     console.log(selectedLocation);
+    if (selectedLocation?.LocationType === "Control") {
+      selectedLocation.LocationParentID = 0;
+    }
+
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify(selectedLocation)
+      });
+
+      if (response.status === 200) {
+        toast.custom((t: any) => (
+          <Toast type='success' content='Location updated successfully' t={t} />
+        ))
+        setEditLocationModal(false);
+        fetchLocationData();
+        setSelectedLocation(null);
+      } else {
+        throw new Error('Failed to update location');
+      }
+
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to update location' t={t} />
+      ))
+    }
   }
 
   const handleSearchLocation = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value;
-    const filteredLocations = locationOptions.filter(location => location.LocatonName.toLowerCase().includes(searchValue.toLowerCase()));
+    const filteredLocations = locationOptions.filter(location => location.LocationName.toLowerCase().includes(searchValue.toLowerCase()));
     setLocationData(filteredLocations);
   }
+
+  useEffect(() => {
+    console.log({ selectedLocation });
+  }, [selectedLocation])
 
   return (
     <div className='w-1/2 h-full overflow-y-auto border-r border-r-border flex flex-col relative'>
@@ -93,9 +135,9 @@ export default function Locations({ locationData, setLocationData, locationOptio
               <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
                 <div>
                   <div>
-                    <h1 className='font-bold text-xl'>{location?.LocatonName}</h1>
+                    <h1 className='font-bold text-xl'>{location?.LocationName}</h1>
                   </div>
-                  <div className='w-full flex justify-between'>
+                  <div className='w-full flex justify-between items-end'>
                     <div className='flex justify-between items-center gap-2'>
                       <div className='w-full'>
                         <div className='w-full flex gap-1 items-center'>
@@ -140,8 +182,8 @@ export default function Locations({ locationData, setLocationData, locationOptio
       {/* Create Location Modal */}
       {
         createLocationModal && (
-          <Modal className="w-1/2" title='Create Location' onClose={handleCloseCreateLocationModal}>
-            <form className="w-full h-full" onSubmit={handleCreateLocationSubmit}>
+          <Modal className="w-1/2" title='New Location' onClose={handleCloseCreateLocationModal}>
+            <form className="mt-2 w-full h-full" onSubmit={handleCreateLocationSubmit}>
               <div className='w-full h-full flex flex-col gap-4 justify-between'>
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
@@ -151,7 +193,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       placeholder='Location Name'
                       name='LocatonName'
-                      value={createLocationFormData.LocatonName}
+                      value={createLocationFormData.LocationName}
                       onChange={handleCreateLocationChange}
                       required
                     />
@@ -192,7 +234,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       </h1>
                       <Select
                         options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocatonName, label: location.LocatonName }))
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationName, label: location.LocationName }))
                         }
                         placeholder='Assign Control'
                         onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
@@ -246,7 +288,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       type='checkBox'
                       name='IsActive'
                       value={createLocationFormData.IsActive.toString()}
-                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked })}
+                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })}
                       required
                     />
                     <h1 className='font-bold text-sm'>
@@ -257,7 +299,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
                   </div>
                 </div>
-                <div className='flex justify-end gap-2'>
+                <div className='flex justify-center gap-2'>
                   <Button text='Save' color='foreground' type='submit' />
                   <Button text='Cancel' color='foreground' onClick={handleCloseCreateLocationModal} />
                 </div>
@@ -271,7 +313,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
       {
         editLocationModal && (
           <Modal className="w-1/2" title='Edit Location' onClose={handleCloseEditLocationModal}>
-            <form onSubmit={handleEditLocationSubmit}>
+            <form className="mt-2" onSubmit={handleEditLocationSubmit}>
               <div className='flex flex-col gap-2'>
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
@@ -280,8 +322,8 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     </h1>
                     <Input
                       placeholder='Location Name'
-                      name='LocatonName'
-                      value={selectedLocation!.LocatonName}
+                      name='LocationName'
+                      value={selectedLocation!.LocationName}
                       onChange={handleEditLocationChange}
                       required
                     />
@@ -323,11 +365,11 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       </h1>
                       <Select
                         options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocatonName, label: location.LocatonName }))
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
                         }
                         placeholder='Assign Control'
                         onChange={(e) => setSelectedLocation({ ...selectedLocation!, LocationParentID: Number(e.target.value) })}
-                        defaultValue={locationData.find(location => location.LocationID === selectedLocation!.LocationParentID)?.LocatonName}
+                        defaultValue={selectedLocation?.LocationParentID!.toString()}
                       />
                     </div>)}
                   <div className='w-full'>
@@ -340,7 +382,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       // value={selectedLocation!.LocationImage}
                       onChange={handleEditLocationChange}
                       type="file"
-                      required
+                    // required
                     />
                   </div>
                 </div>
@@ -355,7 +397,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       // value={selectedLocation!.LocationBanner}
                       onChange={handleEditLocationChange}
                       type="file"
-                      required
+                    // required
                     />
                   </div>
                   <div className='w-full'>
@@ -368,7 +410,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       // value={selectedLocation!.LocationReceptionistPhoto}
                       onChange={handleEditLocationChange}
                       type="file"
-                      required
+                    // required
                     />
                   </div>
                 </div>
@@ -377,8 +419,8 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       type='checkBox'
                       name='IsActive'
-                      value={selectedLocation!.IsActive.toString()}
-                      onChange={(e) => setSelectedLocation({ ...selectedLocation!, IsActive: (e.target as HTMLInputElement).checked })}
+                      value={selectedLocation!.IsActive === 1 ? 'true' : 'false'}
+                      onChange={(e) => setSelectedLocation({ ...selectedLocation!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })}
                       required
                     />
                     <h1 className='font-bold text-sm'>
@@ -389,8 +431,8 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
                   </div>
                 </div>
-                <div className='flex justify-end gap-2'>
-                  <Button text='Create Location' color='foreground' type='submit' />
+                <div className='flex justify-center gap-2'>
+                  <Button text='Save' color='foreground' type='submit' />
                   <Button text='Cancel' color='foreground' onClick={handleCloseEditLocationModal} />
                 </div>
               </div>

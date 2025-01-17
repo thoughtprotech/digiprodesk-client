@@ -574,7 +574,7 @@ export default function Index() {
           ) : (
             <div className="w-full h-full bg-foreground border-2 border-border rounded-md mb-20 p-4 flex flex-col space-y-4 justify-center items-center">
               <div>
-                <h1 className="font-bold text-2xl text-textAlt">No Ongoing Call</h1>
+                <h1 className="font-bold text-2xl text-textAlt">No Ongoing Check Ins</h1>
               </div>
             </div>
           )}
@@ -595,7 +595,7 @@ export default function Index() {
                     </div>
                     <div className="flex items-center gap-2">
                       <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold" || call.status === "pending").length}</h1>
-                      <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">CALLS</h1>
+                      <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">CHECK INS</h1>
                     </div>
                   </div>
                 </div>
@@ -662,7 +662,7 @@ export default function Index() {
                           ))
                         ) : (
                           <div className="col-span-full w-full rounded-md border-2 border-dashed border-border p-4">
-                            <h1 className="text-center text-xl text-textAlt font-bold">No Calls In Progress</h1>
+                            <h1 className="text-center text-xl text-textAlt font-bold">No Ongoing Check Ins</h1>
                           </div>
                         );
                       })()}
@@ -686,7 +686,7 @@ export default function Index() {
                       ))
                     ) : (
                       <div className="col-span-full w-full rounded-md border-2 border-dashed border-border p-4">
-                        <h1 className="text-center text-xl text-textAlt font-bold">No Calls In Progress</h1>
+                        <h1 className="text-center text-xl text-textAlt font-bold">No Ongoing Check Ins</h1>
                       </div>
                     )
                   )}

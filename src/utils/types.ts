@@ -91,7 +91,7 @@ export interface License {
 
 export interface Location {
   LocationID?: number;
-  LocatonName: string;
+  LocationName: string;
   LocationCode: string;
   LocationParentID?: number;
   LocationType: string;
@@ -100,7 +100,7 @@ export interface Location {
   LocationBanner: string;
   LocationVideoFeed?: string;
   LocationReceptionistPhoto: string;
-  IsActive: boolean;
+  IsActive: number;
   CreatedBy?: number;
   CreatedOn?: Date;
   ModifiedBy?: number;
@@ -108,13 +108,14 @@ export interface Location {
 }
 
 export interface LocationGroup {
-  LocationGroupID?: number;
-  LocatonGroupName: string;
-  isActive: boolean;
+  LocationGroupId?: number;
+  LocationGroupName: string;
+  IsActive: number;
   CreatedBy?: number;
   CreatedOn?: Date;
   ModifiedBy?: number;
   ModifiedOn?: Date;
+  Locations?: Location[];
 }
 
 export interface LocationGroupMapping {

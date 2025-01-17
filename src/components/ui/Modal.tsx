@@ -26,7 +26,7 @@ const Modal: React.FC<ModalProps> = ({ title, onClose, children, className }) =>
   return (
     <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black bg-opacity-50">
       <div className={`bg-foreground rounded-lg p-2 md:min-w-96 h-fit ${className}`}>
-        <div className="flex justify-between items-center pb-1 border-b-2 border-border">
+        <div className="flex justify-between gap-5 items-center pb-1 border-b-2 border-border">
           <h1 className="text-2xl font-bold">{title}</h1>
           <Tooltip tooltip="Close" position="top">
             <button onClick={onClose}>
