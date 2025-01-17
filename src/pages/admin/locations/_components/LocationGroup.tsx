@@ -4,20 +4,19 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
 import Toast from "@/components/ui/Toast";
-import { Location, LocationGroup, LocationGroupMapping } from "@/utils/types";
+import { Location, LocationGroup } from "@/utils/types";
 import { Plus, X } from "lucide-react";
 import { parseCookies } from "nookies";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function LocationGroups({ locationGroupData, locationData, fetchLocationGroupData }: {
-  locationGroupMappingData: LocationGroupMapping[];
-  setLocationGroupMappingData: React.Dispatch<React.SetStateAction<LocationGroupMapping[]>>;
   locationGroupData: LocationGroup[];
   locationData: Location[];
   fetchLocationGroupData: () => void;
 }
 ) {
+  const [filteredLocationGroupData, setFilteredLocationGroupData] = useState<LocationGroup[]>([]);
   const [createLocationGroupFormData, setCreateLocationGroupFormData] = useState<LocationGroup>({
     LocationGroupName: "",
     IsActive: 0,
@@ -165,15 +164,15 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
 
   const handleSearchGroup = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     event.preventDefault();
-    // const searchValue = event.target.value;
-    // // Search by name of locationGroupId name
-    // const filteredGroups = locationGroupMapping.filter(group => locationGroupData.find(locationGroup => locationGroup.LocationGroupId === group.LocationGroupId)?.LocationGroupName.toLowerCase().includes(searchValue.toLowerCase()));
-    // setLocationGroupMappingData(filteredGroups);
+    const searchValue = event.target.value;
+    console.log({ searchValue });
+    const filteredGroups = locationGroupData.filter(group => locationGroupData.find(locationGroup => locationGroup.LocationGroupId === group.LocationGroupId)?.LocationGroupName.toLowerCase().includes(searchValue.toLowerCase()));
+    setFilteredLocationGroupData(filteredGroups);
   }
 
   useEffect(() => {
-    console.log({ selectedLocationGroup });
-  }, [selectedLocationGroup])
+    setFilteredLocationGroupData(locationGroupData);
+  }, [locationGroupData])
 
   return (
     <div className='w-1/2 h-full overflow-y-auto flex flex-col relative'>
@@ -189,7 +188,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
         {/* Create a grid to display locationGroups in cards */}
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {
-            locationGroupData?.map((group, index) => (
+            filteredLocationGroupData?.map((group, index) => (
               <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer'
                 onClick={handleOpenEditLocationGroupModal.bind(null, group)}>
                 <div>
@@ -210,7 +209,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                       </div>
                       <div>
                         {
-                          locationGroupData?.find(locationGroup => locationGroup?.LocationGroupId === group?.LocationGroupId)?.IsActive ? (
+                          group.IsActive ? (
                             <span
                               className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
                             >

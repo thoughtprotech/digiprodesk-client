@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from '@/components/Layout'
 import { useEffect, useState } from 'react'
-import { Location, LocationGroup, LocationGroupMapping } from '@/utils/types'
+import { Location, LocationGroup } from '@/utils/types'
 import Locations from './_components/Locations'
 import LocationGroups from './_components/LocationGroup'
 import toast from 'react-hot-toast'
@@ -11,7 +11,6 @@ import { parseCookies } from 'nookies'
 export default function Index() {
   const [locationData, setLocationData] = useState<Location[]>([]);
   const [locationGroupData, setLocationGroupData] = useState<LocationGroup[]>([]);
-  const [locationGroupMappingData, setLocationGroupMappingData] = useState<LocationGroupMapping[]>([]);
 
   const fetchLocationData = async () => {
     try {
@@ -85,8 +84,6 @@ export default function Index() {
         {/* Locations */}
         <Locations
           locationData={locationData}
-          setLocationData={setLocationData}
-          locationOptions={locationData}
           fetchLocationData={fetchLocationData}
           fetchLocationGroupData={fetchLocationGroupData}
         />
@@ -94,8 +91,6 @@ export default function Index() {
         <LocationGroups
           locationData={locationData}
           locationGroupData={locationGroupData}
-          locationGroupMappingData={locationGroupMappingData}
-          setLocationGroupMappingData={setLocationGroupMappingData}
           fetchLocationGroupData={fetchLocationGroupData}
         />
       </div>

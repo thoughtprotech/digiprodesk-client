@@ -10,13 +10,12 @@ import { parseCookies } from "nookies";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-export default function Locations({ locationData, setLocationData, locationOptions, fetchLocationData, fetchLocationGroupData }: {
+export default function Locations({ locationData, fetchLocationData, fetchLocationGroupData }: {
   locationData: Location[];
-  setLocationData: React.Dispatch<React.SetStateAction<Location[]>>;
-  locationOptions: Location[];
   fetchLocationData: () => void;
   fetchLocationGroupData: () => void;
 }) {
+  const [filteredLocationData, setFilteredLocationData] = useState<Location[]>([]);
   const [createLocationModal, setCreateLocationModal] = useState<boolean>(false);
   const [editLocationModal, setEditLocationModal] = useState<boolean>(false);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
@@ -47,6 +46,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
       });
     }
   }
+
   const handleOpenCreateLocationModal = () => {
     setCreateLocationModal(true);
   }
@@ -150,13 +150,13 @@ export default function Locations({ locationData, setLocationData, locationOptio
 
   const handleSearchLocation = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value;
-    const filteredLocations = locationOptions.filter(location => location.LocationName.toLowerCase().includes(searchValue.toLowerCase()));
-    setLocationData(filteredLocations);
+    const filteredLocations = locationData.filter(location => location.LocationName.toLowerCase().includes(searchValue.toLowerCase()));
+    setFilteredLocationData(filteredLocations);
   }
 
   useEffect(() => {
-    console.log({ selectedLocation });
-  }, [selectedLocation])
+    setFilteredLocationData(locationData);
+  }, [locationData])
 
   return (
     <div className='w-1/2 h-full overflow-y-auto border-r border-r-border flex flex-col relative'>
@@ -172,7 +172,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
         {/* Create a grid to display locationOptions in cards */}
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {
-            locationData?.map((location, index) => (
+            filteredLocationData?.map((location, index) => (
               <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
                 <div>
                   <div>
