@@ -10,11 +10,12 @@ import { parseCookies } from "nookies";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-export default function Locations({ locationData, setLocationData, locationOptions, fetchLocationData }: {
+export default function Locations({ locationData, setLocationData, locationOptions, fetchLocationData, fetchLocationGroupData }: {
   locationData: Location[];
   setLocationData: React.Dispatch<React.SetStateAction<Location[]>>;
   locationOptions: Location[];
   fetchLocationData: () => void;
+  fetchLocationGroupData: () => void;
 }) {
   const [createLocationModal, setCreateLocationModal] = useState<boolean>(false);
   const [editLocationModal, setEditLocationModal] = useState<boolean>(false);
@@ -64,9 +65,48 @@ export default function Locations({ locationData, setLocationData, locationOptio
     setEditLocationModal(false);
   }
 
-  const handleCreateLocationSubmit = (event: React.FormEvent) => {
+  const handleCreateLocationSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(createLocationFormData);
+
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify(createLocationFormData)
+      });
+
+      if (response.status === 201) {
+        toast.custom((t: any) => (
+          <Toast type='success' content='Location Created successfully' t={t} />
+        ))
+        setCreateLocationModal(false);
+        fetchLocationData();
+        fetchLocationGroupData();
+        setCreateLocationFormData({
+          LocationName: '',
+          LocationCode: '',
+          LocationType: '',
+          LocationParentID: 0,
+          LocationImage: '',
+          LocationBanner: '',
+          LocationReceptionistPhoto: '',
+          IsActive: 0,
+        });
+      } else {
+        throw new Error('Failed to create location');
+      }
+
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to create location' t={t} />
+      ))
+    }
   }
 
   const handleEditLocationSubmit = async (event: React.FormEvent) => {
@@ -95,6 +135,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
         ))
         setEditLocationModal(false);
         fetchLocationData();
+        fetchLocationGroupData();
         setSelectedLocation(null);
       } else {
         throw new Error('Failed to update location');
@@ -192,7 +233,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     </h1>
                     <Input
                       placeholder='Location Name'
-                      name='LocatonName'
+                      name='LocationName'
                       value={createLocationFormData.LocationName}
                       onChange={handleCreateLocationChange}
                       required
@@ -234,7 +275,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       </h1>
                       <Select
                         options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationName, label: location.LocationName }))
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
                         }
                         placeholder='Assign Control'
                         onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
@@ -250,7 +291,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       // value={createLocationFormData.LocationImage}
                       onChange={handleCreateLocationChange}
                       type="file"
-                      required
+                    // required
                     />
                   </div>
                 </div>
@@ -265,7 +306,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       // value={createLocationFormData.LocationBanner}
                       onChange={handleCreateLocationChange}
                       type="file"
-                      required
+                    // required
                     />
                   </div>
                   <div className='w-full'>
@@ -278,7 +319,7 @@ export default function Locations({ locationData, setLocationData, locationOptio
                       // value={createLocationFormData.LocationReceptionistPhoto}
                       onChange={handleCreateLocationChange}
                       type="file"
-                      required
+                    // required
                     />
                   </div>
                 </div>
@@ -287,9 +328,8 @@ export default function Locations({ locationData, setLocationData, locationOptio
                     <Input
                       type='checkBox'
                       name='IsActive'
-                      value={createLocationFormData.IsActive.toString()}
+                      value={createLocationFormData!.IsActive === 1 ? 'true' : 'false'}
                       onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })}
-                      required
                     />
                     <h1 className='font-bold text-sm'>
                       Is Active

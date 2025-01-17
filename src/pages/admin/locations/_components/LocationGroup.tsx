@@ -79,15 +79,52 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
     setEditLocationGroupModal(false);
   }
 
-  const handleCreateLocationGroupSubmit = (event: React.FormEvent) => {
+  const handleCreateLocationGroupSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     console.log(createLocationGroupFormData);
-    setCreateLocationGroupFormData({
-      LocationGroupName: '',
-      IsActive: 0,
-      Locations: []
-    });
-    handleCloseCreateLocationGroupModal();
+    const dataToSend = {
+      LocationGroupName: createLocationGroupFormData.LocationGroupName,
+      IsActive: createLocationGroupFormData.IsActive,
+      Locations: createLocationGroupFormData.Locations?.map(location => location.LocationID)
+    }
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/locationGroup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (response.status === 201) {
+        toast.custom((t: any) => (
+          <Toast type='success' content='Location group created successfully' t={t} />
+        ))
+        fetchLocationGroupData();
+        setCreateLocationGroupFormData({
+          LocationGroupName: '',
+          IsActive: 0,
+          Locations: []
+        });
+        handleCloseCreateLocationGroupModal();
+      } else {
+        throw new Error('Failed to create location group');
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to create location group' t={t} />
+      ))
+    }
+    // setCreateLocationGroupFormData({
+    //   LocationGroupName: '',
+    //   IsActive: 0,
+    //   Locations: []
+    // });
+    // handleCloseCreateLocationGroupModal();
   }
 
   const handleEditLocationGroupSubmit = async (event: React.FormEvent) => {
@@ -276,7 +313,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                     <Input
                       type='checkBox'
                       name='IsActive'
-                      value={createLocationGroupFormData.IsActive.toString()}
+                      value={createLocationGroupFormData.IsActive === 1 ? "true" : "false"}
                       onChange={(e) => setCreateLocationGroupFormData({ ...createLocationGroupFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })}
                       required
                     />
@@ -364,7 +401,9 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                     </div>
                   </div>
                   <div className='w-full flex items-center gap-2'>
-                    <Input type='checkBox' name='IsActive' value={selectedLocationGroup?.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedLocationGroup({ ...selectedLocationGroup!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} required />
+                    <Input type='checkBox' name='IsActive'
+                      value={selectedLocationGroup?.IsActive === 1 ? "true" : "false"}
+                      onChange={(e) => setSelectedLocationGroup({ ...selectedLocationGroup!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} required />
                     <h1 className='font-bold text-sm'>
                       Is Active
                     </h1>

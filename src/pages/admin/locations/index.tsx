@@ -88,6 +88,7 @@ export default function Index() {
           setLocationData={setLocationData}
           locationOptions={locationData}
           fetchLocationData={fetchLocationData}
+          fetchLocationGroupData={fetchLocationGroupData}
         />
         {/* Location Groups */}
         <LocationGroups
