@@ -62,7 +62,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={className ? className : `w-full max-w-48 ${selectedColor.base} border-2 rounded-md px-2 py-1 flex items-center justify-center space-x-1 duration-300 cursor-pointer`}
+      className={className ? className : `w-full max-w-64 ${selectedColor.base} border-2 rounded-md px-2 py-1 flex items-center justify-center space-x-1 duration-300 cursor-pointer`}
       onClick={onClick}
       type={type}
     >

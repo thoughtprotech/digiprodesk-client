@@ -2,6 +2,7 @@
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import SearchInput from "@/components/ui/Search";
 import Select from "@/components/ui/Select";
 import Toast from "@/components/ui/Toast";
 import { Location, LocationGroup } from "@/utils/types";
@@ -177,8 +178,8 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
   return (
     <div className='w-1/2 h-full overflow-y-auto flex flex-col relative'>
       <div className='flex items-center justify-between sticky top-0 bg-background pb-2 pl-2 border-b border-b-border'>
-        <div>
-          <Input placeholder='Location Groups' onChange={handleSearchGroup} />
+        <div className="flex items-center gap-1">
+          <SearchInput placeholder='Location Groups' onChange={handleSearchGroup} />
         </div>
         <div>
           <Button color='foreground' icon={<Plus />} text='Location Group' onClick={handleOpenCreateLocationGroupModal} />
@@ -242,7 +243,6 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                       Location Group Name
                     </h1>
                     <Input
-                      placeholder='Location Group Name'
                       name='LocationGroupName'
                       value={createLocationGroupFormData.LocationGroupName}
                       onChange={handleCreateLocationGroupChange}
@@ -312,10 +312,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                       required
                     />
                     <h1 className='font-bold text-sm'>
-                      Is Active
+                      {
+                        createLocationGroupFormData.IsActive ? 'Active' : 'Inactive'
+                      }
                     </h1>
                   </div>
-                  <div className='w-full flex justify-center gap-2'>
+                  <div className='w-full flex justify-center gap-2 border-t-2 border-t-border pt-4'>
                     <Button text='Save' color='foreground' type='submit' />
                     <Button text='Cancel' color='foreground' type='button' onClick={handleCloseCreateLocationGroupModal} />
                   </div>
@@ -335,7 +337,6 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                       Location Group Details
                     </h1>
                     <Input
-                      placeholder='Location Group Name'
                       name='LocationGroupName'
                       value={selectedLocationGroup?.LocationGroupName}
                       onChange={handleEditLocationGroupChange}
@@ -397,10 +398,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                       value={selectedLocationGroup?.IsActive === 1 ? "true" : "false"}
                       onChange={(e) => setSelectedLocationGroup({ ...selectedLocationGroup!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} required />
                     <h1 className='font-bold text-sm'>
-                      Is Active
+                      {
+                        selectedLocationGroup?.IsActive ? 'Active' : 'Inactive'
+                      }
                     </h1>
                   </div>
-                  <div className='w-full flex justify-center gap-2'>
+                  <div className='w-full flex justify-center gap-2 border-t-2 border-t-border pt-4'>
                     <Button text='Save' color='foreground' type='submit' />
                     <Button text='Cancel' color='foreground' type='button' onClick={handleCloseEditLocationGroupModal} />
                   </div>

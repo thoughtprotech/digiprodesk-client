@@ -11,6 +11,7 @@ import UserCard from './_components/UserCard'
 import { parseCookies } from 'nookies'
 import toast from 'react-hot-toast'
 import Toast from '@/components/ui/Toast'
+import SearchInput from '@/components/ui/Search'
 
 
 export default function Index() {
@@ -104,7 +105,7 @@ export default function Index() {
       ))
     }
 
-    console.log({selectedUser});
+    console.log({ selectedUser });
 
     try {
       const cookies = parseCookies();
@@ -233,8 +234,8 @@ export default function Index() {
       <div className='w-full h-full flex flex-col gap-2 bg-background px-2'>
         {/* Create a grid to display user cards */}
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
-          <div className='w-64 flex'>
-            <Input placeholder='Users' onChange={filterUserList} />
+          <div className='w-64 flex gap-1'>
+            <SearchInput placeholder='Users' onChange={filterUserList} />
           </div>
           <div>
             <Button color="foreground" icon={<Plus className='w-5' />} text='User' onClick={setCreateUserModal.bind(null, true)} />
@@ -249,7 +250,7 @@ export default function Index() {
         </div>
       </div>
       {createUserModal && (
-        <Modal title="New User" onClose={setCreateUserModal.bind(null, false)}>
+        <Modal className='w-2/6' title="New User" onClose={setCreateUserModal.bind(null, false)}>
           <form className='mt-4' onSubmit={handleCreateUserSubmit}>
             <div className="w-full h-full flex flex-col gap-4 justify-center">
               <div className='w-full flex gap-2 justify-between'>
@@ -294,7 +295,7 @@ export default function Index() {
                   </h1>
                 </div>
               </div>
-              <div className='w-full flex items-center justify-center gap-2 mt-2'>
+              <div className='w-full flex items-center justify-center gap-2 border-t-2 border-t-border pt-4'>
                 <Button color="foreground" text='Save' type='submit' />
                 <Button color="foreground" text='Cancel' type='button' onClick={setCreateUserModal.bind(null, false)} />
               </div>
@@ -303,9 +304,9 @@ export default function Index() {
         </Modal>
       )}
       {editUserModal && (
-        <Modal title="Edit User" onClose={setEditUserModal.bind(null, false)}>
+        <Modal className='w-2/6' title="Edit User" onClose={setEditUserModal.bind(null, false)}>
           <form className='mt-2' onSubmit={handleEditUser}>
-            <div className="w-full h-full flex flex-col gap-4 justify-center">
+            <div className="w-full h-full flex flex-col gap-4 justify-center items-center">
               <div className='w-full flex gap-2 justify-between'>
                 <div className='w-full'>
                   <h1 className='font-bold text-sm'>User Name</h1>
@@ -350,7 +351,7 @@ export default function Index() {
                   </h1>
                 </div>
               </div>
-              <div className='w-full flex items-center gap-2'>
+              <div className='w-full flex items-center justify-center gap-2 border-t-2 border-t-border pt-4'>
                 <Button color="foreground" text='Save' type='submit' />
                 <Button color="foreground" text='Cancel' type='button' onClick={setEditUserModal.bind(null, false)} />
               </div>

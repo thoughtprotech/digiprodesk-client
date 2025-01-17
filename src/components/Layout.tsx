@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Backpack, Cctv, KeyRound, LogOut, MapPinPlus, Users } from "lucide-react";
+import { Backpack, Cctv, LogOut, MapPinPlus, SmartphoneNfc, Users } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
@@ -255,7 +255,7 @@ export default function Index({
                 onClick={() => router.push('/checkInHub')}
               >
                 <Tooltip tooltip="Check-In Hub" position="bottom">
-                  <KeyRound className="w-5 h-5" />
+                  <SmartphoneNfc className="w-5 h-5" />
                 </Tooltip>
               </div>
               {header}
@@ -314,7 +314,7 @@ export default function Index({
           </div>
           {
             confirmToggleModal && (
-              <Modal onClose={handleCloseConfirmToggleModal} title={`Confirm Status Change To ${userOnline ? 'Away' : 'Available  '}`}>
+              <Modal onClose={handleCloseConfirmToggleModal} title={`Change Status To ${userOnline ? 'Away' : 'Available  '}`}>
                 <div className="h-full flex flex-col gap-2 p-2">
                   <div>
                     <h1 className="font-bold">Password</h1>

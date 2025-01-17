@@ -1,9 +1,9 @@
 import Layout from '@/components/Layout'
-import Input from '@/components/ui/Input';
 import { Phone } from 'lucide-react'
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Select from '@/components/ui/Select'
+import SearchInput from '@/components/ui/Search';
 
 const mockCardData: {
   location: string;
@@ -72,7 +72,7 @@ export default function Index() {
       <div className='w-full h-full flex flex-col gap-2 bg-background px-2'>
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w52'>
-            <Input type='text' placeholder='Locations' onChange={handleSearchCall} />
+            <SearchInput placeholder='Locations' onChange={handleSearchCall} />
           </div>
           <div className='flex gap-2'>
             {/* <div>

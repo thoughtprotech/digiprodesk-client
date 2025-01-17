@@ -2,6 +2,7 @@
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
+import SearchInput from "@/components/ui/Search";
 import Select from "@/components/ui/Select";
 import Toast from "@/components/ui/Toast";
 import { Location } from "@/utils/types";
@@ -161,8 +162,8 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
   return (
     <div className='w-1/2 h-full overflow-y-auto border-r border-r-border flex flex-col relative'>
       <div className='flex items-center justify-between sticky top-0 bg-background pb-2 pr-2 border-b border-b-border'>
-        <div>
-          <Input placeholder='Locations' onChange={handleSearchLocation} />
+        <div className="flex items-center gap-1">
+          <SearchInput placeholder='Locations' onChange={handleSearchLocation} />
         </div>
         <div>
           <Button color='foreground' icon={<Plus />} text='Location' onClick={handleOpenCreateLocationModal} />
@@ -327,14 +328,16 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })}
                     />
                     <h1 className='font-bold text-sm'>
-                      Is Active
+                      {
+                        createLocationFormData!.IsActive ? 'Active' : 'Inactive'
+                      }
                     </h1>
                   </div>
                   <div>
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
                   </div>
                 </div>
-                <div className='flex justify-center gap-2'>
+                <div className='flex justify-center gap-2 border-t-2 border-t-border pt-4'>
                   <Button text='Save' color='foreground' type='submit' />
                   <Button text='Cancel' color='foreground' onClick={handleCloseCreateLocationModal} />
                 </div>
@@ -444,7 +447,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     />
                   </div>
                 </div>
-                <div className="w-full flex justify-between">
+                <div className="w-full flex justify-between pb-2">
                   <div className='w-full flex gap-2 items-center'>
                     <Input
                       type='checkBox'
@@ -454,14 +457,16 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       required
                     />
                     <h1 className='font-bold text-sm'>
-                      Is Active
+                      {
+                        selectedLocation!.IsActive ? 'Active' : 'Inactive'
+                      }
                     </h1>
                   </div>
                   <div>
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
                   </div>
                 </div>
-                <div className='flex justify-center gap-2'>
+                <div className='flex justify-center gap-2 border-t-2 border-t-border pt-4'>
                   <Button text='Save' color='foreground' type='submit' />
                   <Button text='Cancel' color='foreground' onClick={handleCloseEditLocationModal} />
                 </div>
