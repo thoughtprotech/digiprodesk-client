@@ -16,6 +16,7 @@ export interface User {
   CreatedOn?: Date;
   ModifiedBy?: number;
   ModifiedOn?: Date;
+  LocationGroupID?: number | null;
 }
 
 export interface Role {

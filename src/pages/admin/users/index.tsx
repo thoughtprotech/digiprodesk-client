@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
-import { Role, User } from '@/utils/types'
+import { LocationGroup, Role, User } from '@/utils/types'
 import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import UserCard from './_components/UserCard'
@@ -15,6 +15,7 @@ import Toast from '@/components/ui/Toast'
 
 export default function Index() {
   const [userListData, setUserListData] = useState<User[]>([]);
+  const [filteredUserListData, setFilteredUserListData] = useState<User[]>([]);
   const [rolesListData, setRolesListData] = useState<Role[]>([]);
   const [createUserModal, setCreateUserModal] = useState<boolean>(false);
   const [createUserFormData, setCreateUserFormData] = useState<User>({
@@ -29,9 +30,11 @@ export default function Index() {
     '24HourFormat': null,
     Calendar: null,
     DateFormat: null,
+    LocationGroupID: null,
   });
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
+  const [locationGroupData, setLocationGroupData] = useState<LocationGroup[]>([]);
 
   const handleOpenEditUser = (user: User) => {
     setEditUserModal(true);
@@ -41,7 +44,7 @@ export default function Index() {
   const filterUserList = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value
     const filteredUserList = userListData.filter(user => user.DisplayName.toLowerCase().includes(searchValue.toLowerCase()))
-    setUserListData(filteredUserList)
+    setFilteredUserListData(filteredUserList)
   }
 
   const handleCreateUserSubmit = async (e: { preventDefault: () => void }) => {
@@ -78,6 +81,7 @@ export default function Index() {
           '24HourFormat': null,
           Calendar: null,
           DateFormat: null,
+          LocationGroupID: null,
         });
         setCreateUserModal(false);
         fetchUserListData();
@@ -99,6 +103,8 @@ export default function Index() {
         <Toast t={t} content='Please select a role' type='warning' />
       ))
     }
+
+    console.log({selectedUser});
 
     try {
       const cookies = parseCookies();
@@ -126,6 +132,7 @@ export default function Index() {
           '24HourFormat': null,
           Calendar: null,
           DateFormat: null,
+          LocationGroupID: null,
         });
         setEditUserModal(false);
         fetchUserListData();
@@ -156,6 +163,7 @@ export default function Index() {
       const data: User[] = await response.json();
       console.log(data);
       setUserListData(data);
+      setFilteredUserListData(data);
     } catch (error) {
       console.error(error);
     }
@@ -181,9 +189,34 @@ export default function Index() {
     }
   }
 
+  const fetchLocationGroupData = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/locationGroup`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      const data = await response.json();
+      if (response.status === 200) {
+        setLocationGroupData(data);
+      } else {
+        throw new Error('Failed to fetch location group data');
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to fetch location group data' t={t} />
+      ))
+    }
+  }
+
   useEffect(() => {
     fetchUserListData();
     fetchRoleListData();
+    fetchLocationGroupData();
   }, [])
 
   return (
@@ -208,7 +241,7 @@ export default function Index() {
           </div>
         </div>
         <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
-          {userListData.map((user, index) => (
+          {filteredUserListData.map((user, index) => (
             <div key={index} className='w-full rounded-md cursor-pointer' onClick={handleOpenEditUser.bind(null, user)}>
               <UserCard user={user} />
             </div>
@@ -247,8 +280,8 @@ export default function Index() {
                 <div className='w-1/2'>
                   <h1 className='font-bold text-sm'>Location Group</h1>
                   <Select
-                    options={rolesListData.map(role => ({ value: role.Name, label: role.Name }))}
-                    onChange={(e) => setCreateUserFormData({ ...createUserFormData, Role: e.target.value })}
+                    options={locationGroupData.map(role => ({ value: role.LocationGroupId!.toString(), label: role.LocationGroupName }))}
+                    onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationGroupID: Number(e.target.value) })}
                     placeholder='Select Location Group'
                   />
                 </div>
@@ -299,6 +332,15 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
+                <div className='w-1/2'>
+                  <h1 className='font-bold text-sm'>Location Group</h1>
+                  <Select
+                    options={locationGroupData.map(role => ({ value: role.LocationGroupId!.toString(), label: role.LocationGroupName }))}
+                    onChange={(e) => setSelectedUser({ ...selectedUser!, LocationGroupID: Number(e.target.value) })}
+                    placeholder='Select Location Group'
+                    defaultValue={selectedUser!.LocationGroupID?.toString()}
+                  />
+                </div>
                 <div className='flex items-center gap-2'>
                   <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
                   <h1 className='font-bold text-sm'>
