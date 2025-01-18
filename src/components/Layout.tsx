@@ -211,7 +211,7 @@ export default function Index({
               {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
                 <>
                   <div className={
-                    `${router.pathname === '/admin/calls' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                    `${router.pathname === '/admin/checkIns' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
                   }
                     onClick={() => router.push('/admin/calls')}
                   >

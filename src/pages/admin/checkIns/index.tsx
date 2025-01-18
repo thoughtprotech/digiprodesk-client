@@ -45,7 +45,7 @@ export default function Index() {
   const router = useRouter();
 
   const handleCallClick = () => {
-    router.push(`/admin/calls/call/1234`)
+    router.push(`/admin/checkIns/checkIn/1234`)
   }
 
   const handleSearchCall = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
