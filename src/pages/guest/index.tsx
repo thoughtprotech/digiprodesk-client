@@ -446,30 +446,11 @@ export default function Index() {
           <div>
             <video ref={remoteVideoRef} autoPlay className="w-full h-screen rounded-lg shadow-lg object-cover" />
             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-            {/* Other elements like video streams */}
-            <div style={{
-              position: 'absolute',
-              bottom: '10px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              background: 'rgba(0, 0, 0, 0.5)',
-              padding: '10px',
-              borderRadius: '8px'
-            }}>
+            <div className="guest-control-container">
               {/* Mute/Unmute Button */}
               <button
                 onClick={toggleMute}
-                style={{
-                  background: isMuted ? '#ff4d4d' : '#4caf50',
-                  color: 'white',
-                  padding: '10px',
-                  border: 'none',
-                  borderRadius: '50%',
-                  cursor: 'pointer'
-                }}
+                className={`guest-mute-button ${isMuted ? 'guest-mute' : 'guest-unmute'}`}
               >
                 {isMuted ? 'Unmute' : 'Mute'}
               </button>
@@ -482,7 +463,7 @@ export default function Index() {
                 step="0.1"
                 value={volume}
                 onChange={handleVolumeChange}
-                style={{ cursor: 'pointer' }}
+                className="guest-volume-slider"
               />
             </div>
           </div>
