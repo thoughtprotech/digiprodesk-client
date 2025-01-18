@@ -27,6 +27,8 @@ export default function Index() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [volume, setVolume] = useState<number>(1); // Volume range: 0 to 1
+  const [isMuted, setIsMuted] = useState<boolean>(false);
 
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -167,6 +169,34 @@ export default function Index() {
   const handleCloseConfirmLogoutModal = () => {
     setConfirmLogoutModal(false);
   }
+
+  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(event.target.value);
+    setVolume(newVolume);
+
+    if (currentUserVideoRef.current) {
+      const currentVideo = currentUserVideoRef.current;
+      currentVideo.volume = newVolume; // Set local video volume
+    }
+
+    if (remoteVideoRef.current) {
+      const remoteVideo = remoteVideoRef.current;
+      remoteVideo.volume = newVolume; // Set remote video volume
+    }
+  };
+
+  const toggleMute = () => {
+    const muteState = !isMuted;
+    setIsMuted(muteState);
+
+    if (currentUserVideoRef.current) {
+      currentUserVideoRef.current.muted = muteState;
+    }
+
+    if (remoteVideoRef.current) {
+      remoteVideoRef.current.muted = muteState;
+    }
+  };
 
   useEffect(() => {
     const cookies = parseCookies();
@@ -415,6 +445,47 @@ export default function Index() {
           </div>
           <div>
             <video ref={remoteVideoRef} autoPlay className="w-full h-screen rounded-lg shadow-lg object-cover" />
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            {/* Other elements like video streams */}
+            <div style={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              background: 'rgba(0, 0, 0, 0.5)',
+              padding: '10px',
+              borderRadius: '8px'
+            }}>
+              {/* Mute/Unmute Button */}
+              <button
+                onClick={toggleMute}
+                style={{
+                  background: isMuted ? '#ff4d4d' : '#4caf50',
+                  color: 'white',
+                  padding: '10px',
+                  border: 'none',
+                  borderRadius: '50%',
+                  cursor: 'pointer'
+                }}
+              >
+                {isMuted ? 'Unmute' : 'Mute'}
+              </button>
+
+              {/* Volume Slider */}
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={volume}
+                onChange={handleVolumeChange}
+                style={{ cursor: 'pointer' }}
+              />
+            </div>
+          </div>
           </div>
         </div>
       )}
