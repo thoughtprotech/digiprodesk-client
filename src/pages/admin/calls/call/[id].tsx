@@ -205,7 +205,7 @@ export default function Index() {
           <div className='w-1/2 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
             <div className='w-full border-b border-b-border pb-2 sticky top-0 z-50 bg-foreground'>
               <div>
-                <h1 className='text-2xl font-bold'>Call Details</h1>
+                <h1 className='text-2xl font-bold'>Check In Details</h1>
               </div>
               {currentCall && (
                 <div className="w-full flex items-center gap-3">

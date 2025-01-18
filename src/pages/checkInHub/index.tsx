@@ -401,11 +401,6 @@ export default function Index() {
   }
 
   const handleCallEnd = async () => {
-    // if (bookingId === "") {
-    //   document.getElementById("bookingId")?.focus();
-    //   return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
-    // }
-
     if (mediaConnectionRef.current) {
       mediaConnectionRef.current.close();
       mediaConnectionRef.current = null;
@@ -463,10 +458,6 @@ export default function Index() {
   }
 
   const handleConfirmEndCall = (callId: string, roomId: string) => {
-    // if (bookingId === "") {
-    //   document.getElementById("bookingId")?.focus();
-    //   return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Required" />));
-    // }
     setScreenshotImage([]);
     setTakeScreenshot(false);
     setBookingId("");

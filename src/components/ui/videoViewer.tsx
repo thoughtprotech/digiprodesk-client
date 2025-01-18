@@ -6,9 +6,10 @@ interface VideoViewerProps {
   title?: string;
   children: React.ReactNode;
   src: string;
+  component?: React.ReactNode;
 }
 
-const VideoViewer: React.FC<VideoViewerProps> = ({ title, children, src }) => {
+const VideoViewer: React.FC<VideoViewerProps> = ({ title, children, src, component }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const togglePopup = () => {
@@ -44,14 +45,17 @@ const VideoViewer: React.FC<VideoViewerProps> = ({ title, children, src }) => {
                 <h1 className="text-xl font-bold">{
                   title ? title : "Video Viewer"}</h1>
               </div>
-              <Tooltip tooltip="Close" position="bottom">
-                <button
-                  onClick={togglePopup}
-                  className="text-text rounded-full"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </Tooltip>
+              <div className="flex items-center gap-5">
+                {component}
+                <Tooltip tooltip="Close" position="bottom">
+                  <button
+                    onClick={togglePopup}
+                    className="text-text rounded-full"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
             <video
               src={src}
