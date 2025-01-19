@@ -99,10 +99,10 @@ export interface Location {
   LocationParentID?: number;
   LocationType: string;
   LocationTheme?: string;
-  LocationImage: string;
-  LocationBanner: string;
+  LocationImage: any;
+  LocationBanner: any;
   LocationVideoFeed?: string;
-  LocationReceptionistPhoto: string;
+  LocationReceptionistPhoto: any;
   IsActive: number;
   CreatedBy?: number;
   CreatedOn?: Date;

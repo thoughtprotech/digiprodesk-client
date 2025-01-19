@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
@@ -19,7 +20,16 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
   const [filteredLocationData, setFilteredLocationData] = useState<Location[]>([]);
   const [createLocationModal, setCreateLocationModal] = useState<boolean>(false);
   const [editLocationModal, setEditLocationModal] = useState<boolean>(false);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location>({
+    LocationName: '',
+    LocationCode: '',
+    LocationType: '',
+    LocationParentID: 0,
+    LocationImage: '',
+    LocationBanner: '',
+    LocationReceptionistPhoto: '',
+    IsActive: 0,
+  });
   const [createLocationFormData, setCreateLocationFormData] = useState<Location>({
     LocationName: '',
     LocationCode: '',
@@ -62,7 +72,16 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
   }
 
   const handleCloseEditLocationModal = () => {
-    setSelectedLocation(null);
+    setSelectedLocation({
+      LocationName: '',
+      LocationCode: '',
+      LocationType: '',
+      LocationParentID: 0,
+      LocationImage: null,
+      LocationBanner: null,
+      LocationReceptionistPhoto: null,
+      IsActive: 0,
+    });
     setEditLocationModal(false);
   }
 
@@ -73,13 +92,42 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       const cookies = parseCookies();
       const { userToken } = cookies;
 
+      const formData = new FormData();
+      // Append all the other form fields
+      Object.keys(createLocationFormData!).forEach((key) => {
+        const value = createLocationFormData![key as keyof Location];
+        if (
+          key !== "LocationImage" &&
+          key !== "LocationBanner" &&
+          key !== "LocationReceptionistPhoto"
+        ) {
+          formData.append(key, value);
+        }
+      });
+
+      // Append the UserPhoto as a file
+      if (createLocationFormData.LocationBanner) {
+        formData.append('LocationBanner', createLocationFormData.LocationBanner);
+      }
+
+      if (createLocationFormData.LocationImage) {
+        formData.append('LocationImage', createLocationFormData.LocationImage);
+      }
+
+      if (createLocationFormData.LocationReceptionistPhoto) {
+        formData.append('LocationReceptionistPhoto', createLocationFormData.LocationReceptionistPhoto);
+      }
+
+      console.log({ createLocationFormData });
+
+      console.log("FormData content:", Array.from(formData.entries()));
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${userToken}`
         },
-        body: JSON.stringify(createLocationFormData)
+        body: formData
       });
 
       if (response.status === 201) {
@@ -94,9 +142,9 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationCode: '',
           LocationType: '',
           LocationParentID: 0,
-          LocationImage: '',
-          LocationBanner: '',
-          LocationReceptionistPhoto: '',
+          LocationImage: null,
+          LocationBanner: null,
+          LocationReceptionistPhoto: null,
           IsActive: 0,
         });
       } else {
@@ -112,6 +160,8 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
 
   const handleEditLocationSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    // Ensure LocationParentID is set to 0 for 'Control' type
     if (selectedLocation?.LocationType === "Control") {
       selectedLocation.LocationParentID = 0;
     }
@@ -120,33 +170,80 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        },
-        body: JSON.stringify(selectedLocation)
+      const formData = new FormData();
+
+      // Append non-file fields to FormData
+      Object.keys(selectedLocation!).forEach((key) => {
+        const value = selectedLocation![key as keyof Location];
+        if (
+          key !== "LocationImage" &&
+          key !== "LocationBanner" &&
+          key !== "LocationReceptionistPhoto"
+        ) {
+          formData.append(key, value);
+        }
       });
+
+      // Append file fields to FormData
+      if (selectedLocation!.LocationImage) {
+        formData.append("LocationImage", selectedLocation!.LocationImage);
+      }
+
+      if (selectedLocation!.LocationBanner) {
+        formData.append("LocationBanner", selectedLocation!.LocationBanner);
+      }
+
+      if (selectedLocation!.LocationReceptionistPhoto) {
+        formData.append(
+          "LocationReceptionistPhoto",
+          selectedLocation!.LocationReceptionistPhoto
+        );
+      }
+
+      console.log({ selectedLocation });
+
+      console.log("FormData content:", Array.from(formData.entries()));
+
+      // Send API request
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${userToken}`, // No 'Content-Type', as FormData sets it
+          },
+          body: formData,
+        }
+      );
 
       if (response.status === 200) {
         toast.custom((t: any) => (
-          <Toast type='success' content='Location updated successfully' t={t} />
-        ))
+          <Toast type="success" content="Location updated successfully" t={t} />
+        ));
         setEditLocationModal(false);
         fetchLocationData();
         fetchLocationGroupData();
-        setSelectedLocation(null);
+        setSelectedLocation({
+          LocationName: "",
+          LocationCode: "",
+          LocationType: "",
+          LocationParentID: 0,
+          LocationImage: null,
+          LocationBanner: null,
+          LocationReceptionistPhoto: null,
+          IsActive: 0,
+        });
       } else {
-        throw new Error('Failed to update location');
+        throw new Error("Failed to update location");
       }
-
-    } catch {
-      return toast.custom((t: any) => (
-        <Toast type='error' content='Failed to update location' t={t} />
-      ))
+    } catch (error) {
+      console.error("Error updating location:", error);
+      toast.custom((t: any) => (
+        <Toast type="error" content="Failed to update location" t={t} />
+      ));
     }
-  }
+  };
+
 
   const handleSearchLocation = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value;
@@ -413,7 +510,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     </h1>
                     <Input
                       name='LocationImage'
-                      // value={selectedLocation!.LocationImage}
+                      value={selectedLocation!.LocationImage}
                       onChange={handleEditLocationChange}
                       type="file"
                     // required
@@ -427,7 +524,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     </h1>
                     <Input
                       name='LocationBanner'
-                      // value={selectedLocation!.LocationBanner}
+                      value={selectedLocation!.LocationBanner}
                       onChange={handleEditLocationChange}
                       type="file"
                     // required
@@ -439,7 +536,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     </h1>
                     <Input
                       name='LocationReceptionistPhoto'
-                      // value={selectedLocation!.LocationReceptionistPhoto}
+                      value={selectedLocation!.LocationReceptionistPhoto}
                       onChange={handleEditLocationChange}
                       type="file"
                     // required
@@ -464,6 +561,78 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   <div>
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
                   </div>
+                </div>
+                <div className="w-full flex justify-between gap-2">
+                  {
+                    selectedLocation!.LocationImage && (
+                      <div className="w-1/3 flex justify-center">
+                        <div className="w-full flex flex-col gap-2">
+                          <div>
+                            <h1 className="font-bold text-sm">
+                              Location Image
+                            </h1>
+                          </div>
+                          <div className="w-full flex justify-center">
+                            <img
+                              src={
+                                selectedLocation!.LocationImage instanceof File ?
+                                  URL.createObjectURL(selectedLocation!.LocationImage) :
+                                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${selectedLocation!.LocationImage}`
+                              }
+                              alt="Location Image"
+                              className="w-20 h-20 object-contain rounded-md"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
+                  {
+                    selectedLocation!.LocationBanner && (
+                      <div className="w-1/3 flex justify-center">
+                        <div className="w-full flex flex-col gap-2">
+                          <div>
+                            <h1 className="font-bold text-sm">
+                              Location Banner
+                            </h1>
+                          </div>
+                          <div className="w-full flex justify-center">
+                            <img
+                              src={
+                                selectedLocation!.LocationBanner instanceof File ?
+                                  URL.createObjectURL(selectedLocation!.LocationBanner) :
+                                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${selectedLocation!.LocationBanner}`}
+                              alt="Location Banner"
+                              className="w-20 h-20 object-contain rounded-md"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
+                  {
+                    selectedLocation!.LocationReceptionistPhoto && (
+                      <div className="w-1/3 flex justify-center">
+                        <div className="w-full flex flex-col gap-2">
+                          <div>
+                            <h1 className="font-bold text-sm">
+                              Receptionist Photo
+                            </h1>
+                          </div>
+                          <div className="w-full flex justify-center">
+                            <img
+                              src={
+                                selectedLocation!.LocationReceptionistPhoto instanceof File ?
+                                  URL.createObjectURL(selectedLocation!.LocationReceptionistPhoto) :
+                                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${selectedLocation!.LocationReceptionistPhoto}`}
+                              alt="Receptionist Photo"
+                              className="w-20 h-20 object-contain rounded-md"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
                 </div>
                 <div className='flex justify-center gap-2 border-t-2 border-t-border pt-4'>
                   <Button text='Save' color='foreground' type='submit' />
