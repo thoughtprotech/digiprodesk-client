@@ -143,6 +143,8 @@ export default function Index() {
   const handleEditUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
+    console.log({ selectedUser });
+
     if (selectedUser!.Role === "") {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please select a role' type='warning' />
@@ -163,7 +165,7 @@ export default function Index() {
       });
 
       // Append the UserPhoto as a file if available
-      if (selectedUser!.UserPhoto) {
+      if (selectedUser!.UserPhoto && selectedUser!.UserPhoto instanceof File) {
         formData.append('UserPhoto', selectedUser!.UserPhoto);
       }
 
@@ -203,7 +205,6 @@ export default function Index() {
       ));
     }
   };
-
 
   const fetchUserListData = async () => {
     const cookies = parseCookies();
