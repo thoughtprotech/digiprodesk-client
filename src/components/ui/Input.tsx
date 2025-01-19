@@ -1,7 +1,4 @@
-import React, { useState } from 'react';
-import Button from './Button';
-import { Trash } from 'lucide-react';
-import Tooltip from './ToolTip';
+import React, { useRef, useState } from 'react';
 
 interface InputProps {
   placeholder?: string;
@@ -26,6 +23,7 @@ const Input: React.FC<InputProps> = ({
 }) => {
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleDragOver = (event: React.DragEvent) => {
     event.preventDefault();
@@ -58,17 +56,10 @@ const Input: React.FC<InputProps> = ({
     }
   };
 
-  const handleRemoveFile = () => {
-    setFile(null);
-    if (onChange) {
-      const syntheticEvent = {
-        target: { name, value: null }
-      };
-      onChange(syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>);
-    }
-  };
-
   if (type === 'file') {
+    // Use the file state for showing the file name, or extract it from the value (file path) if passed
+    const fileName = file ? file.name : (typeof value === 'string' ? value.split('/').pop() : '');
+
     return (
       <div
         className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm ${dragging ? 'border-indigo-500' : 'border-border'} ${className}`}
@@ -83,33 +74,13 @@ const Input: React.FC<InputProps> = ({
             onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
             className="hidden"
             accept="image/*, .pdf, .doc, .docx, .txt"
-            value={value} // Controlled input
             required={required}
-            ref={ref}
+            ref={fileInputRef}
           />
-          {file ? (
+          {file || value ? (
             <div className="w-36">
               <div className="w-full">
-                {/* {filePreview && filePreview.startsWith('data:image') ? (
-                  <img src={filePreview} alt="file-preview" className="w-32 h-32 object-cover rounded-md" />
-                ) : (
-                  <div className="w-32 h-32 text-center flex items-center justify-center rounded-md">
-                    <p>File Preview</p>
-                  </div>
-                )} */}
-                <h1 className='truncateText'>{file.name}</h1>
-              </div>
-              <div className='absolute top-0 right-0'>
-                <Button
-                  type="button"
-                  onClick={handleRemoveFile}
-                  icon={
-                    <Tooltip tooltip="Remove Document" position="top">
-                      <Trash className="w-3 h-3 text-text" />
-                    </Tooltip>
-                  }
-                  className="bg-red-500/60 border border-red-500 hover:bg-red-500 duration-300 rounded-md px-1 p-1 absolute top-0 right-0"
-                />
+                <h1 className="truncateText">{fileName}</h1>
               </div>
             </div>
           ) : (

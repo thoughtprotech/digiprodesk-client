@@ -346,7 +346,7 @@ export default function Index({
                       <Input ref={logOutPasswordRef} type="password" name="password" placeholder="Password" value={logOutPassword} onChange={(e) => setLogOutPassword(e.target.value)} />
                     </div>
                     <div className="flex gap-2 items-center justify-center">
-                      <Button text="Submit" color="foreground" type="submit" />
+                      <Button text="Log Out" color="foreground" type="submit" />
                       <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
                     </div>
                   </form>

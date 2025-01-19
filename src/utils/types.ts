@@ -1,14 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // TypeScript interfaces for the database schema
 
 export interface User {
   UserName: string;
   Password: string;
   DisplayName: string;
+  UserPhoto?: any;
   Role: string;
   Language?: string | null;
   Region?: string | null;
   TimeZone?: string | null;
-  "24HourFormat"?: boolean | null;
+  "24HourFormat"?: boolean | number | null;
   Calendar?: string | null;
   DateFormat?: string | null;
   IsActive: number;

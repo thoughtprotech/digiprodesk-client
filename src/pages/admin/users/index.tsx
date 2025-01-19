@@ -23,12 +23,13 @@ export default function Index() {
     UserName: '',
     Password: '',
     DisplayName: '',
+    UserPhoto: null,
     Role: "",
     IsActive: 0,
     Language: null,
     Region: null,
     TimeZone: null,
-    '24HourFormat': null,
+    '24HourFormat': 0,
     Calendar: null,
     DateFormat: null,
     LocationGroupID: null,
@@ -50,23 +51,35 @@ export default function Index() {
 
   const handleCreateUserSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+
     if (createUserFormData.Role === "") {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please select a role' type='warning' />
-      ))
+      ));
     }
 
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
+      const formData = new FormData();
+      // Append all the other form fields
+      Object.keys(createUserFormData).forEach((key) => {
+        if (key !== 'UserPhoto') {
+          formData.append(key, createUserFormData[key as keyof User] as any);
+        }
+      });
+      // Append the UserPhoto as a file
+      if (createUserFormData.UserPhoto) {
+        formData.append('UserPhoto', createUserFormData.UserPhoto);
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+          'Authorization': `Bearer ${userToken}`,
         },
-        body: JSON.stringify(createUserFormData),
+        body: formData,
       });
 
       if (response.status === 201) {
@@ -74,12 +87,13 @@ export default function Index() {
           UserName: '',
           Password: '',
           DisplayName: '',
+          UserPhoto: null,
           Role: "",
           IsActive: 0,
           Language: "ENGLISH",
           Region: null,
           TimeZone: null,
-          '24HourFormat': null,
+          '24HourFormat': 0,
           Calendar: null,
           DateFormat: null,
           LocationGroupID: null,
@@ -88,36 +102,49 @@ export default function Index() {
         fetchUserListData();
         return toast.custom((t: any) => (
           <Toast t={t} content='User Created Successfully' type='success' />
-        ))
+        ));
       }
     } catch {
       return toast.custom((t: any) => (
         <Toast t={t} content='An error occurred' type='error' />
-      ))
+      ));
     }
-  }
+  };
+
 
   const handleEditUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+
     if (selectedUser!.Role === "") {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please select a role' type='warning' />
-      ))
+      ));
     }
-
-    console.log({ selectedUser });
 
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
+      const formData = new FormData();
+
+      // Append all the fields (same as in handleCreateUserSubmit)
+      Object.keys(selectedUser!).forEach((key) => {
+        if (key !== 'UserPhoto') {
+          formData.append(key, selectedUser![key as keyof User] as any);
+        }
+      });
+
+      // Append the UserPhoto as a file if available
+      if (selectedUser!.UserPhoto) {
+        formData.append('UserPhoto', selectedUser!.UserPhoto);
+      }
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+          'Authorization': `Bearer ${userToken}`,
         },
-        body: JSON.stringify(selectedUser),
+        body: formData,
       });
 
       if (response.status === 200) {
@@ -125,12 +152,13 @@ export default function Index() {
           UserName: '',
           Password: '',
           DisplayName: '',
+          UserPhoto: null,
           Role: "",
           IsActive: 0,
           Language: "ENGLISH",
           Region: null,
           TimeZone: null,
-          '24HourFormat': null,
+          '24HourFormat': 0,
           Calendar: null,
           DateFormat: null,
           LocationGroupID: null,
@@ -139,15 +167,16 @@ export default function Index() {
         fetchUserListData();
         return toast.custom((t: any) => (
           <Toast t={t} content='User Updated Successfully' type='success' />
-        ))
+        ));
       }
     } catch (error: any) {
       console.log({ error });
       return toast.custom((t: any) => (
         <Toast t={t} content='An error occurred' type='error' />
-      ))
+      ));
     }
-  }
+  };
+
 
   const fetchUserListData = async () => {
     const cookies = parseCookies();
@@ -286,14 +315,18 @@ export default function Index() {
                     placeholder='Select Location Group'
                   />
                 </div>
-                <div className='h-full flex items-center gap-2'>
-                  <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
-                  <h1 className='font-bold text-sm'>
-                    {
-                      createUserFormData.IsActive ? 'Active' : 'Inactive'
-                    }
-                  </h1>
+                <div className='w-1/2'>
+                  <h1 className='font-bold text-sm'>User Photo</h1>
+                  <Input type='file' onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserPhoto: e.target.value })} />
                 </div>
+              </div>
+              <div className='h-full flex items-center gap-2'>
+                <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
+                <h1 className='font-bold text-sm'>
+                  {
+                    createUserFormData.IsActive ? 'Active' : 'Inactive'
+                  }
+                </h1>
               </div>
               <div className='w-full flex items-center justify-center gap-2 border-t-2 border-t-border pt-4'>
                 <Button color="foreground" text='Save' type='submit' />
@@ -342,14 +375,22 @@ export default function Index() {
                     defaultValue={selectedUser!.LocationGroupID?.toString()}
                   />
                 </div>
-                <div className='flex items-center gap-2'>
-                  <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
-                  <h1 className='font-bold text-sm'>
-                    {
-                      selectedUser!.IsActive ? 'Active' : 'Inactive'
-                    }
-                  </h1>
+                <div className='w-1/2'>
+                  <h1 className='font-bold text-sm'>User Photo</h1>
+                  <Input
+                    type='file'
+                    onChange={(e) => setSelectedUser({ ...selectedUser!, UserPhoto: e.target.value })}
+                    value={`${selectedUser?.UserPhoto}`}
+                  />
                 </div>
+              </div>
+              <div className='w-full flex items-center gap-2'>
+                <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
+                <h1 className='font-bold text-sm'>
+                  {
+                    selectedUser!.IsActive ? 'Active' : 'Inactive'
+                  }
+                </h1>
               </div>
               <div className='w-full flex items-center justify-center gap-2 border-t-2 border-t-border pt-4'>
                 <Button color="foreground" text='Save' type='submit' />
