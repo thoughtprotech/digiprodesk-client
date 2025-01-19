@@ -256,9 +256,11 @@ export default function Index() {
           'Authorization': `Bearer ${userToken}`
         }
       });
-      const data = await response.json();
       if (response.status === 200) {
-        setLocationGroupData(data);
+        const data: LocationGroup[] = await response.json();
+        setLocationGroupData(
+          data.filter((locationGroup) => locationGroup.IsActive === 1)
+        );
       } else {
         throw new Error('Failed to fetch location group data');
       }
