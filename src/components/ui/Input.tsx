@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useRef, useState } from 'react';
+import toast from 'react-hot-toast';
+import Toast from './Toast';
 
 interface InputProps {
   placeholder?: string;
@@ -43,6 +46,13 @@ const Input: React.FC<InputProps> = ({
 
   const handleFileChange = (uploadedFile: File | null) => {
     if (uploadedFile) {
+      const validImageTypes = ['image/jpeg', 'image/png'];
+      if (!validImageTypes.includes(uploadedFile.type)) {
+        return toast.custom((t: any) => (<Toast t={t} content='Please upload a valid image file (JPG or PNG only).' type='warning' />))
+
+      }
+    }
+    if (uploadedFile) {
       setFile(uploadedFile);
       const reader = new FileReader();
       reader.readAsDataURL(uploadedFile);
@@ -73,7 +83,7 @@ const Input: React.FC<InputProps> = ({
             name={name}
             onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
             className="hidden"
-            accept="image/*, .pdf, .doc, .docx, .txt"
+            accept=".jpg,.jpeg,.png"
             required={required}
             ref={fileInputRef}
           />
