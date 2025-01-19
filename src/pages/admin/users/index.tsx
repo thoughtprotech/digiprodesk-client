@@ -34,7 +34,21 @@ export default function Index() {
     DateFormat: null,
     LocationGroupID: null,
   });
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>({
+    UserName: '',
+    Password: '',
+    DisplayName: '',
+    UserPhoto: null,
+    Role: "",
+    IsActive: 0,
+    Language: null,
+    Region: null,
+    TimeZone: null,
+    '24HourFormat': 0,
+    Calendar: null,
+    DateFormat: null,
+    LocationGroupID: null,
+  });
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
   const [locationGroupData, setLocationGroupData] = useState<LocationGroup[]>([]);
 
