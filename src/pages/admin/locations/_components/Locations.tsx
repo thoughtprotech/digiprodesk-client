@@ -26,7 +26,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationType: '',
     LocationParentID: 0,
     LocationImage: '',
-    LocationBanner: '',
+    LocationLogo: '',
     LocationReceptionistPhoto: '',
     IsActive: 0,
   });
@@ -36,7 +36,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationType: '',
     LocationParentID: 0,
     LocationImage: '',
-    LocationBanner: '',
+    LocationLogo: '',
     LocationReceptionistPhoto: '',
     IsActive: 0,
   });
@@ -78,7 +78,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       LocationType: '',
       LocationParentID: 0,
       LocationImage: null,
-      LocationBanner: null,
+      LocationLogo: null,
       LocationReceptionistPhoto: null,
       IsActive: 0,
     });
@@ -98,7 +98,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
         const value = createLocationFormData![key as keyof Location];
         if (
           key !== "LocationImage" &&
-          key !== "LocationBanner" &&
+          key !== "LocationLogo" &&
           key !== "LocationReceptionistPhoto"
         ) {
           formData.append(key, value);
@@ -106,8 +106,8 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       });
 
       // Append the UserPhoto as a file
-      if (createLocationFormData.LocationBanner) {
-        formData.append('LocationBanner', createLocationFormData.LocationBanner);
+      if (createLocationFormData.LocationLogo) {
+        formData.append('LocationLogo', createLocationFormData.LocationLogo);
       }
 
       if (createLocationFormData.LocationImage) {
@@ -143,7 +143,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationType: '',
           LocationParentID: 0,
           LocationImage: null,
-          LocationBanner: null,
+          LocationLogo: null,
           LocationReceptionistPhoto: null,
           IsActive: 0,
         });
@@ -177,7 +177,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
         const value = selectedLocation![key as keyof Location];
         if (
           key !== "LocationImage" &&
-          key !== "LocationBanner" &&
+          key !== "LocationLogo" &&
           key !== "LocationReceptionistPhoto"
         ) {
           formData.append(key, value);
@@ -189,8 +189,8 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
         formData.append("LocationImage", selectedLocation!.LocationImage);
       }
 
-      if (selectedLocation!.LocationBanner) {
-        formData.append("LocationBanner", selectedLocation!.LocationBanner);
+      if (selectedLocation!.LocationLogo) {
+        formData.append("LocationLogo", selectedLocation!.LocationLogo);
       }
 
       if (selectedLocation!.LocationReceptionistPhoto) {
@@ -229,7 +229,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationType: "",
           LocationParentID: 0,
           LocationImage: null,
-          LocationBanner: null,
+          LocationLogo: null,
           LocationReceptionistPhoto: null,
           IsActive: 0,
         });
@@ -395,8 +395,8 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       Location Banner
                     </h1>
                     <Input
-                      name='LocationBanner'
-                      // value={createLocationFormData.LocationBanner}
+                      name='LocationLogo'
+                      // value={createLocationFormData.LocationLogo}
                       onChange={handleCreateLocationChange}
                       type="file"
                     // required
@@ -520,11 +520,11 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Banner
+                      Location Logo
                     </h1>
                     <Input
-                      name='LocationBanner'
-                      value={selectedLocation!.LocationBanner}
+                      name='LocationLogo'
+                      value={selectedLocation!.LocationLogo}
                       onChange={handleEditLocationChange}
                       type="file"
                     // required
@@ -588,21 +588,21 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     )
                   }
                   {
-                    selectedLocation!.LocationBanner && (
+                    selectedLocation!.LocationLogo && (
                       <div className="w-1/3 flex justify-center">
                         <div className="w-full flex flex-col gap-2">
                           <div>
                             <h1 className="font-bold text-sm">
-                              Location Banner
+                              Location Logo
                             </h1>
                           </div>
                           <div className="w-full flex justify-center">
                             <img
                               src={
-                                selectedLocation!.LocationBanner instanceof File ?
-                                  URL.createObjectURL(selectedLocation!.LocationBanner) :
-                                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${selectedLocation!.LocationBanner}`}
-                              alt="Location Banner"
+                                selectedLocation!.LocationLogo instanceof File ?
+                                  URL.createObjectURL(selectedLocation!.LocationLogo) :
+                                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${selectedLocation!.LocationLogo}`}
+                              alt="Location Logo"
                               className="w-20 h-20 object-contain rounded-md"
                             />
                           </div>

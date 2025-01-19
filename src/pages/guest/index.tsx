@@ -1,7 +1,7 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { toTitleCase } from "@/utils/stringFunctions";
 import { LogOut, Mic, MicOff, Volume1, Volume2, VolumeX } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/router";
 import { destroyCookie, parseCookies } from "nookies";
 import Peer, { MediaConnection } from "peerjs";
@@ -14,6 +14,7 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Tooltip from "@/components/ui/ToolTip";
+import { Location } from "@/utils/types";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -30,6 +31,7 @@ export default function Index() {
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [volume, setVolume] = useState<number>(1); // Volume range: 0 to 1
   const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [location, setLocation] = useState<Location>();
 
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -199,6 +201,32 @@ export default function Index() {
     }
   };
 
+  const fetchLocationData = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${userToken}`
+        }
+      });
+
+      if (response.status === 200) {
+        const data = await response.json();
+        console.log({ data });
+        setLocation(data[0]);
+      } else {
+        return toast.custom((t: any) => <Toast content="Error fetching location data" type="error" t={t} />);
+      }
+    } catch (error) {
+      console.error("Error fetching location data:", error);
+      return toast.custom((t: any) => <Toast content="Something Went Wrong" type="error" t={t} />);
+    }
+  }
+
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
@@ -218,6 +246,7 @@ export default function Index() {
         } else {
           const { userName } = decoded;
           setUserId(userName);  // Set userId from token if valid
+          fetchLocationData();
         }
       }
     } catch (error) {
@@ -401,13 +430,21 @@ export default function Index() {
     <div className="w-full h-screen bg-background flex flex-col text-white">
       <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
         <div>
-          <Image
-            src="/images/logo.png"
-            alt="Logo"
-            width={1000}
-            height={1000}
-            className="w-28"
-          />
+          {
+            location?.LocationLogo ? (
+              <img
+                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
+                alt="Logo"
+                width={1000}
+                height={1000}
+                className="w-28"
+              />
+            ) : (
+              <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                ORION.
+              </h1>
+            )
+          }
         </div>
         <div className="absolute left-1/2 transform -translate-x-1/2">
           <h1 className="font-bold text-[46px]">Welcome To {toTitleCase(userId)}</h1>
@@ -415,23 +452,32 @@ export default function Index() {
       </div>
       {!inCall && callStatus === "notInCall" && (
         <div className="w-full h-full flex justify-center items-center relative">
-          <Image
-            src="/images/background.png"
-            alt="Logo"
-            width={1000}
-            height={1000}
-            className="w-full h-full absolute object-fill"
-          />
+          {
+            location?.LocationImage && (
+              <img
+                src={
+                  (location?.LocationImage && location?.LocationImage !== "") ? (
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
+                  ) :
+                    "/images/background.png"}
+                alt="Logo"
+                className="w-full h-full absolute object-fill"
+              />
+            )
+          }
           <div className="w-80 h-72 rounded-lg p-4 flex flex-col justify-between items-center space-y-4 z-50 bg-zinc-900">
             <div className="w-full flex justify-center">
               <h1 className="font-bold text-2xl">Receptionist</h1>
             </div>
             <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 rounded-md p-2 cursor-pointer" onClick={initiateCall}>
-              <Image
-                src="/images/receptionist.png"
+              <img
+                src={
+                  (location?.LocationReceptionistPhoto && location?.LocationReceptionistPhoto !== "") ? (
+                    `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
+                  ) :
+                    "/images/receptionist.png"
+                }
                 alt="Receptionist"
-                width={1000}
-                height={1000}
                 className="w-28"
               />
               <h1 className="text-xl font-bold whitespace-nowrap">Meet Virtual Receptionist</h1>
