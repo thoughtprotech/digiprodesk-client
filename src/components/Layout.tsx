@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Backpack, Cctv, LogOut, MapPinPlus, SmartphoneNfc, Users } from "lucide-react";
 import { ReactNode, useEffect, useRef, useState } from "react";
@@ -281,9 +282,22 @@ export default function Index({
                 <Tooltip className="transform -translate-x-9  " tooltip="User Name" position="bottom">
                   <div className="flex items-center gap-1">
                     <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
-                      <h1 className="text-textAlt font-bold">{
-                        user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()
-                      }</h1>
+                      {
+                        user?.UserPhoto === "" && (
+                          <h1 className="text-textAlt font-bold">
+                            {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                          </h1>
+                        )
+                      }
+                      {user?.UserPhoto !== "" &&
+                        (
+                          <img
+                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
+                            alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                            className="w-full h-full object-cover rounded-full flex items-center justify-center"
+                          />
+                        )
+                      }
                     </div>
                     <div>
                       <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
