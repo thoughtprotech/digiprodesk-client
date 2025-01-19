@@ -37,16 +37,13 @@ export default function Login() {
     });
 
     if (response.status === 200) {
-      console.log({ response });
       response.json().then((data) => {
-        console.log({ data });
         setCookie(
           null, "userToken", data.token, {
           maxAge: 30 * 24 * 60 * 60,
         })
 
         const decoded = jwt.decode(data.token);
-        console.log({ decoded });
         const { role } = decoded as { role: string };
         if (role === "Guest") {
           router.push('/guest');
@@ -144,7 +141,7 @@ export default function Login() {
               </div>
               <div className="w-full">
                 <Button
-                className="w-full border-indigo-500 border-2 rounded-md p-2 text-indigo-500 font-semibold bg-indigo-500/30 hover:bg-indigo-500 hover:text-white duration-300"
+                  className="w-full border-indigo-500 border-2 rounded-md p-2 text-indigo-500 font-semibold bg-indigo-500/30 hover:bg-indigo-500 hover:text-white duration-300"
                   color="indigo"
                   text="Log In To Virtual Assistance"
                   type="submit"

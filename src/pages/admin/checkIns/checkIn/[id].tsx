@@ -164,7 +164,6 @@ export default function Index() {
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setBookingId(event.target.value);
-    console.log(event.target.value)
     const filteredData = mockCardData.filter(data => data.ticket.includes(event.target.value));
     setCallLogList(filteredData);
   }

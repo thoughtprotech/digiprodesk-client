@@ -19,8 +19,6 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
   const [selectedOption, setSelectedOption] = useState<Option | null>(
     options.find((option) => option.value === defaultValue) || null
   );
-  console.log({ options });
-  console.log({ defaultValue });
   const dropdownRef = useRef<HTMLDivElement>(null);
   useOutsideClick({
     ref: dropdownRef,

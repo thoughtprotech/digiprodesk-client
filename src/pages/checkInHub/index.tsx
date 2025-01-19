@@ -146,7 +146,6 @@ export default function Index() {
 
   useEffect(() => {
     try {
-      console.log({ userId })
       if (userId !== "") {
         const peer = new Peer(userId!, {
           config: {
@@ -222,8 +221,6 @@ export default function Index() {
 
         socket.emit("get-call-list");
         socket.on("call-list-update", (data) => {
-          console.log(data);
-
           // Identify new "pending" calls
           const newPendingCalls = data.filter(
             (call: {

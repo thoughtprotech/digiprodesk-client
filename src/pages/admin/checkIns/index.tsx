@@ -51,7 +51,6 @@ export default function Index() {
   const handleSearchCall = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const filteredData = mockCardData.filter((data) => data.location.toLowerCase().includes(event.target.value.toLowerCase()));
     setCheckInList(filteredData);
-    console.log(event.target.value)
   }
 
   useEffect(() => {

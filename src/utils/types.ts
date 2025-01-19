@@ -10,7 +10,7 @@ export interface User {
   Language?: string | null;
   Region?: string | null;
   TimeZone?: string | null;
-  "24HourFormat"?: boolean | number | null;
+  "24HourFormat"?: boolean | number;
   Calendar?: string | null;
   DateFormat?: string | null;
   IsActive: number;

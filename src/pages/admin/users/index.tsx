@@ -34,19 +34,19 @@ export default function Index() {
     DateFormat: null,
     LocationGroupID: null,
   });
-  const [selectedUser, setSelectedUser] = useState<User | null>({
+  const [selectedUser, setSelectedUser] = useState<User>({
     UserName: '',
     Password: '',
     DisplayName: '',
     UserPhoto: null,
     Role: "",
     IsActive: 0,
-    Language: null,
-    Region: null,
-    TimeZone: null,
+    Language: "",
+    Region: "",
+    TimeZone: "",
     '24HourFormat': 0,
-    Calendar: null,
-    DateFormat: null,
+    Calendar: "",
+    DateFormat: "",
     LocationGroupID: null,
   });
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
@@ -54,7 +54,22 @@ export default function Index() {
 
   const handleOpenEditUser = (user: User) => {
     setEditUserModal(true);
-    setSelectedUser(user);
+    const userData = {
+      UserName: user.UserName || '',
+      Password: user.Password || '',
+      DisplayName: user.DisplayName || '',
+      UserPhoto: user.UserPhoto,
+      Role: user.Role || "",
+      IsActive: user.IsActive || 0,
+      Language: user.Language || "",
+      Region: user.Region || "",
+      TimeZone: user.TimeZone || "",
+      '24HourFormat': user['24HourFormat'] || 0,
+      Calendar: user.Calendar || "",
+      DateFormat: user.DateFormat || "",
+      LocationGroupID: user.LocationGroupID || null,
+    }
+    setSelectedUser(userData);
   }
 
   const filterUserList = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -125,7 +140,6 @@ export default function Index() {
     }
   };
 
-
   const handleEditUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
@@ -183,8 +197,7 @@ export default function Index() {
           <Toast t={t} content='User Updated Successfully' type='success' />
         ));
       }
-    } catch (error: any) {
-      console.log({ error });
+    } catch {
       return toast.custom((t: any) => (
         <Toast t={t} content='An error occurred' type='error' />
       ));
@@ -205,7 +218,6 @@ export default function Index() {
         }
       });
       const data: User[] = await response.json();
-      console.log(data);
       setUserListData(data);
       setFilteredUserListData(data);
     } catch (error) {
@@ -226,7 +238,6 @@ export default function Index() {
         }
       });
       const data: Role[] = await response.json();
-      console.log(data);
       setRolesListData(data);
     } catch (error) {
       console.error(error);

@@ -112,7 +112,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
 
   const handleEditLocationSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(selectedLocation);
     if (selectedLocation?.LocationType === "Control") {
       selectedLocation.LocationParentID = 0;
     }

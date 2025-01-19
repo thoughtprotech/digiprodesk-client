@@ -57,7 +57,6 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
   }
 
   const handleOpenEditLocationGroupModal = (locationGroup: LocationGroup) => {
-    console.log({ locationGroup });
     setSelectedLocationGroup({
       LocationGroupId: locationGroup.LocationGroupId,
       LocationGroupName: locationGroup.LocationGroupName,
@@ -78,7 +77,6 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
 
   const handleCreateLocationGroupSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(createLocationGroupFormData);
     const dataToSend = {
       LocationGroupName: createLocationGroupFormData.LocationGroupName,
       IsActive: createLocationGroupFormData.IsActive,
@@ -126,7 +124,6 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
 
   const handleEditLocationGroupSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log(selectedLocationGroup);
 
     try {
       const cookies = parseCookies();
@@ -166,7 +163,6 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
   const handleSearchGroup = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     event.preventDefault();
     const searchValue = event.target.value;
-    console.log({ searchValue });
     const filteredGroups = locationGroupData.filter(group => locationGroupData.find(locationGroup => locationGroup.LocationGroupId === group.LocationGroupId)?.LocationGroupName.toLowerCase().includes(searchValue.toLowerCase()));
     setFilteredLocationGroupData(filteredGroups);
   }

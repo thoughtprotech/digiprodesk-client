@@ -147,7 +147,6 @@ export default function Index({
       if (response.status === 200) {
         response.json().then((data) => {
           setUser(data);
-          console.log({ user });
         });
       } else if (response.status === 401) {
         destroyCookie(null, 'userToken');
@@ -165,7 +164,6 @@ export default function Index({
     const cookies = parseCookies();
     const { userToken } = cookies;
     const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
-    console.log({ decoded });
 
     try {
       if (!userToken) {
