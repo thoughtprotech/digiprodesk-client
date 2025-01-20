@@ -13,7 +13,7 @@ import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Tooltip from "@/components/ui/ToolTip";
-import { Location } from "@/utils/types";
+import { Location, User } from "@/utils/types";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -31,6 +31,7 @@ export default function Index() {
   const [volume, setVolume] = useState<number>(1); // Volume range: 0 to 1
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [location, setLocation] = useState<Location>();
+  const [user, setUser] = useState<User>();
 
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -220,6 +221,36 @@ export default function Index() {
     }
   }
 
+  const fetchUserDetails = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+    const decoded = jwt.decode(userToken);
+    const { userName } = decoded as { userName: string };
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setUser(data);
+        });
+      } else if (response.status === 401) {
+        destroyCookie(null, 'userToken');
+        router.push('/');
+      } else {
+        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+      }
+
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+    }
+  }
+
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
@@ -240,6 +271,7 @@ export default function Index() {
           const { userName } = decoded;
           setUserId(userName);  // Set userId from token if valid
           fetchLocationData();
+          fetchUserDetails();
         }
       }
     } catch (error) {
@@ -547,12 +579,37 @@ export default function Index() {
           </div>
         )
       }
-      <div className="absolute top-4 right-2 z-50 flex items-center">
-        <LogOut className="cursor-pointer" color="red" onClick={handleOpenConfirmLogoutModal} />
+      <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
+        <div className="flex items-center gap-1">
+          <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
+            {
+              user?.UserPhoto === "" && (
+                <h1 className="text-textAlt font-bold">
+                  {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                </h1>
+              )
+            }
+            {user?.UserPhoto !== "" &&
+              (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
+                  alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                  className="w-full h-full object-cover rounded-full flex items-center justify-center"
+                />
+              )
+            }
+          </div>
+          <div>
+            <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+          </div>
+        </div>
+        <div>
+          <LogOut className="cursor-pointer w-5 h-5" color="red" onClick={handleOpenConfirmLogoutModal} />
+        </div>
       </div>
       {
         confirmLogoutModal && (
-          <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Logout">
+          <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
             <div className="flex flex-col gap-2 p-2">
               <div>
                 <h1 className="font-bold">Password</h1>

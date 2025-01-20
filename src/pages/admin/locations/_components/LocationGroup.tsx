@@ -232,7 +232,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
         {
           createLocationGroupModal && (
             <Modal title='New Location Group' onClose={handleCloseCreateLocationGroupModal}>
-              <form className='w-full mt-2' onSubmit={handleCreateLocationGroupSubmit}>
+              <form className='w-full mt-4' onSubmit={handleCreateLocationGroupSubmit}>
                 <div className='w-full flex flex-col gap-4'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
@@ -325,8 +325,8 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
         {/* Edit Location Group Modal */}
         {
           editLocationGroupModal && (
-            <Modal className="max-w-2xl h-1/2" title='Edit Location Group' onClose={handleCloseEditLocationGroupModal}>
-              <form className='w-full mt-2' onSubmit={handleEditLocationGroupSubmit}>
+            <Modal className="max-w-lg h-1/2" title='Edit Location Group' onClose={handleCloseEditLocationGroupModal}>
+              <form className='w-full mt-4' onSubmit={handleEditLocationGroupSubmit}>
                 <div className='w-full flex flex-col gap-4'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>

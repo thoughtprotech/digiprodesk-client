@@ -5,6 +5,7 @@ interface TooltipProps {
   position?: "top" | "bottom" | "left" | "right"; // Tooltip position (default is "top")
   children: React.ReactNode;
   className?: string;
+  cursor?: boolean;
 }
 
 const Tooltip: React.FC<TooltipProps> = ({
@@ -12,6 +13,7 @@ const Tooltip: React.FC<TooltipProps> = ({
   position = "top",
   children,
   className = "",
+  cursor = true,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -30,7 +32,7 @@ const Tooltip: React.FC<TooltipProps> = ({
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
       >
-        <div className="cursor-pointer">{children}</div>
+        <div className={cursor ? "cursor-pointer" : "cursor-default"}>{children}</div>
 
         {/* Tooltip */}
         <div

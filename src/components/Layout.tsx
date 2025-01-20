@@ -122,7 +122,7 @@ export default function Index({
         setLogOutPassword('');
         setConfirmLogoutModal(false);
         logOut();
-        return toast.custom((t: any) => (<Toast t={t} type="info" content={"Logged Out"} />));
+        return toast.custom((t: any) => (<Toast t={t} type="success" content="Logged Out Successfully" />));
       } else {
         return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
       }
@@ -212,9 +212,9 @@ export default function Index({
                   <div className={
                     `${router.pathname === '/admin/checkIns' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
                   }
-                    onClick={() => router.push('/admin/calls')}
+                    onClick={() => router.push('/admin/checkIns')}
                   >
-                    <Tooltip tooltip="Check Ins" position="bottom">
+                    <Tooltip tooltip="Check-In Trails" position="bottom">
                       <Backpack className="w-5 h-5" />
                     </Tooltip>
                   </div>
@@ -244,7 +244,7 @@ export default function Index({
               }
                 onClick={() => router.push('/watchCenter')}
               >
-                <Tooltip tooltip="Watch Center" position="bottom">
+                <Tooltip tooltip="Watch Hub" position="bottom">
                   <Cctv className="w-5 h-5" />
                 </Tooltip>
               </div>
@@ -279,7 +279,7 @@ export default function Index({
               />
             </div> */}
               <div className="flex items-center gap-2 border-r-2 border-r-border pr-2">
-                <Tooltip className="transform -translate-x-9  " tooltip="User Name" position="bottom">
+                <Tooltip className="transform -translate-x-9" cursor={false} tooltip="User Name" position="bottom">
                   <div className="flex items-center gap-1">
                     <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
                       {

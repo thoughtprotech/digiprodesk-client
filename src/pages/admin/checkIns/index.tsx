@@ -64,7 +64,7 @@ export default function Index() {
           <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-lg'>CHECK IN</h1>
+          <h1 className='font-bold text-lg'>CHECK-IN TRAILS</h1>
         </div>
       </div>
     }>

@@ -321,7 +321,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       {
         createLocationModal && (
           <Modal className="w-1/2" title='New Location' onClose={handleCloseCreateLocationModal}>
-            <form className="mt-2 w-full h-full" onSubmit={handleCreateLocationSubmit}>
+            <form className="mt-4 w-full h-full" onSubmit={handleCreateLocationSubmit}>
               <div className='w-full h-full flex flex-col gap-4 justify-between'>
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
@@ -447,7 +447,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       {
         editLocationModal && (
           <Modal className="w-1/2" title='Edit Location' onClose={handleCloseEditLocationModal}>
-            <form className="mt-2" onSubmit={handleEditLocationSubmit}>
+            <form className="mt-4" onSubmit={handleEditLocationSubmit}>
               <div className='flex flex-col gap-2'>
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>

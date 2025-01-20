@@ -350,7 +350,7 @@ export default function Index() {
                 <div className='w-full flex  items-center gap-2'>
                   <div>
                     <ArrowLeft className='w-5 h-5 cursor-pointer' onClick={() => {
-                      router.push('/admin/calls')
+                      router.push('/admin/checkIns')
                     }} />
                   </div>
                   <div>

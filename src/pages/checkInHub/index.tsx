@@ -520,7 +520,7 @@ export default function Index() {
       <div className="flex gap-2">
         {
           !isRightPanelCollapsed ? (
-            <Tooltip tooltip="Close Panel" position="bottom">
+            <Tooltip tooltip="Collapse Panel" position="bottom">
               <div className="w-fit h-fit rounded-md flex items-center justify-center cursor-pointer hover:bg-highlight p-1" onClick={() => setRightPanelCollapsed(true)}>
                 <PanelRightClose className="w-5 h-5" />
               </div>
