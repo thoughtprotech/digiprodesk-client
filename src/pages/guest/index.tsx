@@ -189,16 +189,10 @@ export default function Index() {
   };
 
   const toggleMute = () => {
-    const muteState = !isMuted;
-    setIsMuted(muteState);
-
-    if (currentUserVideoRef.current) {
-      currentUserVideoRef.current.muted = muteState;
-    }
-
-    if (remoteVideoRef.current) {
-      remoteVideoRef.current.muted = muteState;
-    }
+    console.log(mediaConnectionRef.current?.localStream.getAudioTracks());
+    const audioTracks = mediaConnectionRef.current?.localStream.getAudioTracks();
+    audioTracks![0].enabled = !audioTracks![0].enabled;
+    setIsMuted(!isMuted);
   };
 
   const fetchLocationData = async () => {
