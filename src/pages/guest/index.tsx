@@ -619,7 +619,7 @@ export default function Index() {
                   <Input type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
                 </div>
                 <div className="flex gap-2">
-                  <Button text="Submit" color="foreground" type="submit" />
+                  <Button text="Log Out" color="foreground" type="submit" />
                   <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
                 </div>
               </form>
