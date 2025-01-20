@@ -270,26 +270,32 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
         <div className="w-full h-fit grid grid-cols-3 gap-2">
           {
             filteredLocationData?.map((location, index) => (
-              <div key={index} className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
-                <div>
+              <div key={index} className='w-full h-full rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer' onClick={handleOpenEditLocationModal.bind(null, location)}>
+                <div className="w-full">
                   <div>
                     <h1 className='font-bold text-xl'>{location?.LocationName}</h1>
                   </div>
-                  <div className='w-full flex justify-between items-end'>
-                    <div className='flex justify-between items-center gap-2'>
-                      <div className='w-full'>
-                        <div className='w-full flex gap-1 items-center'>
-                          <h1 className='font-bold text-sm text-textAlt'>Code</h1>
-                          <h1 className='font-bold text-sm text-text'>
-                            {location?.LocationCode}
-                          </h1>
-                        </div>
+                  <div className='w-full h-full flex flex-col gap-1 justify-between items-start'>
+                    <div className='w-full h-full'>
+                      <div className='w-full h-full'>
                         <div className='w-full flex gap-1 items-center'>
                           <h1 className='font-bold text-sm text-textAlt'>Type</h1>
                           <h1 className='font-bold text-sm text-text'>
                             {location?.LocationType}
                           </h1>
                         </div>
+                        {
+                          location.LocationParentID !== 0 &&
+                          (
+                            <div className='w-full flex gap-1 items-center'>
+                              <h1 className='font-bold text-sm text-textAlt'>Control</h1>
+                              <h1 className='font-bold text-sm text-text'>
+                                {
+                                  locationData.find(loc => loc.LocationID === location?.LocationParentID)?.LocationName}
+                              </h1>
+                            </div>
+                          )
+                        }
                       </div>
                     </div>
                     <div>
