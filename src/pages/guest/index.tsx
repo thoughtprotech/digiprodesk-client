@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { toTitleCase } from "@/utils/stringFunctions";
 import { LogOut, Mic, MicOff, Volume1, Volume2, VolumeX } from "lucide-react";
 import { useRouter } from "next/router";
 import { destroyCookie, parseCookies } from "nookies";
@@ -441,7 +440,7 @@ export default function Index() {
           }
         </div>
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <h1 className="font-bold text-[46px]">Welcome To {toTitleCase(userId)}</h1>
+          <h1 className="font-bold text-[46px]">Welcome To {location?.LocationName}</h1>
         </div>
       </div>
       {!inCall && callStatus === "notInCall" && (

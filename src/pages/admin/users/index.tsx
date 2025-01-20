@@ -4,7 +4,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
-import { LocationGroup, Role, User } from '@/utils/types'
+import { Location, LocationGroup, Role, User } from '@/utils/types'
 import { Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import UserCard from './_components/UserCard'
@@ -33,6 +33,7 @@ export default function Index() {
     Calendar: null,
     DateFormat: null,
     LocationGroupID: null,
+    LocationID: null,
   });
   const [selectedUser, setSelectedUser] = useState<User>({
     UserName: '',
@@ -48,9 +49,11 @@ export default function Index() {
     Calendar: "",
     DateFormat: "",
     LocationGroupID: null,
+    LocationID: null,
   });
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
   const [locationGroupData, setLocationGroupData] = useState<LocationGroup[]>([]);
+  const [locationListData, setLocationListData] = useState<Location[]>([]);
 
   const handleOpenEditUser = (user: User) => {
     setEditUserModal(true);
@@ -68,6 +71,7 @@ export default function Index() {
       Calendar: user.Calendar || "",
       DateFormat: user.DateFormat || "",
       LocationGroupID: user.LocationGroupID || null,
+      LocationID: user.LocationID || null,
     }
     setSelectedUser(userData);
   }
@@ -80,12 +84,6 @@ export default function Index() {
 
   const handleCreateUserSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-
-    if (createUserFormData.Role === "") {
-      return toast.custom((t: any) => (
-        <Toast t={t} content='Please select a role' type='warning' />
-      ));
-    }
 
     try {
       const cookies = parseCookies();
@@ -126,6 +124,7 @@ export default function Index() {
           Calendar: null,
           DateFormat: null,
           LocationGroupID: null,
+          LocationID: null,
         });
         setCreateUserModal(false);
         fetchUserListData();
@@ -192,6 +191,7 @@ export default function Index() {
           Calendar: null,
           DateFormat: null,
           LocationGroupID: null,
+          LocationID: null,
         });
         setEditUserModal(false);
         fetchUserListData();
@@ -271,11 +271,42 @@ export default function Index() {
     }
   }
 
+  const fetchLocationListData = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      if (response.status === 200) {
+        const data: Location[] = await response.json();
+        setLocationListData(
+          data.filter((location) => location.IsActive === 1)
+        );
+      } else {
+        throw new Error('Failed to fetch location data');
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to fetch location data' t={t} />
+      ))
+    }
+  }
+
   useEffect(() => {
     fetchUserListData();
     fetchRoleListData();
     fetchLocationGroupData();
+    fetchLocationListData();
   }, [])
+
+  useEffect(() => {
+    console.log({ selectedUser });
+  }, [selectedUser])
 
   return (
     <Layout headerTitle={
@@ -336,17 +367,30 @@ export default function Index() {
               </div>
               <div className='w-full flex items-center gap-2'>
                 <div className='w-1/2'>
-                  <h1 className='font-bold text-sm'>Location Group</h1>
-                  <Select
-                    options={locationGroupData.map(role => ({ value: role.LocationGroupId!.toString(), label: role.LocationGroupName }))}
-                    onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationGroupID: Number(e.target.value) })}
-                    placeholder='Select Location Group'
-                  />
-                </div>
-                <div className='w-1/2'>
                   <h1 className='font-bold text-sm'>User Photo</h1>
                   <Input type='file' onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserPhoto: e.target.value })} />
                 </div>
+                {
+                  createUserFormData.Role === "Guest" ? (
+                    <div className='w-1/2'>
+                      <h1 className='font-bold text-sm'>Location</h1>
+                      <Select
+                        options={locationListData.map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))}
+                        onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationID: Number(e.target.value), LocationGroupID: null })}
+                        placeholder='Select Location Group'
+                      />
+                    </div>
+                  ) : (
+                    <div className='w-1/2'>
+                      <h1 className='font-bold text-sm'>Location Group</h1>
+                      <Select
+                        options={locationGroupData.map(locationGroup => ({ value: locationGroup.LocationGroupId!.toString(), label: locationGroup.LocationGroupName }))}
+                        onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationID: null, LocationGroupID: Number(e.target.value) })}
+                        placeholder='Select Location Group'
+                      />
+                    </div>
+                  )
+                }
               </div>
               <div className='h-full flex items-center gap-2'>
                 <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
@@ -395,15 +439,6 @@ export default function Index() {
               </div>
               <div className='w-full flex items-center gap-2'>
                 <div className='w-1/2'>
-                  <h1 className='font-bold text-sm'>Location Group</h1>
-                  <Select
-                    options={locationGroupData.map(role => ({ value: role.LocationGroupId!.toString(), label: role.LocationGroupName }))}
-                    onChange={(e) => setSelectedUser({ ...selectedUser!, LocationGroupID: Number(e.target.value) })}
-                    placeholder='Select Location Group'
-                    defaultValue={selectedUser!.LocationGroupID?.toString()}
-                  />
-                </div>
-                <div className='w-1/2'>
                   <h1 className='font-bold text-sm'>User Photo</h1>
                   <Input
                     type='file'
@@ -411,6 +446,29 @@ export default function Index() {
                     value={`${selectedUser?.UserPhoto}`}
                   />
                 </div>
+                {
+                  selectedUser.Role === "Guest" ? (
+                    <div className='w-1/2'>
+                      <h1 className='font-bold text-sm'>Location</h1>
+                      <Select
+                        options={locationListData.map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, LocationID: Number(e.target.value), LocationGroupID: null })}
+                        placeholder='Select Location Group'
+                        defaultValue={selectedUser.LocationID?.toString()}
+                      />
+                    </div>
+                  ) : (
+                    <div className='w-1/2'>
+                      <h1 className='font-bold text-sm'>Location Group</h1>
+                      <Select
+                        options={locationGroupData.map(locationGroup => ({ value: locationGroup.LocationGroupId!.toString(), label: locationGroup.LocationGroupName }))}
+                        onChange={(e) => setSelectedUser({ ...selectedUser, LocationID: null, LocationGroupID: Number(e.target.value) })}
+                        placeholder='Select Location Group'
+                        defaultValue={selectedUser.LocationGroupID?.toString()}
+                      />
+                    </div>
+                  )
+                }
               </div>
               <div className='w-full flex items-center gap-2'>
                 <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
