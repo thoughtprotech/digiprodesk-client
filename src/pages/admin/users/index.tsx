@@ -377,7 +377,7 @@ export default function Index() {
                       <Select
                         options={locationListData.map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))}
                         onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationID: Number(e.target.value), LocationGroupID: null })}
-                        placeholder='Select Location Group'
+                        placeholder='Select Location'
                       />
                     </div>
                   ) : (
@@ -453,7 +453,7 @@ export default function Index() {
                       <Select
                         options={locationListData.map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))}
                         onChange={(e) => setSelectedUser({ ...selectedUser, LocationID: Number(e.target.value), LocationGroupID: null })}
-                        placeholder='Select Location Group'
+                        placeholder='Select Location'
                         defaultValue={selectedUser.LocationID?.toString()}
                       />
                     </div>

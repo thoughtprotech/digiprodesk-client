@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from '@/components/Layout'
 import { ArrowLeft, Calendar, Clock, FilePlus2, Ticket, Timer, Trash } from 'lucide-react';
 import CallCard from '../_components/CallCard';
@@ -8,49 +9,11 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import ImageViewer from '@/components/ui/ImageViewer';
 import Tooltip from '@/components/ui/ToolTip';
-
-interface Call {
-  roomId: string;
-  from: string;
-  status: string;
-  to: string;
-  bookingId?: string;
-  timestamps: {
-    timestamp: string;
-    status: 'pending' | 'accepted' | 'onHold' | 'resumed' | 'end';
-  }[]
-}
-
-const callMock: Call =
-{
-  roomId: '1',
-  from: 'John Doe',
-  status: 'pending',
-  bookingId: 'BKID123',
-  to: 'Jane Doe',
-  timestamps: [
-    {
-      timestamp: '2025-01-01T08:00:30.564Z',
-      status: 'pending',
-    },
-    {
-      timestamp: '2025-01-01T08:02:05.564Z',
-      status: 'accepted'
-    },
-    {
-      timestamp: '2025-01-01T08:05:00.564Z',
-      status: 'onHold'
-    },
-    {
-      timestamp: '2025-01-01T08:10:00.564Z',
-      status: 'resumed'
-    },
-    {
-      timestamp: '2025-01-01T08:15:00.564Z',
-      status: 'end'
-    }
-  ]
-};
+import { parseCookies } from 'nookies';
+import toast from 'react-hot-toast';
+import Toast from '@/components/ui/Toast';
+import { Call, CallLog, Location } from '@/utils/types';
+import SearchInput from '@/components/ui/Search';
 
 const callMapping: {
   [key: string]: {
@@ -59,122 +22,153 @@ const callMapping: {
     color: string;
   };
 } = {
-  pending: {
+  Start: {
     text: "Call Initiated",
     bg: "bg-orange-500/30",
     color: "text-orange-500"
   },
-  accepted: {
+  Joined: {
     text: "Call Accepted",
     bg: "bg-green-500/30",
     color: "text-green-500"
   },
-  onHold: {
+  "On Hold": {
     text: "Call On Hold",
     bg: "bg-indigo-500/30",
     color: "text-indigo-500"
   },
-  resumed: {
+  Resume: {
     text: "Call Resumed",
-    bg: "bg-violet-500/30",
-    color: "text-violet-500"
+    bg: "bg-sky-500/30",
+    color: "text-sky-500"
   },
-  end: {
+  End: {
     text: "Call Ended",
     bg: "bg-red-500/30",
     color: "text-red-500"
   }
 }
 
-export function TimelineCard({ timestamps }: {
-  timestamps: {
-    timestamp: string;
-    status: string;
-  }[]
+export function TimelineCard({ timestamp, status }: {
+  timestamp: string | Date;
+  status: string;
 }) {
   return (
     <div className='w-full flex flex-col gap-1'>
-      {timestamps.map((timestamp, index) => (
-        <div key={index} className='w-full flex flex-col gap-1'>
-          <div className={`w-full flex items-center justify-between gap-2 ${callMapping[timestamp.status].bg} p-1 px-2 rounded-md`}>
-            <div>
-              <h1 className='font-bold text-text'>{callMapping[timestamp.status].text}</h1>
-            </div>
-            <div>
-              <h1 className={`text-[0.6rem] ${callMapping[timestamp.status].color} font-bold whitespace-nowrap`}>{
-                new Date(timestamp.timestamp).toLocaleTimeString()
-              }</h1>
-            </div>
+      <div className='w-full flex flex-col gap-1'>
+        <div className={`w-full flex items-center justify-between gap-2 ${callMapping[status].bg} p-1 px-2 rounded-md`}>
+          <div>
+            <h1 className='font-bold text-text'>{callMapping[status].text}</h1>
+          </div>
+          <div>
+            <h1 className={`text-[0.6rem] ${callMapping[status].color} font-bold whitespace-nowrap`}>{
+              new Date(timestamp).toLocaleTimeString()
+            }</h1>
           </div>
         </div>
-      ))}
+      </div>
     </div>
   )
 }
 
-const mockCardData: {
-  id: string;
-  name: string;
-  date: string;
-  time: string;
-  ticket: string;
-}[] = [
-    {
-      id: '1',
-      name: 'John Doe',
-      date: '01-01-2025',
-      time: '08:00 AM',
-      ticket: 'BKID123'
-    },
-    {
-      id: '2',
-      name: 'Jane Doe',
-      date: '01-01-2025',
-      time: '08:00 AM',
-      ticket: 'BKID124'
-    },
-    {
-      id: '3',
-      name: 'John Doe',
-      date: '01-01-2025',
-      time: '08:00 AM',
-      ticket: 'BKID125'
-    },
-    {
-      id: '4',
-      name: 'Jane Doe',
-      date: '01-01-2025',
-      time: '08:00 AM',
-      ticket: 'BKID126'
-    },
-  ]
-
 export default function Index() {
-  const [bookingId, setBookingId] = useState<string>('');
-  const [callLogList, setCallLogList] = useState<{
-    id: string;
-    name: string;
-    date: string;
-    time: string;
-    ticket: string;
-  }[]>([]);
+  const [callList, setCallList] = useState<Call[]>([]);
+  const [filteredCallList, setFilteredCallList] = useState<Call[]>([]);
+  const [callLog, setCallLog] = useState<CallLog[]>();
+  const [location, setLocation] = useState<Location>();
   const [currentCall, setCurrentCall] = useState<Call | null>(null);
 
   const router = useRouter();
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setBookingId(event.target.value);
-    const filteredData = mockCardData.filter(data => data.ticket.includes(event.target.value));
-    setCallLogList(filteredData);
+    const filteredData = callList.filter(data => data.CallBookingID!.includes(event.target.value));
+    setFilteredCallList(filteredData);
   }
 
-  const handleCallChange = () => {
-    setCurrentCall(callMock);
+  const handleCallChange = (call: Call) => {
+    setCurrentCall(call);
+    fetchCallLog(call.CallID);
+  }
+
+  const fetchCallListData = async (locationID: number) => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call?CallPlacedByLocationID=${locationID}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      })
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setCallList(data);
+        setFilteredCallList(data);
+      } else {
+        return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call list data' type='error' />)
+      }
+    } catch {
+      return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call list data' type='error' />)
+    }
+  }
+
+  const fetchLocation = async (locationID: number) => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location/${locationID}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      })
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setLocation(data);
+      } else {
+        return toast.custom((t: any) => <Toast t={t} content='Failed to fetch location list data' type='error' />)
+      }
+    } catch {
+      return toast.custom((t: any) => <Toast t={t} content='Failed to fetch location list data' type='error' />)
+    }
+  }
+
+  const fetchCallLog = async (callID: string) => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/callLog/${callID}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      })
+
+      if (response.status === 200) {
+        const data = await response.json();
+        setCallLog(data);
+      } else {
+        return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call log data' type='error' />)
+      }
+    } catch {
+      return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call log data' type='error' />)
+    }
   }
 
   useEffect(() => {
-    setCallLogList(mockCardData);
-  }, [mockCardData])
+    if (router.isReady && router.query.id) {
+      fetchCallListData(Number(router.query.id));
+      fetchLocation(Number(router.query.id));
+    }
+  }, [router.isReady, router.query.id]);
 
   const formatDuration = (difference: number) => {
     const hours = Math.floor(difference / (60 * 60 * 1000));
@@ -206,30 +200,30 @@ export default function Index() {
               <div>
                 <h1 className='text-2xl font-bold'>Check In Details</h1>
               </div>
-              {currentCall && (
+              {(currentCall && callLog) && (
                 <div className="w-full flex items-center gap-3">
                   <div className="flex items-center gap-1">
                     <Ticket className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{currentCall.bookingId}</h1>
+                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{currentCall.CallBookingID || currentCall.CallID}</h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 text-textAlt" />
                     <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">
-                      {new Date(currentCall.timestamps[0].timestamp).toLocaleDateString()}
+                      {new Date(currentCall.CreatedOn!).toLocaleDateString()}
                     </h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 text-textAlt" />
                     <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{
-                      new Date(currentCall.timestamps[0].timestamp).toLocaleTimeString()
+                      new Date(currentCall.CreatedOn!).toLocaleTimeString()
                     }</h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Timer className="w-4 text-textAlt" />
                     <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{
                       formatDuration(
-                        new Date(currentCall.timestamps[currentCall.timestamps.length - 1].timestamp).getTime()
-                        - new Date(currentCall.timestamps[0].timestamp).getTime()
+                        new Date(callLog![callLog!.length - 1].CallTimeStamp).getTime()
+                        - new Date(callLog![0].CallTimeStamp).getTime()
                       )
                     }</h1>
                   </div>
@@ -245,15 +239,15 @@ export default function Index() {
                       <h1 className='font-bold text-xl'>Timeline</h1>
                     </div>
                     <div className='w-full h-full flex flex-col gap-1'>
-                      {currentCall.timestamps.map((timestamp, index) => {
+                      {callLog && callLog!.map((callL, index) => {
                         const difference =
-                          index < currentCall.timestamps.length - 1
-                            ? new Date(currentCall.timestamps[index + 1].timestamp).getTime() - new Date(timestamp.timestamp).getTime()
+                          index < callLog!.length - 1
+                            ? new Date(callLog![index + 1].CallTimeStamp).getTime() - new Date(callL.CallTimeStamp).getTime()
                             : 0;
                         return (
                           <div key={index} className='flex flex-col gap-1'>
-                            <TimelineCard timestamps={[timestamp]} />
-                            {index < currentCall.timestamps.length - 1 && (
+                            <TimelineCard timestamp={callL.CallTimeStamp} status={callL.Type.trim()} />
+                            {index < callLog!.length - 1 && (
                               <div className='w-full flex items-center justify-center gap-2 bg-foreground border-2 border-border border-dashed p-1 px-2 rounded-md'>
                                 <div>
                                   {/* <PhoneIncoming className='w-4 text-sky-500' /> */}
@@ -269,24 +263,28 @@ export default function Index() {
                       })}
                     </div>
                   </div>
-                  <div className='w-1/2 h-full flex flex-col gap-2'>
-                    <div>
-                      <div>
-                        <h1 className='font-bold text-xl'>Booking ID</h1>
+                  {
+                    currentCall && (
+                      <div className='w-1/2 h-full flex flex-col gap-2'>
+                        <div>
+                          <div>
+                            <h1 className='font-bold text-xl'>Booking ID</h1>
+                          </div>
+                          <div className='w-full h-full'>
+                            <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID} />
+                          </div>
+                        </div>
+                        <div className='w-full h-full'>
+                          <div>
+                            <h1 className='font-bold text-xl'>Notes</h1>
+                          </div>
+                          <div className='w-full h-5/6'>
+                            <Input type='textArea' placeholder='Enter Notes' value={currentCall?.CallNotes} />
+                          </div>
+                        </div>
                       </div>
-                      <div className='w-full h-full'>
-                        <Input type='text' placeholder='Enter Booking ID' />
-                      </div>
-                    </div>
-                    <div className='w-full h-full'>
-                      <div>
-                        <h1 className='font-bold text-xl'>Notes</h1>
-                      </div>
-                      <div className='w-full h-5/6'>
-                        <Input type='textArea' placeholder='Enter Notes' />
-                      </div>
-                    </div>
-                  </div>
+                    )
+                  }
                 </div>
               ) : (
                 <div className='w-full h-full max-h-[50vh] p-2 rounded-md flex flex-col items-center justify-center gap-2 overflow-auto relative'>
@@ -354,23 +352,24 @@ export default function Index() {
                     }} />
                   </div>
                   <div>
-                    <h1 className='text-2xl font-bold'>Olive Indiranagar</h1>
+                    <h1 className='text-2xl font-bold'>{location?.LocationName}</h1>
                   </div>
-                  {/* <div className="flex items-center gap-1">
-                    <Phone className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">7 Calls</h1>
-                  </div> */}
                 </div>
                 <div className="w-full flex justify-between items-center">
                   <div className='w-full'>
-                    <Input value={bookingId} className="py-1" type='text' placeholder='Booking ID' onChange={handleOnChange} />
+                    <SearchInput placeholder='Search Booking ID' onChange={handleOnChange} />
                   </div>
                 </div>
               </div>
               <div className='flex flex-col gap-2 px-2'>
                 {
-                  callLogList.map((call, index) => (
-                    <CallCard key={index} {...call} onClick={handleCallChange} />
+                  filteredCallList.map((call, index) => (
+                    <CallCard key={index}
+                      name={call.CallAssignedTo!}
+                      date={new Date(call.CallStartDateTime!).toLocaleDateString()}
+                      time={new Date(call.CallStartDateTime!).toLocaleTimeString()}
+                      ticket={call.CallBookingID || call.CallID}
+                      onClick={handleCallChange.bind(null, call)} />
                   ))
                 }
               </div>

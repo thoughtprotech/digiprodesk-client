@@ -124,7 +124,7 @@ export default function Index() {
     setInCall(true);
     setCallStatus('calling');
     if (socketRef.current) {
-      socketRef.current.emit("initiate-call", JSON.stringify({ roomId }));
+      socketRef.current.emit("initiate-call", JSON.stringify({ roomId, LocationID: location?.LocationID }));
     }
   };
 

@@ -12,9 +12,10 @@ interface CustomSelectProps {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   name?: string;
+  className?: string;
 }
 
-const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, placeholder, name }) => {
+const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, placeholder, name, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<Option | null>(
     options.find((option) => option.value === defaultValue) || null
@@ -46,7 +47,7 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
     <div ref={dropdownRef} className="w-full relative inline-block min-w-44">
       {/* Selected Option */}
       <div
-        className="w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none cursor-pointer"
+        className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none cursor-pointer ${className}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <h1 className={`"font-bold text-textAlt text-sm"`}>

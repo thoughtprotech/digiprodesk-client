@@ -19,7 +19,7 @@ export default function SearchInput({
 }) {
   return (
     <div className="flex items-center rounded-md">
-      <div className="border-l-2 border-t-2 border-b-2 border-border rounded-tl-md rounded-bl-md p-2">
+      <div className="border-l-2 border-t-2 border-b-2 border-border rounded-tl-md rounded-bl-md p-2 bg-background">
         <Search className="w-5 h-5 text-textAlt" />
       </div>
       <input

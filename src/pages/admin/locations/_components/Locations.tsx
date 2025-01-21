@@ -28,6 +28,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationImage: '',
     LocationLogo: '',
     LocationReceptionistPhoto: '',
+    LocationAdvertisementVideo: '',
     IsActive: 0,
   });
   const [createLocationFormData, setCreateLocationFormData] = useState<Location>({
@@ -38,6 +39,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationImage: '',
     LocationLogo: '',
     LocationReceptionistPhoto: '',
+    LocationAdvertisementVideo: '',
     IsActive: 0,
   });
 
@@ -80,6 +82,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       LocationImage: null,
       LocationLogo: null,
       LocationReceptionistPhoto: null,
+      LocationAdvertisementVideo: '',
       IsActive: 0,
     });
     setEditLocationModal(false);
@@ -145,6 +148,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationImage: null,
           LocationLogo: null,
           LocationReceptionistPhoto: null,
+          LocationAdvertisementVideo: '',
           IsActive: 0,
         });
       } else {
@@ -231,6 +235,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationImage: null,
           LocationLogo: null,
           LocationReceptionistPhoto: null,
+          LocationAdvertisementVideo: '',
           IsActive: 0,
         });
       } else {
@@ -398,7 +403,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Banner
+                      Location Logo
                     </h1>
                     <Input
                       name='LocationLogo'
@@ -418,6 +423,30 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       onChange={handleCreateLocationChange}
                       type="file"
                     // required
+                    />
+                  </div>
+                </div>
+                <div className='w-full flex justify-between gap-2'>
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Location Video Feed
+                    </h1>
+                    <Input
+                      name='LocationVideoFeed'
+                      value={createLocationFormData.LocationVideoFeed}
+                      onChange={handleCreateLocationChange}
+                      required
+                    />
+                  </div>
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Location Advertisement Video
+                    </h1>
+                    <Input
+                      name='LocationAdvertisementVideo'
+                      value={createLocationFormData.LocationAdvertisementVideo}
+                      onChange={handleCreateLocationChange}
+                      required
                     />
                   </div>
                 </div>
@@ -546,6 +575,30 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       onChange={handleEditLocationChange}
                       type="file"
                     // required
+                    />
+                  </div>
+                </div>
+                <div className='w-full flex justify-between gap-2'>
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Location Video Feed
+                    </h1>
+                    <Input
+                      name='LocationVideoFeed'
+                      value={selectedLocation.LocationVideoFeed}
+                      onChange={handleEditLocationChange}
+                      required
+                    />
+                  </div>
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Location Advertisement Video
+                    </h1>
+                    <Input
+                      name='LocationAdvertisementVideo'
+                      value={selectedLocation.LocationAdvertisementVideo}
+                      onChange={handleEditLocationChange}
+                      required
                     />
                   </div>
                 </div>

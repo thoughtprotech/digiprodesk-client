@@ -105,6 +105,7 @@ export interface Location {
   LocationBanner?: any;
   LocationVideoFeed?: string;
   LocationReceptionistPhoto?: any;
+  LocationAdvertisementVideo?: string;
   IsActive: number;
   CreatedBy?: number;
   CreatedOn?: Date;
@@ -144,27 +145,44 @@ export interface UserPreferredLocation {
 
 export interface Call {
   CallID: string;
-  CallStartDateTime: Date;
-  CallEndDateTime: Date;
-  CallStatus: string;
-  CallBookingID: string;
-  CallDocumentUploadStatus: string;
-  CallNotes: string;
-  CallVideoProcessingStatus: string;
-  CallAnalyticsStatus: string;
-  CallRank: number;
-  CallAnalytics: string;
-  CallReport: string;
-  CreatedBy: number;
-  CreatedOn: Date;
-  ModifiedBy: number;
-  ModifiedOn: Date;
+  CallStartDateTime?: string | null;
+  CallEndDateTime?: string | null;
+  CallStatus?:
+    | "New"
+    | "In Progress"
+    | "On Hold"
+    | "Completed"
+    | "Cancelled"
+    | "Purged"
+    | "Error";
+  CallPlacedByUserName?: string | null;
+  CallPlacedByLocationID?: number;
+  CallAssignedTo?: string | null;
+  CallTransferredTo?: string | null;
+  CallBookingID?: string;
+  CallDocumentUploadStatus?: "Success" | "Error" | null;
+  CallNotes?: string;
+  CallVideoProcessingStatus?:
+    | "To Do"
+    | "Pending"
+    | "Processing"
+    | "Completed"
+    | "Error";
+  CallAnalyticsStatus?: "To Do" | "Completed" | "Cancelled";
+  CallRank?: number | null;
+  CallAnalytics?: string;
+  CallReport?: string;
+  CreatedBy?: string | null;
+  CreatedOn?: string;
+  ModifiedBy?: string;
+  ModifiedOn?: string;
+  CallPlacedByLocation: Location | null;
 }
 
 export interface CallLog {
   ID: number;
   CallID: string;
-  Type: string;
+  Type: "Start" | "On Hold" | "Resume" | "Transfer" | "Error";
   CallTimeStamp: Date;
   EndTime: Date;
 }
