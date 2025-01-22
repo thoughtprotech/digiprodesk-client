@@ -27,7 +27,7 @@ const callMapping: {
     bg: "bg-orange-500/30",
     color: "text-orange-500"
   },
-  Joined: {
+  Initiated: {
     text: "Call Accepted",
     bg: "bg-green-500/30",
     color: "text-green-500"

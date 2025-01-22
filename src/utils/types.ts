@@ -182,7 +182,7 @@ export interface Call {
 export interface CallLog {
   ID: number;
   CallID: string;
-  Type: "Start" | "On Hold" | "Resume" | "Transfer" | "Error";
+  Type: "Initiated" | "Start" | "On Hold" | "Resume" | "Transfer" | "Error";
   CallTimeStamp: Date;
   EndTime: Date;
 }
