@@ -85,6 +85,20 @@ export default function Index() {
   const handleCreateUserSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
+    const {
+      UserName,
+      Password,
+      DisplayName,
+      Role,
+      IsActive,
+    } = createUserFormData;
+
+    if (!UserName || !Password || !DisplayName || !Role || !IsActive) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please fill all the required fields' type='warning' />
+      ));
+    }
+
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
@@ -141,6 +155,20 @@ export default function Index() {
 
   const handleEditUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+
+    const {
+      UserName,
+      Password,
+      DisplayName,
+      Role,
+      IsActive,
+    } = selectedUser;
+
+    if (!UserName || !Password || !DisplayName || !Role || !IsActive) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please fill all the required fields' type='warning' />
+      ));
+    }
 
     console.log({ selectedUser });
 
@@ -377,7 +405,7 @@ export default function Index() {
                       <Select
                         options={locationListData.map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))}
                         onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationID: Number(e.target.value), LocationGroupID: null })}
-                        placeholder='Select Location'
+                        placeholder='No Location Selected'
                       />
                     </div>
                   ) : (
@@ -386,7 +414,7 @@ export default function Index() {
                       <Select
                         options={locationGroupData.map(locationGroup => ({ value: locationGroup.LocationGroupId!.toString(), label: locationGroup.LocationGroupName }))}
                         onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationID: null, LocationGroupID: Number(e.target.value) })}
-                        placeholder='Select Location Group'
+                        placeholder='No Location Group Selected'
                       />
                     </div>
                   )
@@ -453,7 +481,7 @@ export default function Index() {
                       <Select
                         options={locationListData.map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))}
                         onChange={(e) => setSelectedUser({ ...selectedUser, LocationID: Number(e.target.value), LocationGroupID: null })}
-                        placeholder='Select Location'
+                        placeholder='No Location Selected'
                         defaultValue={selectedUser.LocationID?.toString()}
                       />
                     </div>
@@ -463,7 +491,7 @@ export default function Index() {
                       <Select
                         options={locationGroupData.map(locationGroup => ({ value: locationGroup.LocationGroupId!.toString(), label: locationGroup.LocationGroupName }))}
                         onChange={(e) => setSelectedUser({ ...selectedUser, LocationID: null, LocationGroupID: Number(e.target.value) })}
-                        placeholder='Select Location Group'
+                        placeholder='No Location Group Selected'
                         defaultValue={selectedUser.LocationGroupID?.toString()}
                       />
                     </div>

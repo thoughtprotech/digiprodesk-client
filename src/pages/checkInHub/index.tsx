@@ -67,6 +67,38 @@ export default function Index() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const updateCallInfo = async (roomId: string, bookingId: string, notes: string) => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const formData = new FormData();
+      formData.append("CallID", roomId);
+      formData.append("CallBookingID", bookingId);
+      formData.append("CallNotes", notes);
+
+      // screenshotImage.map((image) => {
+      //   formData.append("Document", image);
+      // });
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        return toast.custom((t: any) => (<Toast t={t} type="success" content="Call Info Updated" />));
+      } else {
+        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating Call Info" />));
+      }
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating Call Info" />));
+    }
+  }
+
   useEffect(() => {
     // Initialize the audio element
     audioRef.current = new Audio('/sounds/call-ringtone.wav');
@@ -95,6 +127,8 @@ export default function Index() {
 
   const endCall = (roomId: string) => {
     socket.emit("end-call", JSON.stringify({ roomId }));
+
+    updateCallInfo(roomId, bookingId, callNotes);
 
     // Close the PeerJS call if it's active
     if (mediaConnectionRef.current) {
