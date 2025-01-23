@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Tooltip from "@/components/ui/ToolTip";
 import { PhoneOutgoing } from "lucide-react";
-import { useRouter } from "next/router";
 
-export default function Index({ title, src }: { title: string; src?: any }) {
-  const router = useRouter();
-
+export default function Index({ title, src, onClick }: { title: string; src?: any; onClick?: () => void }) {
   return (
     <div className="w-full h-56 flex flex-col space-y-4 bg-foreground rounded-lg group">
       <div className="w-full h-full bg-background flex items-center justify-center rounded-lg relative">
@@ -33,7 +30,7 @@ export default function Index({ title, src }: { title: string; src?: any }) {
             <Tooltip tooltip="Call Location" position="bottom">
               <div
                 className="bg-green-500/50 hover:bg-green-500 border-2 border-green-500 duration-300 w-fit h-fit rounded-md py-1 px-3 flex items-center cursor-pointer"
-                onClick={() => router.push("/checkInHub")}
+                onClick={onClick}
               >
                 <PhoneOutgoing className="w-4 h-4 font-bold text-text" />
               </div>

@@ -1,16 +1,27 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from "@/components/Layout";
 import WatchCard from "./_components/WatchCard";
 import VideoViewer from "@/components/ui/videoViewer";
 import Button from "@/components/ui/Button";
 import { PhoneOutgoing } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { parseCookies } from "nookies";
-import { Location } from "@/utils/types";
+import { Location, User } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
+import { CallContext } from "@/context/CallContext";
+import { useRouter } from "next/router";
+import toast from "react-hot-toast";
+import Toast from "@/components/ui/Toast";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>([]);
   const [filteredUserLocationData, setFilteredUserLocationData] = useState<Location[]>([]);
+  const [userList, setUserList] = useState<User[]>([]);
+
+  const { setCallId: setGuestCallId } = useContext(CallContext);
+
+  const router = useRouter();
+
 
   const fetchUserLocationList = async () => {
     try {
@@ -26,8 +37,29 @@ export default function Index() {
       });
       if (response.status === 200) {
         const data = await response.json();
-        setUserLocationListData(data);
-        setFilteredUserLocationData(data);
+        setUserLocationListData(data.filter((loc: Location) => loc.LocationParentID !== 0));
+        setFilteredUserLocationData(data.filter((loc: Location) => loc.LocationParentID !== 0));
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const fetchUserList = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      if (response.status === 200) {
+        const data = await response.json();
+        setUserList(data);
       }
     } catch (error) {
       console.error(error);
@@ -40,8 +72,21 @@ export default function Index() {
     setFilteredUserLocationData(filteredUserList)
   }
 
+  const handleCallGuest = (locationId: number) => {
+    const guestId = userList.find(user => user.LocationID === locationId)?.UserName;
+    if (!guestId) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content="Location Not Mapped To This User" type="error" />));
+    } else {
+      console.log(guestId);
+      setGuestCallId(guestId);
+      router.push('/checkInHub');
+    }
+  }
+
   useEffect(() => {
     fetchUserLocationList();
+    fetchUserList();
   }, []);
 
   return (
@@ -65,10 +110,10 @@ export default function Index() {
           {filteredUserLocationData.map((location, index) => (
             <VideoViewer key={index} title={location.LocationName} src="/videos/placeholder.mp4"
               component={
-                <Button text="Call" color="green" icon={<PhoneOutgoing className="w-5 h-5" />} />
+                <Button text="Call" color="green" icon={<PhoneOutgoing className="w-5 h-5" />} onClick={handleCallGuest.bind(null, location.LocationID!)} />
               }
             >
-              <WatchCard title={location.LocationName} src="/videos/placeholder.mp4" />
+              <WatchCard title={location.LocationName} src="/videos/placeholder.mp4" onClick={handleCallGuest.bind(null, location.LocationID!)} />
             </VideoViewer>
           ))}
         </div>

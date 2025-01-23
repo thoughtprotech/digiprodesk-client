@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { FilePlus2, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
@@ -17,8 +17,7 @@ import { io } from "socket.io-client";
 import { parseCookies } from "nookies";
 import { toTitleCase } from "@/utils/stringFunctions";
 import jwt from "jsonwebtoken";
-
-
+import { CallContext } from "@/context/CallContext";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -67,6 +66,8 @@ export default function Index() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { callId: guestCallId } = useContext(CallContext);
+
   const updateCallInfo = async (roomId: string, bookingId: string, notes: string) => {
     try {
       const cookies = parseCookies();
@@ -99,6 +100,7 @@ export default function Index() {
     }
   }
 
+
   useEffect(() => {
     // Initialize the audio element
     audioRef.current = new Audio('/sounds/call-ringtone.wav');
@@ -119,6 +121,27 @@ export default function Index() {
     },
     withCredentials: true,
   });
+
+
+  useEffect(() => {
+    console.log({ guestCallId });
+    if (guestCallId && userId) {
+      initiateCall(guestCallId);
+    }
+  }, [guestCallId, userId]);
+
+  const initiateCall = (guestId: string) => {
+    const roomId = `room-${Math.floor(Math.random() * 1000)}`;
+    currentRoomId.current = roomId;
+    setInCall({
+      status: true,
+      callId: userId!,
+      roomId: roomId
+    });
+    if (socket) {
+      socket.emit("initiate-call", JSON.stringify({ roomId, LocationID: 1, to: guestId }));
+    }
+  };
 
   const joinCall = (roomId: string) => {
     currentRoomId.current = roomId;
@@ -180,7 +203,7 @@ export default function Index() {
 
   useEffect(() => {
     try {
-      if (userId !== "") {
+      if (userId && userId !== "") {
         const peer = new Peer(userId!, {
           config: {
             iceServers: [
@@ -260,7 +283,7 @@ export default function Index() {
             (call: {
               from: string; roomId: string; status: string; to: string | null;
             }) =>
-              call.status === "pending" &&
+              call.status === "pending" && call.from !== userId &&
               !callList.some((existingCall) => existingCall.roomId === call.roomId)
           );
 
@@ -268,6 +291,7 @@ export default function Index() {
           console.log("New pending calls:", newPendingCalls);
 
           if (newPendingCalls.length > 0) {
+            console.log({ userId });
             // Handle new pending calls here, e.g., show a notification
             if (audioRef.current) {
               audioRef.current.play().catch((error) => {
@@ -292,7 +316,7 @@ export default function Index() {
           }
 
           // Update the call list state
-          setCallList(data);
+          setCallList(data.filter((call: any) => call.from !== userId));
         });
 
         peer.on('open', (id: string) => {

@@ -404,20 +404,17 @@ export default function Index() {
           }
           setInCall(false);
           setCallStatus("notInCall");
+        }
+      });
 
-          // try {
-          //   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/merge-chunks`, {
-          //     method: "POST",
-          //     headers: {
-          //       "Content-Type": "application/json",
-          //     },
-          //     body: JSON.stringify({ sessionId: currentRoomId, user: "guest" }),
-          //   });
-          //   const result = await response.json();
-          //   console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
-          // } catch (error) {
-          //   console.error("Error merging video:", error);
-          // }
+      socket.on("call-list-update", (data) => {
+        console.log({ data });
+        const incomingCall = data.find((call: any) => call.to === userId && call.status === "pending");
+        if (incomingCall) {
+          call(incomingCall.from);
+          setCallStatus("inProgress");
+          setCurrentRoomId(incomingCall.roomId);
+          setInCall(true);
         }
       });
 
