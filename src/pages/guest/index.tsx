@@ -476,57 +476,55 @@ export default function Index() {
         </div>
       </div>
       {!inCall && callStatus === "notInCall" && (
-       <div className="w-full h-full flex relative">
-       {/* Video Section (75% of the width) */}
-       <div className="w-3/4 h-full">
-         { location?.LocationVideoFeed && location?.LocationVideoFeed?.length > 0 ? (
-           <video
-             src={`${location?.LocationVideoFeed}`}
-             autoPlay
-             loop
-             muted
-             className="w-full h-full object-cover"
-           />
-         ) : (
-           location?.LocationImage && (
-             <img
-               src={
-                 location?.LocationImage && location?.LocationImage !== ""
-                   ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
-                   : "/images/background.png"
-               }
-               alt="Background"
-               className="w-full h-full object-cover"
-             />
-           )
-         )}
-       </div>
-     
-       {/* Receptionist Section (25% of the width) */}
-       <div className="w-1/4 h-full bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-         {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
-         <div
-           className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 rounded-md p-4 cursor-pointer"
-           onClick={initiateCall}
-         >
-           <img
-             src={
-               location?.LocationReceptionistPhoto &&
-               location?.LocationReceptionistPhoto !== ""
-                 ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
-                 : "/images/receptionist.png"
-             }
-             alt="Receptionist"
-             className="w-28 rounded-full"
-           />
-           <h1 className="text-xl font-bold text-white whitespace-nowrap">
-             Meet Virtual Receptionist
-           </h1>
-         </div>
-       </div>
-     </div>
-     
-      
+        <div className="w-full h-full flex relative">
+          {/* Video Section (75% of the width) */}
+          <div className="w-3/4 h-full">
+            {location?.LocationVideoFeed && location?.LocationVideoFeed?.length > 0 ? (
+              <video
+                src={`${location?.LocationVideoFeed}`}
+                autoPlay
+                loop
+                muted
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              location?.LocationImage && (
+                <img
+                  src={
+                    location?.LocationImage && location?.LocationImage !== ""
+                      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
+                      : "/images/background.png"
+                  }
+                  alt="Background"
+                  className="w-full h-full object-cover"
+                />
+              )
+            )}
+          </div>
+
+          {/* Receptionist Section (25% of the width) */}
+          <div className="w-1/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
+            {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
+            <div
+              className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 hover:bg-highlight duration-300 rounded-md p-4 cursor-pointer"
+              onClick={initiateCall}
+            >
+              <img
+                src={
+                  location?.LocationReceptionistPhoto &&
+                    location?.LocationReceptionistPhoto !== ""
+                    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
+                    : "/images/receptionist.png"
+                }
+                alt="Receptionist"
+                className="w-28 rounded-full"
+              />
+              <h1 className="text-xl font-bold text-white whitespace-nowrap">
+                Meet Virtual Receptionist
+              </h1>
+            </div>
+          </div>
+        </div>
       )}
       {inCall && callStatus === "inProgress" && (
         <div className="w-full h-full relative">
