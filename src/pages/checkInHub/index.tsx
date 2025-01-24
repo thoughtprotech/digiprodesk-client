@@ -18,6 +18,7 @@ import { parseCookies } from "nookies";
 import { toTitleCase } from "@/utils/stringFunctions";
 import jwt from "jsonwebtoken";
 import { CallContext } from "@/context/CallContext";
+import generateUUID from "@/utils/uuidGenerator";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -100,7 +101,6 @@ export default function Index() {
     }
   }
 
-
   useEffect(() => {
     // Initialize the audio element
     audioRef.current = new Audio('/sounds/call-ringtone.wav');
@@ -131,7 +131,7 @@ export default function Index() {
   }, [guestCallId, userId]);
 
   const initiateCall = (guestId: string) => {
-    const roomId = `room-${Math.floor(Math.random() * 1000)}`;
+    const roomId = generateUUID();
     currentRoomId.current = roomId;
     setInCall({
       status: true,
@@ -467,20 +467,6 @@ export default function Index() {
       mediaRecorderRef.current.stop(); // Stop recording
       mediaRecorderRef.current = null;
     }
-
-    // try {
-    //   const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/merge-chunks`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({ sessionId: currentRoomId.current, user: "host" }),
-    //   });
-    //   const result = await response.json();
-    //   console.log("Merged video path:", result.mergedVideoPath); // Handle the merged video path as needed
-    // } catch (error) {
-    //   console.error("Error merging video:", error);
-    // }
 
     setScreenshotImage([]);
     setTakeScreenshot(false);

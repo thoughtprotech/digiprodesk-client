@@ -14,6 +14,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Tooltip from "@/components/ui/ToolTip";
 import { Location, User } from "@/utils/types";
+import generateUUID from "@/utils/uuidGenerator";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -119,7 +120,7 @@ export default function Index() {
   };
 
   const initiateCall = () => {
-    const roomId = `room-${Math.floor(Math.random() * 1000)}`;
+    const roomId = generateUUID();
     setCurrentRoomId(roomId);
     setInCall(true);
     setCallStatus('calling');
@@ -398,10 +399,10 @@ export default function Index() {
             mediaRecorderRef.current.stop(); // Stop recording
             mediaRecorderRef.current = null;
           }
-          if (recordingIntervalRef.current) {
-            clearInterval(recordingIntervalRef.current); // Clear the interval
-            recordingIntervalRef.current = null;
-          }
+          clearInterval(recordingIntervalRef.current!); // Clear the interval
+          recordingIntervalRef.current = null;
+          // if (recordingIntervalRef.current) {
+          // }
           setInCall(false);
           setCallStatus("notInCall");
         }
@@ -412,9 +413,9 @@ export default function Index() {
         const incomingCall = data.find((call: any) => call.to === userId && call.status === "pending");
         if (incomingCall) {
           call(incomingCall.from);
-          setCallStatus("inProgress");
           setCurrentRoomId(incomingCall.roomId);
           setInCall(true);
+          setCallStatus("inProgress");
         }
       });
 
