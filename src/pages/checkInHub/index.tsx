@@ -69,7 +69,7 @@ export default function Index() {
 
   const { callId: guestCallId } = useContext(CallContext);
 
-  const updateCallInfo = async (roomId: string, bookingId: string, notes: string) => {
+  const updateCallInfo = async (roomId: string, bookingId: string, notes: string, documents?: string[]) => {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
@@ -78,6 +78,23 @@ export default function Index() {
       formData.append("CallID", roomId);
       formData.append("CallBookingID", bookingId);
       formData.append("CallNotes", notes);
+
+      if (documents && documents.length > 0) {
+        documents.forEach((base64String, index) => {
+          // Extract the MIME type and base64 data
+          const matches = base64String.match(/^data:(.+);base64,(.+)$/);
+          if (matches) {
+            const mimeType = matches[1];
+            const base64Data = matches[2];
+            const buffer = Buffer.from(base64Data, "base64");
+
+            // Convert the buffer to a Blob
+            const blob = new Blob([buffer], { type: mimeType });
+            const file = new File([blob], `document-${index + 1}.${mimeType.split('/')[1]}`);
+            formData.append("CallDocument", file);
+          }
+        });
+      }
 
       // screenshotImage.map((image) => {
       //   formData.append("Document", image);
@@ -151,7 +168,11 @@ export default function Index() {
   const endCall = (roomId: string) => {
     socket.emit("end-call", JSON.stringify({ roomId }));
 
-    updateCallInfo(roomId, bookingId, callNotes);
+    if (screenshotImage && screenshotImage.length > 0) {
+      updateCallInfo(roomId, bookingId, callNotes, screenshotImage);
+    } else {
+      updateCallInfo(roomId, bookingId, callNotes);
+    }
 
     // Close the PeerJS call if it's active
     if (mediaConnectionRef.current) {

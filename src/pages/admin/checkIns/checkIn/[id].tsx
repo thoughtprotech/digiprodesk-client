@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from '@/components/Layout'
 import { ArrowLeft, Calendar, Clock, FilePlus2, Ticket, Timer, Trash } from 'lucide-react';
@@ -6,7 +7,6 @@ import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import ImageViewer from '@/components/ui/ImageViewer';
 import Tooltip from '@/components/ui/ToolTip';
 import { parseCookies } from 'nookies';
@@ -174,6 +174,7 @@ export default function Index() {
       formData.append('CallID', currentCall!.CallID!);
       formData.append('CallBookingID', currentCall!.CallBookingID!);
       formData.append('CallNotes', currentCall!.CallNotes!);
+      formData.append('CallDocuments', currentCall!.CallDocuments!);
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call`, {
         method: 'PUT',
@@ -349,14 +350,14 @@ export default function Index() {
                 {/* Grid of black boxes */}
                 <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
                   {
-                    Array.from({ length: 10 }, (_, i) => (
+                    currentCall.CallDocuments?.split("|").map((doc, i) => (
                       <div key={i} className='w-full h-fit rounded-md flex flex-col gap-2 bg-black relative'>
                         <ImageViewer src={"/images/doc.png"}>
-                          <Image
-                            src="/images/doc.png"
+                          <img
+                            src={
+                              `${process.env.NEXT_PUBLIC_BACKEND_URL}${doc}`
+                            }
                             alt="Logo"
-                            width={1000}
-                            height={1000}
                             className="w-full object-fill"
                           />
                         </ImageViewer>
@@ -365,7 +366,15 @@ export default function Index() {
                             <Tooltip tooltip="Delete Document" position="top">
                               <Trash className="w-3 h-3 text-text" />
                             </Tooltip>
-                          } />
+                          }
+                          onClick={() => {
+                            const docArray = currentCall.CallDocuments?.split("|");
+                            const filteredDocs = docArray?.filter((doc, index) => index !== i);
+                            const updatedDocs = filteredDocs?.join("|");
+
+                            setCurrentCall({ ...currentCall, CallDocuments: updatedDocs });
+                          }}
+                        />
                       </div>
                     ))
                   }

@@ -172,6 +172,7 @@ export interface Call {
   CallRank?: number | null;
   CallAnalytics?: string;
   CallReport?: string;
+  CallDocuments?: string;
   CreatedBy?: string | null;
   CreatedOn?: string;
   ModifiedBy?: string;
