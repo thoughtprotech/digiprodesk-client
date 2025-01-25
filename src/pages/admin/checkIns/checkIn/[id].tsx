@@ -81,7 +81,7 @@ export default function Index() {
   const router = useRouter();
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const filteredData = callList.filter(data => data.CallBookingID!.includes(event.target.value) || data.CallID!.includes(event.target.value));
+    const filteredData = callList.filter(data => data.CallBookingID?.includes(event.target.value) || data.CallID?.includes(event.target.value));
     setFilteredCallList(filteredData);
   }
 
