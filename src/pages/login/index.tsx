@@ -90,7 +90,7 @@ export default function Login() {
     <div className="flex h-screen">
       <div className="w-1/2 h-full border-r-2 border-r-border">
         <Image
-          src={`/images/loginBackground.svg`}
+          src={`/images/loginBackground.jpg`}
           alt="Login"
           width={1000}
           height={1000}
