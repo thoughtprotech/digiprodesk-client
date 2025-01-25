@@ -81,7 +81,7 @@ export default function Index() {
   const router = useRouter();
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const filteredData = callList.filter(data => data.CallBookingID!.includes(event.target.value));
+    const filteredData = callList.filter(data => data.CallBookingID!.includes(event.target.value) || data.CallID!.includes(event.target.value));
     setFilteredCallList(filteredData);
   }
 
@@ -163,6 +163,36 @@ export default function Index() {
     }
   }
 
+  const updateCallInfo = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const formData = new FormData();
+      formData.append('CallID', currentCall!.CallID!);
+      formData.append('CallBookingID', currentCall!.CallBookingID!);
+      formData.append('CallNotes', currentCall!.CallNotes!);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${userToken}`
+        },
+        body: formData
+      })
+      fetchCallListData(Number(router.query.id));
+      if (response.status === 200) {
+        return toast.custom((t: any) => <Toast t={t} content='Call info updated successfully' type='success' />)
+      } else {
+        return toast.custom((t: any) => <Toast t={t} content='Failed to update call info' type='error' />)
+      }
+    } catch {
+      return toast.custom((t: any) => <Toast t={t} content='Failed to update call info' type='error' />)
+    }
+  }
+
   useEffect(() => {
     if (router.isReady && router.query.id) {
       fetchCallListData(Number(router.query.id));
@@ -189,7 +219,7 @@ export default function Index() {
           <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
         </div>
         <div>
-          <h1 className='font-bold text-lg'>CHECK IN</h1>
+          <h1 className='font-bold text-lg'>CHECK-IN TRAILS</h1>
         </div>
       </div>
     }>
@@ -265,13 +295,15 @@ export default function Index() {
                   </div>
                   {
                     currentCall && (
-                      <div className='w-1/2 h-full flex flex-col gap-2'>
+                      <form onSubmit={updateCallInfo} className='w-1/2 h-full flex flex-col gap-2'>
                         <div>
                           <div>
                             <h1 className='font-bold text-xl'>Booking ID</h1>
                           </div>
                           <div className='w-full h-full'>
-                            <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID} />
+                            <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID} onChange={
+                              (event) => setCurrentCall({ ...currentCall, CallBookingID: event.target.value })
+                            } />
                           </div>
                         </div>
                         <div className='w-full h-full'>
@@ -279,10 +311,15 @@ export default function Index() {
                             <h1 className='font-bold text-xl'>Notes</h1>
                           </div>
                           <div className='w-full h-5/6'>
-                            <Input type='textArea' placeholder='Enter Notes' value={currentCall?.CallNotes} />
+                            <Input type='textArea' placeholder='Enter Notes' value={currentCall?.CallNotes} onChange={
+                              (event) => setCurrentCall({ ...currentCall, CallNotes: event.target.value })
+                            } />
                           </div>
                         </div>
-                      </div>
+                        <div className='w-full flex items-center justify-end'>
+                          <Button altClassName="w-full max-w-full" text='Save' color='foreground' type='submit' onClick={() => console.log('Save')} />
+                        </div>
+                      </form>
                     )
                   }
                 </div>

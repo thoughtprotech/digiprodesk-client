@@ -46,6 +46,7 @@ interface ButtonProps {
   color?: keyof typeof colorClasses | null;
   icon?: ReactNode;
   className?: string;
+  altClassName?: string;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
 }
@@ -55,6 +56,7 @@ const Button: React.FC<ButtonProps> = ({
   color = 'blue', // Default color
   icon,
   className,
+  altClassName,
   onClick,
   type = 'button',
 }) => {
@@ -62,7 +64,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={className ? className : `w-full max-w-64 ${selectedColor.base} border-2 rounded-md px-2 py-1 flex items-center justify-center space-x-1 duration-300 cursor-pointer`}
+      className={className ? className : `w-full max-w-64 ${selectedColor.base} border-2 rounded-md px-2 py-1 flex items-center justify-center space-x-1 duration-300 cursor-pointer ${altClassName}`}
       onClick={onClick}
       type={type}
     >
