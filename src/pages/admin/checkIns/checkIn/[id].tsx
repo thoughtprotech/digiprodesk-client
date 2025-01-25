@@ -23,14 +23,14 @@ const callMapping: {
   };
 } = {
   Start: {
-    text: "Call Initiated",
-    bg: "bg-orange-500/30",
-    color: "text-orange-500"
-  },
-  Initiated: {
     text: "Call Accepted",
     bg: "bg-green-500/30",
     color: "text-green-500"
+  },
+  Initiated: {
+    text: "Call Initiated",
+    bg: "bg-orange-500/30",
+    color: "text-orange-500"
   },
   "On Hold": {
     text: "Call On Hold",
