@@ -48,8 +48,7 @@ const Input: React.FC<InputProps> = ({
     if (uploadedFile) {
       const validImageTypes = ['image/jpeg', 'image/png'];
       if (!validImageTypes.includes(uploadedFile.type)) {
-        return toast.custom((t: any) => (<Toast t={t} content='Please upload a valid image file (JPG or PNG only).' type='warning' />))
-
+        return toast.custom((t: any) => (<Toast t={t} content='Please upload a valid image file (JPG or PNG only).' type='warning' />));
       }
     }
     if (uploadedFile) {

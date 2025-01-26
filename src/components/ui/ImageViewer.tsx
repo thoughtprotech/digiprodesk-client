@@ -1,5 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
 import { X } from "lucide-react";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
 interface ImageViewerProps {
@@ -49,11 +49,9 @@ const ImageViewer: React.FC<ImageViewerProps> = ({ children, src }) => {
                 <X className="w-6 h-6" />
               </button>
             </div>
-            <Image
+            <img
               src={src}
               alt=""
-              width={1000}
-              height={1000}
               className="rounded-md max-w-lg max-h-[32rem] object-contain"
             />
           </div>

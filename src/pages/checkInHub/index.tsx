@@ -96,10 +96,6 @@ export default function Index() {
         });
       }
 
-      // screenshotImage.map((image) => {
-      //   formData.append("Document", image);
-      // });
-
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call`, {
         method: "PUT",
         headers: {
