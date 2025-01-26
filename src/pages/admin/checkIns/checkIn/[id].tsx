@@ -408,38 +408,46 @@ export default function Index() {
             {currentCall ? (
               <div className='p-2'>
                 {/* Grid of black boxes */}
-                <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
-                  {
-                    currentCall.CallDocuments !== "" && currentCall.CallDocuments?.split("|").map((doc, i) => (
-                      <div key={i} className='w-32 h-32 rounded-md flex flex-col justify-center items-center gap-2 relative'>
-                        <ImageViewer src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${doc}`
-                        }>
-                          <img
-                            src={
-                              `${process.env.NEXT_PUBLIC_BACKEND_URL}${doc}`
-                            }
-                            alt="Logo"
-                            className="w-full object-fill"
-                          />
-                        </ImageViewer>
-                        <Button
-                          className="bg-red-500/60 border border-red-500 hover:bg-red-500 duration-300 rounded-md px-1 p-1 absolute top-0 right-0" color="red" icon={
-                            <Tooltip tooltip="Delete Document" position="top">
-                              <Trash className="w-3 h-3 text-text" />
-                            </Tooltip>
-                          }
-                          onClick={() => {
-                            const docArray = currentCall.CallDocuments?.split("|");
-                            const filteredDocs = docArray?.filter((doc, index) => index !== i);
-                            const updatedDocs = filteredDocs?.join("|");
+                {
+                  currentCall.CallDocuments && currentCall.CallDocuments !== "" ? (
+                    <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
+                      {
+                        currentCall.CallDocuments?.split("|").map((doc, i) => (
+                          <div key={i} className='w-32 h-32 rounded-md flex flex-col justify-center items-center gap-2 relative'>
+                            <ImageViewer src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${doc}`
+                            }>
+                              <img
+                                src={
+                                  `${process.env.NEXT_PUBLIC_BACKEND_URL}${doc}`
+                                }
+                                alt="Logo"
+                                className="w-full object-fill"
+                              />
+                            </ImageViewer>
+                            <Button
+                              className="bg-red-500/60 border border-red-500 hover:bg-red-500 duration-300 rounded-md px-1 p-1 absolute top-0 right-0" color="red" icon={
+                                <Tooltip tooltip="Delete Document" position="top">
+                                  <Trash className="w-3 h-3 text-text" />
+                                </Tooltip>
+                              }
+                              onClick={() => {
+                                const docArray = currentCall.CallDocuments?.split("|");
+                                const filteredDocs = docArray?.filter((doc, index) => index !== i);
+                                const updatedDocs = filteredDocs?.join("|");
 
-                            setCurrentCall({ ...currentCall, CallDocuments: updatedDocs });
-                          }}
-                        />
-                      </div>
-                    ))
-                  }
-                </div>
+                                setCurrentCall({ ...currentCall, CallDocuments: updatedDocs });
+                              }}
+                            />
+                          </div>
+                        ))
+                      }
+                    </div>
+                  ) : (
+                    <div className='w-full h-44 border-2 rounded-md border-border border-dashed flex items-center justify-center'>
+                      <h1 className='text-xl font-bold text-textAlt'>No Documents Uploaded</h1>
+                    </div>
+                  )
+                }
               </div>
             ) : (
               <div className='w-full h-full rounded-md flex items-center justify-center'>
