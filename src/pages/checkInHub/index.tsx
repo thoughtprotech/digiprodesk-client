@@ -105,7 +105,7 @@ export default function Index() {
       });
 
       if (response.ok) {
-        return toast.custom((t: any) => (<Toast t={t} type="success" content="Call Info Updated" />));
+        return;
       } else {
         return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating Call Info" />));
       }
@@ -594,7 +594,9 @@ export default function Index() {
             </Tooltip>
           )
         }
-      </div>}>
+      </div>}
+      menu={!inCall.status}
+    >
       <div className="w-full h-full flex">
         {/* Left Panel */}
         <div className={`h-[90.5vh] ${isRightPanelCollapsed ? 'w-full pr-0' : 'w-2/3'} transition-all duration-300 ease-in-out`}>

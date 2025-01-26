@@ -17,10 +17,12 @@ import Button from "./ui/Button";
 export default function Index({
   header,
   headerTitle,
+  menu = true,
   children
 }: {
   header?: ReactNode;
   headerTitle: ReactNode;
+  menu?: boolean;
   children: ReactNode;
 }) {
   // const { theme, toggleTheme } = useContext(ThemeContext);
@@ -205,125 +207,115 @@ export default function Index({
             </div>
             {headerTitle}
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center gap-2">
-              {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
-                <>
-                  <div className={
-                    `${router.pathname === '/admin/checkIns' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                  }
-                    onClick={() => router.push('/admin/checkIns')}
-                  >
-                    <Tooltip tooltip="Check-In Trails" position="bottom">
-                      <Backpack className="w-5 h-5" />
-                    </Tooltip>
-                  </div>
-                  <div className={
-                    `${router.pathname === '/admin/locations' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                  }
-                    onClick={() => router.push('/admin/locations')}
-                  >
-                    <Tooltip tooltip="Locations" position="bottom">
-                      <MapPinPlus className="w-5 h-5" />
-                    </Tooltip>
-                  </div>
-                  <div className={
-                    `${router.pathname === '/admin/users' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                  }
-                    onClick={() => router.push('/admin/users')}
-                  >
-                    <Tooltip tooltip="Users" position="bottom">
-                      <Users className="w-5 h-5" />
-                    </Tooltip>
-                  </div>
-                </>
-              )
-              }
-              <div className={
-                `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-              }
-                onClick={() => router.push('/watchCenter')}
-              >
-                <Tooltip tooltip="Watch Hub" position="bottom">
-                  <Cctv className="w-5 h-5" />
-                </Tooltip>
-              </div>
-              <div className={
-                `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-              }
-                onClick={() => router.push('/checkInHub')}
-              >
-                <Tooltip tooltip="Check-In Hub" position="bottom">
-                  <SmartphoneNfc className="w-5 h-5" />
-                </Tooltip>
-              </div>
-              {header}
-            </div>
-            <div className="border-l-2 border-l-border pl-2 flex items-center gap-2">
-              {/* <div>
-              <Dropdown
-                id='person'
-                title={
-                  <div className='flex items-center gap-2'>
-                    <Tooltip tooltip="Menu" position="bottom">
-                      <Menu />
-                    </Tooltip>
-                  </div>
-                }
-                position="bottom-right"
-                data={dropdownItems}
-                hasImage
-                style='bg-purple-800'
-                selectedId='3'
-                onSelect={handleSelect}
-              />
-            </div> */}
-              <div className="flex items-center gap-2 border-r-2 border-r-border pr-2">
-                <Tooltip className="transform -translate-x-9" cursor={false} tooltip="User Name" position="bottom">
-                  <div className="flex items-center gap-1">
-                    <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
-                      {
-                        user?.UserPhoto === "" && (
-                          <h1 className="text-textAlt font-bold">
-                            {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
-                          </h1>
-                        )
+          {
+            menu ? (
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center gap-2">
+                  {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
+                    <>
+                      <div className={
+                        `${router.pathname === '/admin/checkIns' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
                       }
-                      {user?.UserPhoto !== "" &&
-                        (
-                          <img
-                            src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
-                            alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
-                            className="w-full h-full object-cover rounded-full flex items-center justify-center"
-                          />
-                        )
+                        onClick={() => router.push('/admin/checkIns')}
+                      >
+                        <Tooltip tooltip="Check-In Trails" position="bottom">
+                          <Backpack className="w-5 h-5" />
+                        </Tooltip>
+                      </div>
+                      <div className={
+                        `${router.pathname === '/admin/locations' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
                       }
-                    </div>
-                    <div>
-                      <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
-                    </div>
+                        onClick={() => router.push('/admin/locations')}
+                      >
+                        <Tooltip tooltip="Locations" position="bottom">
+                          <MapPinPlus className="w-5 h-5" />
+                        </Tooltip>
+                      </div>
+                      <div className={
+                        `${router.pathname === '/admin/users' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                      }
+                        onClick={() => router.push('/admin/users')}
+                      >
+                        <Tooltip tooltip="Users" position="bottom">
+                          <Users className="w-5 h-5" />
+                        </Tooltip>
+                      </div>
+                    </>
+                  )
+                  }
+                  <div className={
+                    `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                  }
+                    onClick={() => router.push('/watchCenter')}
+                  >
+                    <Tooltip tooltip="Watch Hub" position="bottom">
+                      <Cctv className="w-5 h-5" />
+                    </Tooltip>
                   </div>
-                </Tooltip>
-                <Tooltip className="transform -translate-x-6" tooltip="Status" position="bottom">
-                  <div className="w-[5.6rem] h-full flex items-center gap-1" onClick={toggleUserAway}>
-                    <div className="flex items-center">
-                      <Input type="checkBox" name="Status" value={userOnline.toString()} />
-                    </div>
-                    <h1 className="text-xs font-bold">
-                      {userOnline ? 'Available' : 'Away'}
-                    </h1>
+                  <div className={
+                    `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                  }
+                    onClick={() => router.push('/checkInHub')}
+                  >
+                    <Tooltip tooltip="Check-In Hub" position="bottom">
+                      <SmartphoneNfc className="w-5 h-5" />
+                    </Tooltip>
                   </div>
-                </Tooltip>
+                  {header}
+                </div>
+                <div className="border-l-2 border-l-border pl-2 flex items-center gap-2">
+                  <div className="flex items-center gap-2 border-r-2 border-r-border pr-2">
+                    <Tooltip className="transform -translate-x-9" cursor={false} tooltip="User Name" position="bottom">
+                      <div className="flex items-center gap-1">
+                        <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
+                          {
+                            user?.UserPhoto === "" && (
+                              <h1 className="text-textAlt font-bold">
+                                {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                              </h1>
+                            )
+                          }
+                          {user?.UserPhoto !== "" &&
+                            (
+                              <img
+                                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
+                                alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                                className="w-full h-full object-cover rounded-full flex items-center justify-center"
+                              />
+                            )
+                          }
+                        </div>
+                        <div>
+                          <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+                        </div>
+                      </div>
+                    </Tooltip>
+                    <Tooltip className="transform -translate-x-6" tooltip="Status" position="bottom">
+                      <div className="w-[5.6rem] h-full flex items-center gap-1" onClick={toggleUserAway}>
+                        <div className="flex items-center">
+                          <Input type="checkBox" name="Status" value={userOnline.toString()} />
+                        </div>
+                        <h1 className="text-xs font-bold">
+                          {userOnline ? 'Available' : 'Away'}
+                        </h1>
+                      </div>
+                    </Tooltip>
+                  </div>
+                  <div
+                    onClick={handleLogOutToggle}
+                  >
+                    <Tooltip className="transform -translate-x-12" tooltip="Log Out" position="bottom">
+                      <LogOut className="w-5 h-5 text-red-500" />
+                    </Tooltip>
+                  </div>
+                </div>
               </div>
-              <div
-                onClick={handleLogOutToggle}
-              >
-                <Tooltip className="transform -translate-x-12" tooltip="Log Out" position="bottom">
-                  <LogOut className="w-5 h-5 text-red-500" />
-                </Tooltip>
+            ) : (
+              <div className="space-x-4">
+                <h1 className="text-sm font-bold text-textAlt">End or hold the call to access the menu</h1>
               </div>
-            </div>
-          </div>
+            )
+          }
           {
             confirmToggleModal && (
               <Modal onClose={handleCloseConfirmToggleModal} title={`Change Status To ${userOnline ? 'Away' : 'Available  '}`}>

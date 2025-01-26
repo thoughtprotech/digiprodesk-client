@@ -435,7 +435,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       name='LocationVideoFeed'
                       value={createLocationFormData.LocationVideoFeed}
                       onChange={handleCreateLocationChange}
-                      required
+                      required={createLocationFormData.LocationType === 'Property'}
                     />
                   </div>
                   <div className='w-full'>
@@ -446,7 +446,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       name='LocationAdvertisementVideo'
                       value={createLocationFormData.LocationAdvertisementVideo}
                       onChange={handleCreateLocationChange}
-                      required
+                      required={createLocationFormData.LocationType === 'Property'}
                     />
                   </div>
                 </div>
