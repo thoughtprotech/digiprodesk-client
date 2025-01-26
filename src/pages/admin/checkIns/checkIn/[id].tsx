@@ -362,7 +362,7 @@ export default function Index() {
                             <h1 className='font-bold text-xl'>Booking ID</h1>
                           </div>
                           <div className='w-full h-full'>
-                            <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID} onChange={
+                            <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID || ""} onChange={
                               (event) => setCurrentCall({ ...currentCall, CallBookingID: event.target.value })
                             } />
                           </div>
@@ -410,7 +410,7 @@ export default function Index() {
                 {/* Grid of black boxes */}
                 <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
                   {
-                    currentCall.CallDocuments?.split("|").map((doc, i) => (
+                    currentCall.CallDocuments !== "" && currentCall.CallDocuments?.split("|").map((doc, i) => (
                       <div key={i} className='w-32 h-32 rounded-md flex flex-col justify-center items-center gap-2 relative'>
                         <ImageViewer src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${doc}`
                         }>
