@@ -59,7 +59,7 @@ export function TimelineCard({ timestamp, status }: {
       <div className='w-full flex flex-col gap-1'>
         <div className={`w-full flex items-center justify-between gap-2 ${callMapping[status].bg} p-1 px-2 rounded-md`}>
           <div>
-            <h1 className='font-bold text-text'>{callMapping[status].text}</h1>
+            <h1 className='font-bold text-text text-sm'>{callMapping[status].text}</h1>
           </div>
           <div>
             <h1 className={`text-[0.6rem] ${callMapping[status].color} font-bold whitespace-nowrap`}>{
@@ -80,12 +80,35 @@ export default function Index() {
   const [currentCall, setCurrentCall] = useState<Call | null>(null);
   const [uploadDocumentModal, setUploadDocumentModal] = useState<boolean>(false);
   const [documentList, setDocumentList] = useState<string[]>([]);
+  const [confirmCallChangeModal, setConfirmCallChangeModal] = useState<{
+    status: boolean;
+    call: Call | null;
+  }>({
+    status: false,
+    call: null
+  });
 
   const router = useRouter();
 
   const handleOnChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const filteredData = callList.filter(data => data.CallBookingID?.includes(event.target.value) || data.CallID?.includes(event.target.value));
     setFilteredCallList(filteredData);
+  }
+
+  const handleCallChangePopUp = (call: Call) => {
+    if (currentCall) {
+      const prevCall = callList.find(call => call.CallID === currentCall?.CallID);
+
+      if (prevCall && currentCall) {
+        if (prevCall.CallBookingID !== currentCall.CallBookingID || prevCall.CallNotes !== currentCall.CallNotes || prevCall.CallDocuments !== currentCall.CallDocuments || documentList.length > 0) {
+          setConfirmCallChangeModal({ status: true, call });
+        } else {
+          handleCallChange(call);
+        }
+      }
+    } else {
+      handleCallChange(call);
+    }
   }
 
   const handleCallChange = (call: Call) => {
@@ -209,9 +232,9 @@ export default function Index() {
 
       const formData = new FormData();
       formData.append('CallID', currentCall!.CallID!);
-      formData.append('CallBookingID', currentCall!.CallBookingID!);
-      formData.append('CallNotes', currentCall!.CallNotes!);
-      formData.append('CallDocuments', currentCall!.CallDocuments!);
+      formData.append('CallBookingID', currentCall!.CallBookingID || "");
+      formData.append('CallNotes', currentCall!.CallNotes || "");
+      formData.append('CallDocuments', currentCall!.CallDocuments || "");
 
       if (documentList && documentList.length > 0) {
         documentList.forEach((base64String, index) => {
@@ -286,7 +309,7 @@ export default function Index() {
     }>
       <div className='w-full h-[90vh] flex flex-col-reverse gap-2'>
         <div className='w-full h-1/2 flex gap-2'>
-          <div className='w-1/2 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-auto relative'>
+          <div className='w-1/2 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-y-auto overflow-x-hidden relative'>
             <div className='w-full border-b border-b-border pb-2 sticky top-0 z-50 bg-foreground'>
               <div>
                 <h1 className='text-2xl font-bold'>Check In Details</h1>
@@ -327,7 +350,7 @@ export default function Index() {
                 <div className='w-full h-full overflow-hidden flex gap-2'>
                   <div className='w-1/2 px-2 h-full overflow-auto flex flex-col gap-2 border-r border-r-border relative'>
                     <div className='w-full flex bg-foreground sticky top-0'>
-                      <h1 className='font-bold text-xl'>Timeline</h1>
+                      <h1 className='font-bold text-lg'>Timeline</h1>
                     </div>
                     <div className='w-full h-full flex flex-col gap-1'>
                       {callLog && callLog!.map((callL, index) => {
@@ -359,7 +382,7 @@ export default function Index() {
                       <div onSubmit={updateCallInfo} className='w-1/2 h-full flex flex-col gap-2'>
                         <div>
                           <div>
-                            <h1 className='font-bold text-xl'>Booking ID</h1>
+                            <h1 className='font-bold text-lg'>Booking ID</h1>
                           </div>
                           <div className='w-full h-full'>
                             <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID || ""} onChange={
@@ -369,7 +392,7 @@ export default function Index() {
                         </div>
                         <div className='w-full h-full'>
                           <div>
-                            <h1 className='font-bold text-xl'>Notes</h1>
+                            <h1 className='font-bold text-lg'>Notes</h1>
                           </div>
                           <div className='w-full h-5/6'>
                             <Input type='textArea' placeholder='Enter Notes' value={currentCall?.CallNotes} onChange={
@@ -433,8 +456,10 @@ export default function Index() {
                               onClick={() => {
                                 const docArray = currentCall.CallDocuments?.split("|");
                                 const filteredDocs = docArray?.filter((doc, index) => index !== i);
-                                const updatedDocs = filteredDocs?.join("|");
-
+                                let updatedDocs = filteredDocs?.join("|");
+                                if (updatedDocs == "null") {
+                                  updatedDocs = "";
+                                }
                                 setCurrentCall({ ...currentCall, CallDocuments: updatedDocs });
                               }}
                             />
@@ -472,7 +497,7 @@ export default function Index() {
                 </div>
                 <div className="w-full flex justify-between items-center">
                   <div className='w-full'>
-                    <SearchInput placeholder='Search Booking ID' onChange={handleOnChange} />
+                    <SearchInput placeholder='Booking ID' onChange={handleOnChange} />
                   </div>
                 </div>
               </div>
@@ -484,7 +509,7 @@ export default function Index() {
                       date={new Date(call.CallStartDateTime!).toLocaleDateString()}
                       time={new Date(call.CallStartDateTime!).toLocaleTimeString()}
                       ticket={call.CallBookingID || call.CallID}
-                      onClick={handleCallChange.bind(null, call)} />
+                      onClick={handleCallChangePopUp.bind(null, call)} />
                   ))
                 }
               </div>
@@ -558,6 +583,27 @@ export default function Index() {
             }
             <div className='w-full flex items-center justify-center'>
               <Button text='Save' color='foreground' onClick={handleUploadDocument} />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Confirm Call Change Modal */}
+      {confirmCallChangeModal.status && (
+        <Modal className='w-1/4' title='Confirm Call Change' onClose={setConfirmCallChangeModal.bind(null, { status: false, call: null })}>
+          <div className='w-full h-full flex flex-col gap-4 py-2'>
+            <div className='flex flex-col gap-1'>
+              <h1 className='font-bold'>Would you like to save your changes?</h1>
+            </div>
+            <div className='w-full flex items-center justify-center gap-4'>
+              <Button text='Yes' color='foreground' onClick={() => {
+                updateCallInfo();
+                handleCallChange(confirmCallChangeModal.call!);
+                setConfirmCallChangeModal({ status: false, call: null });
+              }} />
+              <Button text='No' color='foreground' onClick={() => {
+                setConfirmCallChangeModal({ status: false, call: null });
+              }} />
             </div>
           </div>
         </Modal>

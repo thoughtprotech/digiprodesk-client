@@ -330,7 +330,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
                 <div className='w-full flex flex-col gap-4'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Group Details
+                      Location Group Name
                     </h1>
                     <Input
                       name='LocationGroupName'

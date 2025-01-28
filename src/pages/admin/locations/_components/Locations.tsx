@@ -337,7 +337,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Name
+                      Name
                     </h1>
                     <Input
                       name='LocationName'
@@ -348,7 +348,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   </div>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Code
+                      Code
                     </h1>
                     <Input
                       name='LocationCode'
@@ -361,7 +361,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Type
+                      Type
                     </h1>
                     <Select
                       options={
@@ -377,7 +377,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   {createLocationFormData.LocationType === "Property" &&
                     (<div className='w-full'>
                       <h1 className='font-bold text-sm'>
-                        Choose Control
+                        Control
                       </h1>
                       <Select
                         options={
@@ -389,7 +389,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     </div>)}
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Image
+                      Image
                     </h1>
                     <Input
                       name='LocationImage'
@@ -403,7 +403,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Logo
+                      Logo
                     </h1>
                     <Input
                       name='LocationLogo'
@@ -429,7 +429,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Video Feed
+                      Video Feed
                     </h1>
                     <Input
                       name='LocationVideoFeed'
@@ -440,7 +440,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   </div>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Advertisement Video
+                      Advertisement Video
                     </h1>
                     <Input
                       name='LocationAdvertisementVideo'
@@ -487,7 +487,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Name
+                      Name
                     </h1>
                     <Input
                       name='LocationName'
@@ -498,7 +498,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   </div>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Code
+                      Code
                     </h1>
                     <Input
                       name='LocationCode'
@@ -511,7 +511,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Type
+                      Type
                     </h1>
                     <Select
                       options={
@@ -528,7 +528,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   {selectedLocation!.LocationType === "Property" &&
                     (<div className='w-full'>
                       <h1 className='font-bold text-sm'>
-                        Choose Control
+                        Control
                       </h1>
                       <Select
                         options={
@@ -541,7 +541,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     </div>)}
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Image
+                      Image
                     </h1>
                     <Input
                       name='LocationImage'
@@ -555,7 +555,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Logo
+                      Logo
                     </h1>
                     <Input
                       name='LocationLogo'
@@ -581,7 +581,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                 <div className='w-full flex justify-between gap-2'>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Video Feed
+                      Video Feed
                     </h1>
                     <Input
                       name='LocationVideoFeed'
@@ -592,7 +592,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   </div>
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Location Advertisement Video
+                      Advertisement Video
                     </h1>
                     <Input
                       name='LocationAdvertisementVideo'

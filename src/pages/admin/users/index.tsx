@@ -90,12 +90,25 @@ export default function Index() {
       Password,
       DisplayName,
       Role,
-      IsActive,
+      LocationID,
+      LocationGroupID,
     } = createUserFormData;
 
-    if (!UserName || !Password || !DisplayName || !Role || !IsActive) {
+    if (!UserName || !Password || !DisplayName || !Role) {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please fill all the required fields' type='warning' />
+      ));
+    }
+
+    if (Role === "Guest" && !LocationID) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please select a location' type='warning' />
+      ));
+    }
+
+    if (Role !== "Guest" && !LocationGroupID) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please select a location group' type='warning' />
       ));
     }
 
@@ -161,12 +174,25 @@ export default function Index() {
       Password,
       DisplayName,
       Role,
-      IsActive,
+      LocationID,
+      LocationGroupID,
     } = selectedUser;
 
-    if (!UserName || !Password || !DisplayName || !Role || !IsActive) {
+    if (!UserName || !Password || !DisplayName || !Role) {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please fill all the required fields' type='warning' />
+      ));
+    }
+
+    if (Role === "Guest" && !LocationID) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please select a location' type='warning' />
+      ));
+    }
+
+    if (Role !== "Guest" && !LocationGroupID) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Please select a location group' type='warning' />
       ));
     }
 
@@ -394,10 +420,6 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
-                <div className='w-1/2'>
-                  <h1 className='font-bold text-sm'>User Photo</h1>
-                  <Input type='file' onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserPhoto: e.target.value })} />
-                </div>
                 {
                   createUserFormData.Role === "Guest" ? (
                     <div className='w-1/2'>
@@ -419,6 +441,10 @@ export default function Index() {
                     </div>
                   )
                 }
+                <div className='w-1/2'>
+                  <h1 className='font-bold text-sm'>User Photo</h1>
+                  <Input type='file' onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserPhoto: e.target.value })} />
+                </div>
               </div>
               <div className='h-full flex items-center gap-2'>
                 <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
@@ -466,14 +492,6 @@ export default function Index() {
                 </div>
               </div>
               <div className='w-full flex items-center gap-2'>
-                <div className='w-1/2'>
-                  <h1 className='font-bold text-sm'>User Photo</h1>
-                  <Input
-                    type='file'
-                    onChange={(e) => setSelectedUser({ ...selectedUser!, UserPhoto: e.target.value })}
-                    value={`${selectedUser?.UserPhoto}`}
-                  />
-                </div>
                 {
                   selectedUser.Role === "Guest" ? (
                     <div className='w-1/2'>
@@ -497,6 +515,14 @@ export default function Index() {
                     </div>
                   )
                 }
+                <div className='w-1/2'>
+                  <h1 className='font-bold text-sm'>User Photo</h1>
+                  <Input
+                    type='file'
+                    onChange={(e) => setSelectedUser({ ...selectedUser!, UserPhoto: e.target.value })}
+                    value={`${selectedUser?.UserPhoto}`}
+                  />
+                </div>
               </div>
               <div className='w-full flex items-center gap-2'>
                 <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
