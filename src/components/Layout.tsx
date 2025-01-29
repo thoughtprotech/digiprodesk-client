@@ -10,7 +10,7 @@ import Input from "./ui/Input";
 import toast from "react-hot-toast";
 import Toast from "./ui/Toast";
 import jwt from "jsonwebtoken";
-import { User } from "@/utils/types";
+import { RoleDetail, User } from "@/utils/types";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
 
@@ -29,6 +29,7 @@ export default function Index({
   const router = useRouter();
   const [userOnline, setUserOnline] = useState(true);
   const [user, setUser] = useState<User>();
+  const [roleDetails, setRoleDetails] = useState<RoleDetail[]>();
   const [confirmToggleModal, setConfirmToggleModal] = useState(false);
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [password, setPassword] = useState('');
@@ -163,6 +164,35 @@ export default function Index({
     }
   }
 
+  const fetchRoleDetails = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/roleDetails`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setRoleDetails(data);
+        });
+      } else if (response.status === 401) {
+        destroyCookie(null, 'userToken');
+        router.push('/');
+      } else {
+        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+      }
+
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+    }
+  }
+
+
+
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
@@ -189,6 +219,7 @@ export default function Index({
 
   useEffect(() => {
     fetchUserDetails();
+    fetchRoleDetails();
   }, []);
 
   if (user) {
@@ -211,56 +242,101 @@ export default function Index({
             menu ? (
               <div className="flex items-center space-x-2">
                 <div className="flex items-center gap-2">
-                  {(user?.Role === "Admin" || user?.Role === "Super Admin") && (
+                  {roleDetails && (
                     <>
-                      <div className={
-                        `${router.pathname === '/admin/checkIns' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                      {
+                        roleDetails.find(role =>
+                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
+                          role.Menu.toLowerCase() === "check ins" &&
+                          role.Action.toLowerCase() === "view, edit"
+                        ) &&
+                        (
+                          <div className={
+                            `${router.pathname === '/admin/checkIns' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                          }
+                            onClick={() => router.push('/admin/checkIns')}
+                          >
+                            <Tooltip tooltip="Check-In Trails" position="bottom">
+                              <Backpack className="w-5 h-5" />
+                            </Tooltip>
+                          </div>
+                        )
                       }
-                        onClick={() => router.push('/admin/checkIns')}
-                      >
-                        <Tooltip tooltip="Check-In Trails" position="bottom">
-                          <Backpack className="w-5 h-5" />
-                        </Tooltip>
-                      </div>
-                      <div className={
-                        `${router.pathname === '/admin/locations' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                      {
+                        roleDetails.find(role =>
+                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
+                          role.Menu.toLowerCase() === "locations" &&
+                          role.Action.toLowerCase() === "view, edit"
+                        ) &&
+                        (
+                          <div className={
+                            `${router.pathname === '/admin/locations' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                          }
+                            onClick={() => router.push('/admin/locations')}
+                          >
+                            <Tooltip tooltip="Locations" position="bottom">
+                              <MapPinPlus className="w-5 h-5" />
+                            </Tooltip>
+                          </div>
+                        )
                       }
-                        onClick={() => router.push('/admin/locations')}
-                      >
-                        <Tooltip tooltip="Locations" position="bottom">
-                          <MapPinPlus className="w-5 h-5" />
-                        </Tooltip>
-                      </div>
-                      <div className={
-                        `${router.pathname === '/admin/users' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                      {
+                        roleDetails.find(role =>
+                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
+                          role.Menu.toLowerCase() === "users" &&
+                          role.Action.toLowerCase() === "view, edit"
+                        ) &&
+                        (
+                          <div className={
+                            `${router.pathname === '/admin/users' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                          }
+                            onClick={() => router.push('/admin/users')}
+                          >
+                            <Tooltip tooltip="Users" position="bottom">
+                              <Users className="w-5 h-5" />
+                            </Tooltip>
+                          </div>
+                        )
                       }
-                        onClick={() => router.push('/admin/users')}
-                      >
-                        <Tooltip tooltip="Users" position="bottom">
-                          <Users className="w-5 h-5" />
-                        </Tooltip>
-                      </div>
+                      {
+                        roleDetails.find(role =>
+                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
+                          role.Menu.toLowerCase() === "watch center" &&
+                          role.Action.toLowerCase() === "view, edit"
+                        ) &&
+                        (
+                          <div className={
+                            `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                          }
+                            onClick={() => router.push('/watchCenter')}
+                          >
+                            <Tooltip tooltip="Watch Hub" position="bottom">
+                              <Cctv className="w-5 h-5" />
+                            </Tooltip>
+                          </div>
+                        )
+                      }
+                      {
+                        roleDetails.find(role =>
+                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
+                          role.Menu.toLowerCase() === "check-in hub" &&
+                          role.Action.toLowerCase() === "view, edit"
+                        ) &&
+                        (
+                          <div className={
+                            `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                          }
+                            onClick={() => router.push('/checkInHub')}
+                          >
+                            <Tooltip tooltip="Check-In Hub" position="bottom">
+                              <SmartphoneNfc className="w-5 h-5" />
+                            </Tooltip>
+                          </div>
+                        )
+                      }
                     </>
                   )
                   }
-                  <div className={
-                    `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                  }
-                    onClick={() => router.push('/watchCenter')}
-                  >
-                    <Tooltip tooltip="Watch Hub" position="bottom">
-                      <Cctv className="w-5 h-5" />
-                    </Tooltip>
-                  </div>
-                  <div className={
-                    `${router.pathname === '/checkInHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
-                  }
-                    onClick={() => router.push('/checkInHub')}
-                  >
-                    <Tooltip tooltip="Check-In Hub" position="bottom">
-                      <SmartphoneNfc className="w-5 h-5" />
-                    </Tooltip>
-                  </div>
                   {header}
                 </div>
                 <div className="border-l-2 border-l-border pl-2 flex items-center gap-2">

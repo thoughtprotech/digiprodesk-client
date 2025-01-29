@@ -35,7 +35,7 @@ export interface Role {
 }
 
 export interface RoleDetail {
-  RoleID: number;
+  Role: string;
   Menu: string;
   Action: string;
   IsActive: boolean;
