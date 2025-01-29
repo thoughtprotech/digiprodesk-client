@@ -282,12 +282,31 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                   </div>
                   <div className='w-full h-full flex flex-col gap-1 justify-between items-start'>
                     <div className='w-full h-full'>
-                      <div className='w-full h-full'>
-                        <div className='w-full flex gap-1 items-center'>
-                          <h1 className='font-bold text-sm text-textAlt'>Type</h1>
-                          <h1 className='font-bold text-sm text-text'>
-                            {location?.LocationType}
-                          </h1>
+                      <div className='w-full h-full flex flex-col gap-1'>
+                        <div className="w-full flex justify-center items-center">
+                          <div className='w-full flex gap-1 items-center'>
+                            <h1 className='font-bold text-sm text-textAlt'>Type</h1>
+                            <h1 className='font-bold text-sm text-text'>
+                              {location?.LocationType}
+                            </h1>
+                          </div>
+                          <div>
+                            {
+                              location?.IsActive ? (
+                                <span
+                                  className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
+                                >
+                                  Active
+                                </span>
+                              ) : (
+                                <span
+                                  className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/30 text-red-500"
+                                >
+                                  Inactive
+                                </span>
+                              )
+                            }
+                          </div>
                         </div>
                         {
                           location.LocationParentID !== 0 &&
@@ -302,23 +321,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                           )
                         }
                       </div>
-                    </div>
-                    <div>
-                      {
-                        location?.IsActive ? (
-                          <span
-                            className="px-3 py-1 text-xs font-semibold rounded-full bg-green-500/30 text-green-500"
-                          >
-                            Active
-                          </span>
-                        ) : (
-                          <span
-                            className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/30 text-red-500"
-                          >
-                            Inactive
-                          </span>
-                        )
-                      }
                     </div>
                   </div>
                 </div>
