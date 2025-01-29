@@ -247,7 +247,7 @@ export default function Index({
                       {
                         roleDetails.find(role =>
                           role.Role.toLowerCase() === user.Role.toLowerCase() &&
-                          role.Menu.toLowerCase() === "check ins" &&
+                          role.Menu.toLowerCase() === "check-in trails" &&
                           role.Action.toLowerCase() === "view, edit"
                         ) &&
                         (
