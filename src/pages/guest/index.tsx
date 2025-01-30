@@ -62,8 +62,14 @@ export default function Index() {
           });
         }
 
+        const mimeType = 'video/webm; codecs=vp8,opus';
+
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          console.warn('VP8 not supported, falling back to default WebM settings');
+        }
+
         // Recording Start
-        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9,opus' });
+        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
 
         // Queue for storing chunks to upload
         const chunkQueue: Blob[] = [];

@@ -361,8 +361,14 @@ export default function Index() {
 
               mediaConnectionRef.current = call;
 
+              const mimeType = 'video/webm; codecs=vp8,opus';
+
+              if (!MediaRecorder.isTypeSupported(mimeType)) {
+                console.warn('VP8 not supported, falling back to default WebM settings');
+              }
+
               // Recording Start
-              const mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm; codecs=vp9,opus' });
+              const mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
 
               // Create an array to hold the data chunks
               const chunkQueue: Blob[] = [];
