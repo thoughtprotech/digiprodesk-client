@@ -82,7 +82,7 @@ export default function Index() {
           const chunk = chunkQueue.shift(); // Remove the first chunk from the queue
 
           const formData = new FormData();
-          formData.append("videoChunk", chunk!, "chunk.webm");
+          formData.append("videoChunk", chunk!, "chunk.mp4");
           formData.append("sessionId", currentRoomId);
           formData.append("user", "guest");
 
