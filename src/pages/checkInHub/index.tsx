@@ -361,7 +361,7 @@ export default function Index() {
 
               mediaConnectionRef.current = call;
 
-              const mimeType = 'video/mp4;';
+              const mimeType = 'video/mp4; codecs=vp8';
 
               if (!MediaRecorder.isTypeSupported(mimeType)) {
                 console.warn('VP8 not supported, falling back to default WebM settings');
