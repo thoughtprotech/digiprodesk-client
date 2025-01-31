@@ -97,6 +97,19 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
 
       const formData = new FormData();
       // Append all the other form fields
+
+      if (createLocationFormData?.LocationName.length > 100) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='Location Name Too Long' t={t} />
+        ))
+      }
+
+      if (createLocationFormData?.LocationCode.length > 10) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='Location Code Too Long' t={t} />
+        ))
+      }
+
       Object.keys(createLocationFormData!).forEach((key) => {
         const value = createLocationFormData![key as keyof Location];
         if (
@@ -168,6 +181,18 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     // Ensure LocationParentID is set to 0 for 'Control' type
     if (selectedLocation?.LocationType === "Control") {
       selectedLocation.LocationParentID = 0;
+    }
+
+    if (selectedLocation?.LocationName.length > 100) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='Location Name Too Long' t={t} />
+      ))
+    }
+
+    if (selectedLocation?.LocationCode.length > 10) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='Location Code Too Long' t={t} />
+      ))
     }
 
     try {

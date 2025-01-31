@@ -164,6 +164,14 @@ export default function Index() {
   const endCall = (roomId: string) => {
     socket.emit("end-call", JSON.stringify({ roomId }));
 
+    if (bookingId.length > 50) {
+      return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Is Too Long" />));
+    }
+    
+    if (callNotes.length > 2000) {
+      return toast.custom((t: any) => (<Toast t={t} type="warning" content="Call Notes Is Too Long" />));
+    }
+
     if (screenshotImage && screenshotImage.length > 0) {
       updateCallInfo(roomId, bookingId, callNotes, screenshotImage);
     } else {

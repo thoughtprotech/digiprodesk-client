@@ -77,6 +77,13 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
 
   const handleCreateLocationGroupSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+
+    if (createLocationGroupFormData.LocationGroupName.length > 100) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='Location Group Name Too Long' t={t} />
+      ))
+    }
+
     const dataToSend = {
       LocationGroupName: createLocationGroupFormData.LocationGroupName,
       IsActive: createLocationGroupFormData.IsActive,
@@ -128,6 +135,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
+
+      if (selectedLocationGroup.LocationGroupName.length > 100) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='Location Group Name Too Long' t={t} />
+        ))
+      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/locationGroup`, {
         method: 'PUT',

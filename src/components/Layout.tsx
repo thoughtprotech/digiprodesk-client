@@ -191,8 +191,6 @@ export default function Index({
     }
   }
 
-
-
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;

@@ -33,6 +33,7 @@ export default function Index() {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [location, setLocation] = useState<Location>();
   const [user, setUser] = useState<User>();
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -40,6 +41,13 @@ export default function Index() {
   });
 
   const router = useRouter();
+
+  useEffect(() => {
+    if (confirmLogoutModal) {
+      passwordRef.current?.focus();
+    }
+  },
+    [confirmLogoutModal]);
 
   const call = (remotePeerId: string) => {
     console.log("Calling peer with ID: ", remotePeerId);
@@ -640,7 +648,7 @@ export default function Index() {
               </div>
               <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
                 <div>
-                  <Input type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                  <Input ref={passwordRef} type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
                 </div>
                 <div className="flex gap-2">
                   <Button text="Log Out" color="foreground" type="submit" />

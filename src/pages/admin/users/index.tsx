@@ -100,6 +100,18 @@ export default function Index() {
       ));
     }
 
+    if (UserName.length > 50) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Username Too Long' type='warning' />
+      ));
+    }
+
+    if (DisplayName.length > 50) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Display Name Too Long' type='warning' />
+      ));
+    }
+
     if (Role === "Guest" && !LocationID) {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please select a location' type='warning' />
@@ -181,6 +193,18 @@ export default function Index() {
     if (!UserName || !Password || !DisplayName || !Role) {
       return toast.custom((t: any) => (
         <Toast t={t} content='Please fill all the required fields' type='warning' />
+      ));
+    }
+
+    if (UserName.length > 50) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Username Too Long' type='warning' />
+      ));
+    }
+
+    if (DisplayName.length > 50) {
+      return toast.custom((t: any) => (
+        <Toast t={t} content='Display Name Too Long' type='warning' />
       ));
     }
 

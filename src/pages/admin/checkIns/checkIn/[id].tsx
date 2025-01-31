@@ -230,6 +230,14 @@ export default function Index() {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
+      if ((currentCall?.CallBookingID?.length ?? 0) > 50) {
+        return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Is Too Long" />));
+      }
+
+      if ((currentCall?.CallNotes?.length ?? 0) > 2000) {
+        return toast.custom((t: any) => (<Toast t={t} type="warning" content="Call Notes Is Too Long" />));
+      }
+
       const formData = new FormData();
       formData.append('CallID', currentCall!.CallID!);
       formData.append('CallBookingID', currentCall!.CallBookingID || "");
