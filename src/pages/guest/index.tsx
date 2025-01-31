@@ -113,8 +113,12 @@ export default function Index() {
 
         recordingIntervalRef.current = setInterval(() => {
           if (mediaRecorder.state === "recording") {
+            mediaRecorder.requestData();
             mediaRecorder.stop();  // Stop to trigger ondataavailable event
-            mediaRecorder.start(); // Start again for the next chunk
+            setTimeout(() => {
+
+              mediaRecorder.start(); // Start again for the next chunk
+            }, 100);
           }
         }, 2000); // Send video chunks every 2 seconds
 
