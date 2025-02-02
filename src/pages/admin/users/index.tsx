@@ -5,7 +5,7 @@ import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import Select from '@/components/ui/Select'
 import { Location, LocationGroup, Role, User } from '@/utils/types'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import UserCard from './_components/UserCard'
 import { parseCookies } from 'nookies'
@@ -56,6 +56,7 @@ export default function Index() {
   const [locationListData, setLocationListData] = useState<Location[]>([]);
 
   const handleOpenEditUser = (user: User) => {
+    console.log({ user })
     setEditUserModal(true);
     const userData = {
       UserName: user.UserName || '',
@@ -70,7 +71,7 @@ export default function Index() {
       '24HourFormat': user['24HourFormat'] || 0,
       Calendar: user.Calendar || "",
       DateFormat: user.DateFormat || "",
-      LocationGroupID: user.LocationGroupID || null,
+      LocationGroupID: user?.LocationGroupID?.split(",").map((locGrpID: any) => Number(locGrpID)) || null,
       LocationID: user.LocationID || null,
     }
     setSelectedUser(userData);
@@ -93,6 +94,8 @@ export default function Index() {
       LocationID,
       LocationGroupID,
     } = createUserFormData;
+
+    // return console.log({ createUserFormData });
 
     if (!UserName || !Password || !DisplayName || !Role) {
       return toast.custom((t: any) => (
@@ -459,7 +462,11 @@ export default function Index() {
                       <h1 className='font-bold text-sm'>Location Group</h1>
                       <Select
                         options={locationGroupData.map(locationGroup => ({ value: locationGroup.LocationGroupId!.toString(), label: locationGroup.LocationGroupName }))}
-                        onChange={(e) => setCreateUserFormData({ ...createUserFormData, LocationID: null, LocationGroupID: Number(e.target.value) })}
+                        onChange={(e) => setCreateUserFormData({
+                          ...createUserFormData, LocationID: null, LocationGroupID: [
+                            ...createUserFormData.LocationGroupID || [], Number(e.target.value)
+                          ]
+                        })}
                         placeholder='No Location Group Selected'
                       />
                     </div>
@@ -470,6 +477,30 @@ export default function Index() {
                   <Input type='file' onChange={(e) => setCreateUserFormData({ ...createUserFormData, UserPhoto: e.target.value })} />
                 </div>
               </div>
+              {
+                (createUserFormData?.Role !== "Guest" && createUserFormData?.LocationGroupID || [])?.length > 0 && (
+                  <div className='w-full'>
+                    <div className='flex gap-2'>
+                      {
+                        createUserFormData.LocationGroupID?.map((locationGroupID: any, index: any) => {
+                          const locationGroup = locationGroupData.find(locationGroup => locationGroup.LocationGroupId === locationGroupID);
+                          return (
+                            <div key={index} className='flex items-center gap-2 bg-background border border-border px-2 rounded-md'>
+                              <h1 className='font-bold text-sm'>{locationGroup?.LocationGroupName}</h1>
+                              <div className='cursor-pointer' onClick={() => setCreateUserFormData({
+                                ...createUserFormData,
+                                LocationGroupID: createUserFormData.LocationGroupID?.filter((id: any) => id !== locationGroupID)
+                              })}>
+                                <X className='w-4' />
+                              </div>
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
+                  </div>
+                )
+              }
               <div className='h-full flex items-center gap-2'>
                 <Input required placeholder='Is Active' type='checkBox' value={createUserFormData.IsActive === 1 ? "true" : "false"} onChange={(e) => setCreateUserFormData({ ...createUserFormData, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
                 <h1 className='font-bold text-sm'>
@@ -532,9 +563,13 @@ export default function Index() {
                       <h1 className='font-bold text-sm'>Location Group</h1>
                       <Select
                         options={locationGroupData.map(locationGroup => ({ value: locationGroup.LocationGroupId!.toString(), label: locationGroup.LocationGroupName }))}
-                        onChange={(e) => setSelectedUser({ ...selectedUser, LocationID: null, LocationGroupID: Number(e.target.value) })}
+                        onChange={(e) => setSelectedUser({
+                          ...selectedUser, LocationID: null, LocationGroupID: [
+                            ...selectedUser.LocationGroupID || [],
+                            Number(e.target.value)]
+                        })}
                         placeholder='No Location Group Selected'
-                        defaultValue={selectedUser.LocationGroupID?.toString()}
+                        // defaultValue={selectedUser.LocationGroupID?.toString()}
                       />
                     </div>
                   )
@@ -548,6 +583,30 @@ export default function Index() {
                   />
                 </div>
               </div>
+              {
+                (selectedUser?.Role !== "Guest" && selectedUser?.LocationGroupID || [])?.length > 0 && (
+                  <div className='w-full'>
+                    <div className='flex gap-2'>
+                      {
+                        selectedUser.LocationGroupID?.map((locationGroupID: any, index: any) => {
+                          const locationGroup = locationGroupData.find(locationGroup => locationGroup.LocationGroupId === locationGroupID);
+                          return (
+                            <div key={index} className='flex items-center gap-2 bg-background border border-border px-2 rounded-md'>
+                              <h1 className='font-bold text-sm'>{locationGroup?.LocationGroupName}</h1>
+                              <div className='cursor-pointer' onClick={() => setSelectedUser({
+                                ...selectedUser,
+                                LocationGroupID: selectedUser.LocationGroupID?.filter((id: any) => id !== locationGroupID)
+                              })}>
+                                <X className='w-4' />
+                              </div>
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
+                  </div>
+                )
+              }
               <div className='w-full flex items-center gap-2'>
                 <Input required placeholder='Is Active' type='checkBox' value={selectedUser!.IsActive === 1 ? "true" : "false"} onChange={(e) => setSelectedUser({ ...selectedUser!, IsActive: (e.target as HTMLInputElement).checked ? 1 : 0 })} />
                 <h1 className='font-bold text-sm'>
