@@ -92,7 +92,7 @@ export default function Index() {
 
   useEffect(() => {
     if (currentCall?.CallID) {
-      const newVideoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall.CallID}/output_final.mp4`;
+      const newVideoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall.CallID}.mp4`;
       setVideoUrl(newVideoUrl);
       setVideoError(false);
     }
@@ -305,7 +305,7 @@ export default function Index() {
         return toast.custom((t: any) => <Toast t={t} content='No call selected' type='error' />)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall?.CallID}/output_final.mp4`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall?.CallID}.mp4`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
