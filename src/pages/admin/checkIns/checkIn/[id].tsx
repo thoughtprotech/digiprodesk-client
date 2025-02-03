@@ -87,6 +87,17 @@ export default function Index() {
     status: false,
     call: null
   });
+  const [videoUrl, setVideoUrl] = useState<string>('');
+  const [videoError, setVideoError] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (currentCall?.CallID) {
+      const newVideoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall.CallID}/output_final.mp4?t=${Date.now()}`;
+      setVideoUrl(newVideoUrl);
+      setVideoError(false);
+    }
+  }, [currentCall?.CallID]);
+
 
   const router = useRouter();
 
@@ -524,7 +535,18 @@ export default function Index() {
             </div>
           </div>
           {currentCall ? (
-            <div className='w-3/4 h-full bg-black rounded-md'></div>
+            <div className='w-3/4 h-full bg-black rounded-md'>
+              {!videoError ? (
+
+                <video className='w-full h-full' key={videoUrl} autoPlay controls onError={() => setVideoError(true)}>
+                  <source src={videoUrl} type='video/mp4' />
+                </video>
+              ) : (
+                <div className='w-full h-full flex items-center justify-center'>
+                  <h1 className='text-2xl font-bold text-textAlt'>Video Not Found</h1>
+                </div>
+              )}
+            </div>
           ) : (
             <div className='w-3/4 h-full rounded-md flex flex-col'>
               <div className='w-full flex items-center bg-foreground justify-between border-b border-b-border pb-2 p-2 sticky top-0'>
