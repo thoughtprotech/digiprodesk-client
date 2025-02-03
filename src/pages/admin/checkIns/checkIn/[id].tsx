@@ -92,7 +92,7 @@ export default function Index() {
 
   useEffect(() => {
     if (currentCall?.CallID) {
-      const newVideoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall.CallID}/output_final.mp4?t=${Date.now()}`;
+      const newVideoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall.CallID}/output_final.mp4`;
       setVideoUrl(newVideoUrl);
       setVideoError(false);
     }
