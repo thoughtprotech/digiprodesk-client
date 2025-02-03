@@ -537,13 +537,31 @@ export default function Index() {
           {currentCall ? (
             <div className='w-3/4 h-full bg-black rounded-md'>
               {!videoError ? (
+                <div className='w-full h-full'>
+                  {currentCall?.CallVideoProcessingStatus === 'Completed' ? (
 
-                <video className='w-full h-full' key={videoUrl} autoPlay controls onError={() => setVideoError(true)}>
-                  <source src={videoUrl} type='video/mp4' />
-                </video>
+                    <video className='w-full h-full' key={videoUrl} autoPlay controls onError={() => setVideoError(true)}>
+                      <source src={videoUrl} type='video/mp4' />
+                    </video>
+                  ) :
+                    currentCall?.CallVideoProcessingStatus === 'Processing' ? (
+                      <div className='w-full h-full flex items-center justify-center'>
+                        <h1 className='text-2xl font-bold text-textAlt'>Processing Video, Please Wait...</h1>
+                      </div>
+                    ) : currentCall?.CallVideoProcessingStatus === 'Pending' ? (
+                      <div className='w-full h-full flex items-center justify-center'>
+                        <h1 className='text-2xl font-bold text-textAlt'>Video Processing Is Pending. Please Check Back Later.</h1>
+                      </div>
+                    ): (
+                      <div className='w-full h-full flex items-center justify-center'>
+                        <h1 className='text-2xl font-bold text-textAlt'>Something Went Wrong.</h1>
+                      </div>
+                    )
+                  }
+                </div>
               ) : (
                 <div className='w-full h-full flex items-center justify-center'>
-                  <h1 className='text-2xl font-bold text-textAlt'>Video Not Found</h1>
+                  <h1 className='text-2xl font-bold text-textAlt'>No Video Available.</h1>
                 </div>
               )}
             </div>
