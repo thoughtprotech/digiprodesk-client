@@ -296,6 +296,39 @@ export default function Index() {
     setCurrentCall(null);
   }
 
+  const downloadVideo = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      if (!currentCall) {
+        return toast.custom((t: any) => <Toast t={t} content='No call selected' type='error' />)
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall?.CallID}/output_final.mp4`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      })
+
+      if (response.status === 200) {
+        const data = await response.blob();
+        const url = window.URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = currentCall?.CallBookingID ? `${currentCall?.CallBookingID}.mp4` : `${currentCall?.CallID}.mp4`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } else {
+        return toast.custom((t: any) => <Toast t={t} content='Failed to download video' type='error' />)
+      }
+    } catch {
+      return toast.custom((t: any) => <Toast t={t} content='Failed to download video' type='error' />)
+    }
+  }
+
   useEffect(() => {
     if (router.isReady && router.query.id) {
       fetchCallListData(Number(router.query.id));
@@ -535,35 +568,48 @@ export default function Index() {
             </div>
           </div>
           {currentCall ? (
-            <div className='w-3/4 h-full bg-black rounded-md'>
-              {!videoError ? (
-                <div className='w-full h-full'>
-                  {currentCall?.CallVideoProcessingStatus === 'Completed' ? (
-
-                    <video className='w-full h-full' key={videoUrl} autoPlay controls onError={() => setVideoError(true)}>
-                      <source src={videoUrl} type='video/mp4' />
-                    </video>
-                  ) :
-                    currentCall?.CallVideoProcessingStatus === 'Processing' ? (
-                      <div className='w-full h-full flex items-center justify-center'>
-                        <h1 className='text-2xl font-bold text-textAlt'>Processing Video, Please Wait...</h1>
-                      </div>
-                    ) : currentCall?.CallVideoProcessingStatus === 'Pending' ? (
-                      <div className='w-full h-full flex items-center justify-center'>
-                        <h1 className='text-2xl font-bold text-textAlt'>Video Processing Is Pending. Please Check Back Later.</h1>
-                      </div>
-                    ): (
-                      <div className='w-full h-full flex items-center justify-center'>
-                        <h1 className='text-2xl font-bold text-textAlt'>Something Went Wrong.</h1>
-                      </div>
-                    )
-                  }
+            <div className='w-3/4 h-full bg-black rounded-md relative'>
+              <div className='absolute w-full flex items-center justify-between pb-2 p-2 top-0 z-50'>
+                <div className='w-full'>
+                  <div>
+                    <h1 className='text-2xl font-bold'>Video</h1>
+                  </div>
                 </div>
-              ) : (
-                <div className='w-full h-full flex items-center justify-center'>
-                  <h1 className='text-2xl font-bold text-textAlt'>No Video Available.</h1>
-                </div>
-              )}
+                {currentCall?.CallVideoProcessingStatus === 'Completed' && (
+                  <div>
+                    <Button text='Download' color='foreground' onClick={downloadVideo} />
+                  </div>
+                )}
+              </div>
+              <div className='w-full h-full'>
+                {!videoError ? (
+                  <div className='w-full h-full'>
+                    {currentCall?.CallVideoProcessingStatus === 'Completed' ? (
+                      <video className='w-full h-full' key={videoUrl} autoPlay controls onError={() => setVideoError(true)}>
+                        <source src={videoUrl} type='video/mp4' />
+                      </video>
+                    ) :
+                      currentCall?.CallVideoProcessingStatus === 'Processing' ? (
+                        <div className='w-full h-full flex items-center justify-center'>
+                          <h1 className='text-2xl font-bold text-textAlt'>Processing Video, Please Wait...</h1>
+                        </div>
+                      ) : currentCall?.CallVideoProcessingStatus === 'Pending' ? (
+                        <div className='w-full h-full flex items-center justify-center'>
+                          <h1 className='text-2xl font-bold text-textAlt'>Video Processing Is Pending. Please Check Back Later.</h1>
+                        </div>
+                      ) : (
+                        <div className='w-full h-full flex items-center justify-center'>
+                          <h1 className='text-2xl font-bold text-textAlt'>Something Went Wrong.</h1>
+                        </div>
+                      )
+                    }
+                  </div>
+                ) : (
+                  <div className='w-full h-full flex items-center justify-center'>
+                    <h1 className='text-2xl font-bold text-textAlt'>No Video Available.</h1>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             <div className='w-3/4 h-full rounded-md flex flex-col'>
