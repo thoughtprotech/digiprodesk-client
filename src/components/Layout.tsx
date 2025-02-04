@@ -299,7 +299,7 @@ export default function Index({
                       {
                         roleDetails.find(role =>
                           role.Role.toLowerCase() === user.Role.toLowerCase() &&
-                          role.Menu.toLowerCase() === "watch center" &&
+                          role.Menu.toLowerCase() === "watch hub" &&
                           role.Action.toLowerCase() === "view, edit"
                         ) &&
                         (
