@@ -6,7 +6,7 @@ import Modal from "@/components/ui/Modal";
 import SearchInput from "@/components/ui/Search";
 import Select from "@/components/ui/Select";
 import Toast from "@/components/ui/Toast";
-import { Location } from "@/utils/types";
+import { Location, User } from "@/utils/types";
 import { Plus } from "lucide-react";
 import { parseCookies } from "nookies";
 import { useEffect, useState } from "react";
@@ -24,6 +24,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationName: '',
     LocationCode: '',
     LocationType: '',
+    LocationManager: null,
     LocationParentID: 0,
     LocationImage: '',
     LocationLogo: '',
@@ -35,6 +36,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationName: '',
     LocationCode: '',
     LocationType: '',
+    LocationManager: null,
     LocationParentID: 0,
     LocationImage: '',
     LocationLogo: '',
@@ -42,6 +44,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     LocationAdvertisementVideo: '',
     IsActive: 0,
   });
+  const [userListData, setUserListData] = useState<User[]>([]);
 
 
   const handleCreateLocationChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -78,6 +81,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       LocationName: '',
       LocationCode: '',
       LocationType: '',
+      LocationManager: null,
       LocationParentID: 0,
       LocationImage: null,
       LocationLogo: null,
@@ -94,6 +98,8 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
+
+      console.log({ createLocationFormData });
 
       const formData = new FormData();
       // Append all the other form fields
@@ -157,6 +163,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationName: '',
           LocationCode: '',
           LocationType: '',
+          LocationManager: null,
           LocationParentID: 0,
           LocationImage: null,
           LocationLogo: null,
@@ -256,6 +263,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
           LocationName: "",
           LocationCode: "",
           LocationType: "",
+          LocationManager: null,
           LocationParentID: 0,
           LocationImage: null,
           LocationLogo: null,
@@ -274,6 +282,32 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     }
   };
 
+  const fetchUserListData = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      if (response.status === 200) {
+        const data: User[] = await response.json();
+        setUserListData(
+          data.filter((user) => user.IsActive === 1 && user.Role !== "Guest")
+        );
+      } else {
+        throw new Error('Failed to fetch location data');
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast type='error' content='Failed to fetch location data' t={t} />
+      ))
+    }
+  }
+
 
   const handleSearchLocation = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value;
@@ -284,6 +318,10 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
   useEffect(() => {
     setFilteredLocationData(locationData);
   }, [locationData])
+
+  useEffect(() => {
+    fetchUserListData();
+  }, [])
 
   return (
     <div className='w-1/2 h-full overflow-y-auto border-r border-r-border flex flex-col relative'>
@@ -477,6 +515,22 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     />
                   </div>
                 </div>
+                <div className='w-1/2 flex justify-between gap-2'>
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Location Manager
+                    </h1>
+                    <Select
+                      options={
+                        userListData?.map(user => {
+                          return { value: user.UserName, label: user.DisplayName }
+                        })
+                      }
+                      placeholder='Select Location Type'
+                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationManager: e.target.value })}
+                    />
+                  </div>
+                </div>
                 <div className="w-full flex justify-between">
                   <div className='w-full flex items-center gap-2'>
                     <Input
@@ -626,6 +680,23 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       value={selectedLocation.LocationAdvertisementVideo}
                       onChange={handleEditLocationChange}
                       required
+                    />
+                  </div>
+                </div>
+                <div className='w-1/2 flex justify-between gap-2'>
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Location Manager
+                    </h1>
+                    <Select
+                      options={
+                        userListData?.map(user => {
+                          return { value: user.UserName, label: user.DisplayName }
+                        })
+                      }
+                      placeholder='Select Location Type'
+                      onChange={(e) => setSelectedLocation({ ...selectedLocation, LocationManager: e.target.value })}
+                      defaultValue={selectedLocation?.LocationManager ?? undefined}
                     />
                   </div>
                 </div>

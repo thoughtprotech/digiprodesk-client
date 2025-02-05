@@ -99,6 +99,7 @@ export interface Location {
   LocationCode: string;
   LocationParentID?: number;
   LocationType: string;
+  LocationManager: string | null;
   LocationTheme?: string;
   LocationLogo?: any;
   LocationImage?: any;
