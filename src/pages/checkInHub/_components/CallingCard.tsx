@@ -54,7 +54,7 @@ export default function CallingCard({
       });
     }
 
-    if (status === "pending") {
+    if (status === "New") {
       setInCall({
         status: true,
         callId: title,
@@ -77,7 +77,7 @@ export default function CallingCard({
       <div className="w-full flex flex-col gap-2 justify-between pb-1">
         <div className="w-full flex justify-between space-x-3 border-b-2 border-b-border pb-2">
           <div>
-            {status === "pending" && (
+            {status === "New" && (
               <h1 className="w-fit text-[0.65rem] font-bold rounded text-orange-500">
                 INCOMING CALL
               </h1>
@@ -87,7 +87,7 @@ export default function CallingCard({
                 ACTIVE
               </h1>
             )}
-            {status === "onHold" && (
+            {status === "On Hold" && (
               <h1 className="w-fit text-[0.65rem] font-bold rounded text-indigo-500">
                 CALL ON HOLD
               </h1>
@@ -106,16 +106,16 @@ export default function CallingCard({
           </div>
           <div>
             <Tooltip
-              tooltip={status === "pending" ? "Accept Call" : "Resume Call"}
+              tooltip={status === "New" ? "Accept Call" : "Resume Call"}
               position="bottom"
             >
               <Button
-                className={`w-fit h-fit whitespace-nowrap rounded-md ${status === "pending"
+                className={`w-fit h-fit whitespace-nowrap rounded-md ${status === "New"
                   ? "bg-green-500/50 dark:bg-green-500/30 hover:bg-green-500 dark:hover:bg-green-500 border border-green-500"
                   : "bg-indigo-500/50 dark:bg-indigo-500/30 hover:bg-indigo-500 dark:hover:bg-indigo-500 border border-indigo-500"
                   } duration-300 font-bold text-sm justify-center items-center flex px-4 py-1`}
                 onClick={handleJoinCall}
-                icon={status === "pending" ? (
+                icon={status === "New" ? (
                   <Phone className="w-4 h-4" />
                 ) : (
                   <Play className="w-4 h-4" />

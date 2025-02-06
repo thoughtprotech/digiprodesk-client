@@ -385,27 +385,27 @@ export default function Index() {
       socketRef.current = socket; // Store socket in ref
 
       socket.on("call-joined", (data) => {
-        if (data.roomId === currentRoomId) {
-          call(data.to);
+        if (data.CallID === currentRoomId) {
+          call(data.CallAssignedTo);
           setCallStatus("inProgress");
         }
       });
 
       socket.on("call-on-hold", (data) => {
-        if (data.roomId === currentRoomId) {
+        if (data.CallID === currentRoomId) {
           setCallStatus("onHold");
         }
       });
 
       socket.on("call-resumed", (data) => {
-        if (data.roomId === currentRoomId) {
-          call(data.to);
+        if (data.CallID === currentRoomId) {
+          call(data.CallAssignedTo);
           setCallStatus("inProgress");
         }
       });
 
       socket.on("call-ended", async (data) => {
-        if (data.roomId === currentRoomId) {
+        if (data.CallID === currentRoomId) {
           if (mediaConnectionRef.current) {
             mediaConnectionRef.current.close();
             mediaConnectionRef.current = null;

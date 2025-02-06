@@ -19,6 +19,7 @@ import { toTitleCase } from "@/utils/stringFunctions";
 import jwt from "jsonwebtoken";
 import { CallContext } from "@/context/CallContext";
 import generateUUID from "@/utils/uuidGenerator";
+import { Call } from "@/utils/types";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -54,12 +55,7 @@ export default function Index() {
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const videoCallRef = useRef<MediaStreamTrack | null>(null);
   const peerInstance = useRef<Peer | null>(null);
-  const [callList, setCallList] = useState<{
-    from: string,
-    roomId: string,
-    status: string,
-    to: string | null
-  }[]>([]);
+  const [callList, setCallList] = useState<Call[]>([]);
   const currentRoomId = useRef<string>('');
   const mediaConnectionRef = useRef<MediaConnection | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
@@ -167,7 +163,7 @@ export default function Index() {
     if (bookingId.length > 50) {
       return toast.custom((t: any) => (<Toast t={t} type="warning" content="Booking ID Is Too Long" />));
     }
-    
+
     if (callNotes.length > 2000) {
       return toast.custom((t: any) => (<Toast t={t} type="warning" content="Call Notes Is Too Long" />));
     }
@@ -302,17 +298,16 @@ export default function Index() {
         });
 
         socket.emit("get-call-list");
-        socket.on("call-list-update", (data) => {
+        socket.on("call-list-update", (data: Call[]) => {
           // Identify new "pending" calls
           const newPendingCalls = data.filter(
-            (call: {
-              from: string; roomId: string; status: string; to: string | null;
-            }) =>
-              call.status === "pending" && call.from !== userId &&
-              !callList.some((existingCall) => existingCall.roomId === call.roomId)
+            (call) =>
+              call.CallStatus === "New" && call.CallPlacedByUserName !== userId &&
+              !callList.some((existingCall) => existingCall.CallID === call.CallID)
           );
 
           // Log or handle the new pending calls if needed
+          console.log("Calls:", data);
           console.log("New pending calls:", newPendingCalls);
 
           if (newPendingCalls.length > 0) {
@@ -323,14 +318,15 @@ export default function Index() {
                 console.error('Error playing audio:', error);
               });
             }
-            newPendingCalls.map((call: { from: string; roomId: string; status: string; to: string | null; }) => {
+            newPendingCalls.map((call) => {
               toast.custom((t: any) => (
                 <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md absolute top-[3.6rem] ${t.visible ? 'animate-enter' : 'animate-leave'
                   }`}>
                   <div className="w-full p-2 bg-orange-700/40 flex items-center gap-2">
                     <PhoneIncoming className="w-5 h-5 text-orange-500" />
                     <h1 className="font-bold">
-                      Incoming Call From {toTitleCase(call.from)}</h1>
+                      Incoming Call From {toTitleCase(call.CallPlacedByUserName!)}
+                    </h1>
                   </div>
                 </div>
               ), {
@@ -467,7 +463,7 @@ export default function Index() {
 
   const filteredData = callList.filter((card) => {
     if (filter === "all") return true;
-    return card.status === filter;
+    return card.CallStatus === filter;
   });
 
   const handleScreenshot = (image: string) => {
@@ -548,8 +544,8 @@ export default function Index() {
       callId,
       roomId
     });
-    const call = callList.find((call) => call.roomId === roomId);
-    if (call?.status === "pending") {
+    const call = callList.find((call) => call.CallID === roomId);
+    if (call?.CallStatus === "New") {
       joinCall(roomId)
     } else {
       resumeCall(roomId);
@@ -574,8 +570,8 @@ export default function Index() {
       callId,
       roomId
     });
-    const call = callList.find((call) => call.roomId === roomId);
-    if (call?.status === "pending") {
+    const call = callList.find((call) => call.CallID === roomId);
+    if (call?.CallStatus === "New") {
       joinCall(roomId)
     } else {
       resumeCall(roomId);
@@ -619,7 +615,6 @@ export default function Index() {
         <div className={`h-[90.5vh] ${isRightPanelCollapsed ? 'w-full pr-0' : 'w-2/3'} transition-all duration-300 ease-in-out`}>
           {inCall.status ? (
             <div className="w-full h-full bg-black rounded-md relative z-0">
-              {/* TODO: Implement Video Feed Below */}
               <div className="w-full h-full">
                 <video
                   autoPlay
@@ -662,35 +657,35 @@ export default function Index() {
                       <Phone className="w-5 h-5 text-sky-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold" || call.status === "pending").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold" || call.CallStatus === "New").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">CHECK INS</h1>
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "onHold" ? "border-indigo-500" : "border-transparent"}`}
-                  onClick={() => handleFilterChange("onHold")}
+                  className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "On Hold" ? "border-indigo-500" : "border-transparent"}`}
+                  onClick={() => handleFilterChange("On Hold")}
                 >
                   <div className="flex space-x-2 items-center">
                     <div className="border-r-2 border-r-indigo-500 pr-2">
                       <Pause className="w-5 h-5 text-indigo-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">ON HOLD</h1>
                     </div>
                   </div>
                 </div>
                 <div
-                  className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "pending" ? "border-[#FF9300] dark:border-orange-500" : "border-transparent"}`}
-                  onClick={() => handleFilterChange("pending")}
+                  className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer border-2 ${filter === "New" ? "border-[#FF9300] dark:border-orange-500" : "border-transparent"}`}
+                  onClick={() => handleFilterChange("New")}
                 >
                   <div className="flex space-x-2 items-center">
                     <div className="border-r-2 border-r-orange-500 pr-2">
                       <PhoneIncoming className="w-5 h-5 text-orange-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.status === "incoming").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "New").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">INCOMING</h1>
                     </div>
                   </div>
@@ -703,8 +698,8 @@ export default function Index() {
                   {filter === "all" && (
                     <>
                       {(() => {
-                        const incomingCalls = callList.filter((card) => card.status === "pending");
-                        const holdCalls = callList.filter((card) => card.status === "onHold");
+                        const incomingCalls = callList.filter((card) => card.CallStatus === "New");
+                        const holdCalls = callList.filter((card) => card.CallStatus === "On Hold");
 
                         const interleavedCalls: typeof callList = [];
                         const maxLength = Math.max(incomingCalls.length, holdCalls.length);
@@ -718,14 +713,14 @@ export default function Index() {
                           interleavedCalls.map((card, index) => (
                             <CallingCard
                               key={index}
-                              title={card.from}
-                              status={card.status}
+                              title={card.CallPlacedByUserName || ""}
+                              status={card.CallStatus || ""}
                               inCall={inCall}
                               setInCall={setInCall}
                               setConfirmEndCall={setConfirmEndCall}
                               joinCall={joinCall}
                               resumeCall={resumeCall}
-                              roomId={card.roomId}
+                              roomId={card.CallID}
                             />
                           ))
                         ) : (
@@ -742,14 +737,14 @@ export default function Index() {
                       filteredData.map((card, index) => (
                         <CallingCard
                           key={index}
-                          title={card.from}
-                          status={card.status}
+                          title={card.CallPlacedByUserName || ""}
+                          status={card.CallStatus || ""}
                           inCall={inCall}
                           setInCall={setInCall}
                           setConfirmEndCall={setConfirmEndCall}
                           joinCall={joinCall}
                           resumeCall={resumeCall}
-                          roomId={card.roomId}
+                          roomId={card.CallID}
                         />
                       ))
                     ) : (
@@ -766,7 +761,7 @@ export default function Index() {
                     <div className="w-full flex justify-between items-center sticky top-0 z-50">
                       <div className="flex flex-col">
                         <Chip text="CALL IN PROGRESS" className="border-green-500 text-green-500" />
-                        <h1 className="font-bold text-lg">{toTitleCase(inCall.callId || "")}</h1>
+                        {/* <h1 className="font-bold text-lg">{toTitleCase(inCall?.callId || "")}</h1> */}
                       </div>
                       <div className="w-fit">
                         <input
@@ -876,16 +871,16 @@ export default function Index() {
                     handleFilterChange("all");
                   }}>
                     <Phone className="w-5 h-5 text-sky-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold" || call.status === "pending").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold" || call.CallStatus === "New").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="On Hold" position="left">
                   <div className="w-full h-fit bg-indigo-500/30 hover:bg-indigo-500/50 duration-300 p-2 rounded-md flex space-x-2 justify-center items-center cursor-pointer" onClick={() => {
                     setRightPanelCollapsed(false);
-                    handleFilterChange("onHold");
+                    handleFilterChange("On Hold");
                   }}>
                     <Pause className="w-5 h-5 text-indigo-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.status === "onHold").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="Incoming" position="left">
@@ -894,7 +889,7 @@ export default function Index() {
                     handleFilterChange("incoming");
                   }}>
                     <PhoneIncoming className="w-5 h-5 text-orange-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.status === "incoming").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "New").length}</h1>
                   </div>
                 </Tooltip>
               </div>
