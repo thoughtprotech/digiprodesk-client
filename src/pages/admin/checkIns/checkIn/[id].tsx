@@ -59,7 +59,7 @@ export function TimelineCard({ timestamp, status }: {
       <div className='w-full flex flex-col gap-1'>
         <div className={`w-full flex items-center justify-between gap-2 ${callMapping[status].bg} p-1 px-2 rounded-md`}>
           <div>
-            <h1 className='font-bold text-text text-sm'>{callMapping[status].text}</h1>
+            <h1 className='font-bold text-text text-xs'>{callMapping[status].text}</h1>
           </div>
           <div>
             <h1 className={`text-[0.6rem] ${callMapping[status].color} font-bold whitespace-nowrap`}>{
@@ -364,29 +364,29 @@ export default function Index() {
           <div className='w-1/2 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-y-auto overflow-x-hidden relative'>
             <div className='w-full border-b border-b-border pb-2 sticky top-0 z-50 bg-foreground'>
               <div>
-                <h1 className='text-2xl font-bold'>Check In Details</h1>
+                <h1 className='text-xl font-bold'>Check In Details</h1>
               </div>
               {(currentCall && callLog) && (
                 <div className="w-full flex items-center gap-3">
                   <div className="flex items-center gap-1">
                     <Ticket className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{currentCall.CallBookingID || currentCall.CallID}</h1>
+                    <h1 className="font text-sm text-textAlt whitespace-nowrap">{currentCall.CallBookingID || currentCall.CallID}</h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">
+                    <h1 className="font text-sm text-textAlt whitespace-nowrap">
                       {new Date(currentCall.CreatedOn!).toLocaleDateString()}
                     </h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{
+                    <h1 className="font text-sm text-textAlt whitespace-nowrap">{
                       new Date(currentCall.CreatedOn!).toLocaleTimeString()
                     }</h1>
                   </div>
                   <div className="flex items-center gap-1">
                     <Timer className="w-4 text-textAlt" />
-                    <h1 className="font-semibold text-sm text-textAlt whitespace-nowrap">{
+                    <h1 className="font text-sm text-textAlt whitespace-nowrap">{
                       formatDuration(
                         new Date(callLog![callLog!.length - 1].CallTimeStamp).getTime()
                         - new Date(callLog![0].CallTimeStamp).getTime()
@@ -402,7 +402,7 @@ export default function Index() {
                 <div className='w-full h-full overflow-hidden flex gap-2'>
                   <div className='w-1/2 px-2 h-full overflow-auto flex flex-col gap-2 border-r border-r-border relative'>
                     <div className='w-full flex bg-foreground sticky top-0'>
-                      <h1 className='font-bold text-lg'>Timeline</h1>
+                      <h1 className='font-bold text-base'>Timeline</h1>
                     </div>
                     <div className='w-full h-full flex flex-col gap-1'>
                       {callLog && callLog!.map((callL, index) => {
@@ -434,7 +434,7 @@ export default function Index() {
                       <div onSubmit={updateCallInfo} className='w-1/2 h-full flex flex-col gap-2'>
                         <div>
                           <div>
-                            <h1 className='font-bold text-lg'>Booking ID</h1>
+                            <h1 className='font-bold text-base'>Booking ID</h1>
                           </div>
                           <div className='w-full h-full'>
                             <Input type='text' placeholder='Enter Booking ID' value={currentCall?.CallBookingID || ""} onChange={
@@ -444,7 +444,7 @@ export default function Index() {
                         </div>
                         <div className='w-full h-full'>
                           <div>
-                            <h1 className='font-bold text-lg'>Notes</h1>
+                            <h1 className='font-bold text-base'>Notes</h1>
                           </div>
                           <div className='w-full h-5/6'>
                             <Input type='textArea' placeholder='Enter Notes' value={currentCall?.CallNotes} onChange={
@@ -461,7 +461,7 @@ export default function Index() {
                 </div>
               ) : (
                 <div className='w-full h-full max-h-[50vh] p-2 rounded-md flex flex-col items-center justify-center gap-2 overflow-auto relative'>
-                  <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
+                  <h1 className='text-xl font-bold text-textAlt'>Select A Check In</h1>
                 </div>
               )}
             </div>
@@ -471,7 +471,7 @@ export default function Index() {
             <div className='w-full flex items-center bg-foreground justify-between border-b border-b-border pb-2 p-2 sticky top-0'>
               <div className='w-full'>
                 <div>
-                  <h1 className='text-2xl font-bold'>Documents</h1>
+                  <h1 className='text-xl font-bold'>Documents</h1>
                 </div>
               </div>
               {currentCall && (
@@ -528,7 +528,7 @@ export default function Index() {
               </div>
             ) : (
               <div className='w-full h-full rounded-md flex items-center justify-center'>
-                <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
+                <h1 className='text-xl font-bold text-textAlt'>Select A Check In</h1>
               </div>
             )}
           </div>
@@ -544,7 +544,7 @@ export default function Index() {
                     }} />
                   </div>
                   <div>
-                    <h1 className='text-2xl font-bold'>{location?.LocationName}</h1>
+                    <h1 className='text-xl font-bold'>{location?.LocationName}</h1>
                   </div>
                 </div>
                 <div className="w-full flex justify-between items-center">
@@ -572,7 +572,7 @@ export default function Index() {
               <div className='absolute w-full flex items-center justify-between pb-2 p-2 top-0 z-50'>
                 <div className='w-full'>
                   <div>
-                    <h1 className='text-2xl font-bold'>Video</h1>
+                    <h1 className='text-xl font-bold'>Video</h1>
                   </div>
                 </div>
                 {currentCall?.CallVideoProcessingStatus === 'Completed' && (
@@ -591,22 +591,22 @@ export default function Index() {
                     ) :
                       currentCall?.CallVideoProcessingStatus === 'Processing' ? (
                         <div className='w-full h-full flex items-center justify-center'>
-                          <h1 className='text-2xl font-bold text-textAlt'>Processing Video, Please Wait...</h1>
+                          <h1 className='text-xl font-bold text-textAlt'>Processing Video, Please Wait...</h1>
                         </div>
                       ) : currentCall?.CallVideoProcessingStatus === 'Pending' ? (
                         <div className='w-full h-full flex items-center justify-center'>
-                          <h1 className='text-2xl font-bold text-textAlt'>Video Processing Is Pending. Please Check Back Later.</h1>
+                          <h1 className='text-xl font-bold text-textAlt'>Video Processing Is Pending. Please Check Back Later.</h1>
                         </div>
                       ) : (
                         <div className='w-full h-full flex items-center justify-center'>
-                          <h1 className='text-2xl font-bold text-textAlt'>Something Went Wrong.</h1>
+                          <h1 className='text-xl font-bold text-textAlt'>Something Went Wrong.</h1>
                         </div>
                       )
                     }
                   </div>
                 ) : (
                   <div className='w-full h-full flex items-center justify-center'>
-                    <h1 className='text-2xl font-bold text-textAlt'>No Video Available.</h1>
+                    <h1 className='text-xl font-bold text-textAlt'>No Video Available.</h1>
                   </div>
                 )}
               </div>
@@ -616,12 +616,12 @@ export default function Index() {
               <div className='w-full flex items-center bg-foreground justify-between border-b border-b-border pb-2 p-2 sticky top-0'>
                 <div className='w-full'>
                   <div>
-                    <h1 className='text-2xl font-bold'>Video</h1>
+                    <h1 className='text-xl font-bold'>Video</h1>
                   </div>
                 </div>
               </div>
               <div className='w-full h-full bg-foreground flex items-center justify-center'>
-                <h1 className='text-2xl font-bold text-textAlt'>Select A Check In</h1>
+                <h1 className='text-xl font-bold text-textAlt'>Select A Check In</h1>
               </div>
             </div>
           )}

@@ -34,7 +34,7 @@ export default function CallCard({
         </div>
         <div className="w-full flex items-start justify-between">
           <div>
-            <h1 className='font-bold text-sm'>{ticket}</h1>
+            <h1 className='text-sm'>{ticket}</h1>
           </div>
         </div>
       </div>
