@@ -25,7 +25,7 @@ The Orion UI Demo provides an interface for different user roles—Guest, Host, 
 
 - Users can manage their personal settings such as updating passwords, notification preferences, and profile details.
 
-### /watchCenter (Host Route):
+### /watchHub (Host Route):
 
 - Hosts can view live video feeds from selected locations.
 - Hosts can add and remove locations as required.

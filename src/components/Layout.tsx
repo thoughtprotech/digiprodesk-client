@@ -304,9 +304,9 @@ export default function Index({
                         ) &&
                         (
                           <div className={
-                            `${router.pathname === '/watchCenter' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                            `${router.pathname === '/watchHub' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
                           }
-                            onClick={() => router.push('/watchCenter')}
+                            onClick={() => router.push('/watchHub')}
                           >
                             <Tooltip tooltip="Watch Hub" position="bottom">
                               <Cctv className="w-5 h-5" />
