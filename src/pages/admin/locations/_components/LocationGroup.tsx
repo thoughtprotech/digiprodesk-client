@@ -84,6 +84,20 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
       ))
     }
 
+    let count = 0;
+    createLocationGroupFormData.Locations?.forEach(location => {
+      const loc = locationData.find(loc => loc.LocationID === location.LocationID);
+      if (loc!.LocationParentID === 0) {
+        count = count + 1;
+      }
+    })
+
+    if (count > 1) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='Only 1 Control Can Be Assigned Per Location Group' t={t} />
+      ))
+    }
+
     const dataToSend = {
       LocationGroupName: createLocationGroupFormData.LocationGroupName,
       IsActive: createLocationGroupFormData.IsActive,
@@ -139,6 +153,20 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
       if (selectedLocationGroup.LocationGroupName.length > 100) {
         return toast.custom((t: any) => (
           <Toast type='warning' content='Location Group Name Too Long' t={t} />
+        ))
+      }
+
+      let count = 0;
+      selectedLocationGroup.Locations?.forEach(location => {
+        const loc = locationData.find(loc => loc.LocationID === location.LocationID);
+        if (loc!.LocationParentID === 0) {
+          count = count + 1;
+        }
+      })
+
+      if (count > 1) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='Only 1 Control Can Be Assigned Per Location Group' t={t} />
         ))
       }
 

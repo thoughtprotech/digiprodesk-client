@@ -116,6 +116,18 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
         ))
       }
 
+      if (createLocationFormData?.LocationManager === null) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='Select a location manager' t={t} />
+        ))
+      }
+
+      if (createLocationFormData?.LocationType === "Property" && createLocationFormData?.LocationParentID === 0) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='Select a control location for property' t={t} />
+        ))
+      }
+
       Object.keys(createLocationFormData!).forEach((key) => {
         const value = createLocationFormData![key as keyof Location];
         if (
@@ -199,6 +211,18 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
     if (selectedLocation?.LocationCode.length > 10) {
       return toast.custom((t: any) => (
         <Toast type='warning' content='Location Code Too Long' t={t} />
+      ))
+    }
+
+    if (selectedLocation?.LocationManager === null) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='Select a location manager' t={t} />
+      ))
+    }
+
+    if (selectedLocation?.LocationType === "Property" && selectedLocation?.LocationParentID === 0) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='Select a control location for property' t={t} />
       ))
     }
 
@@ -439,29 +463,18 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationType: e.target.value })}
                     />
                   </div>
-                  {createLocationFormData.LocationType === "Property" &&
-                    (<div className='w-full'>
-                      <h1 className='font-bold text-sm'>
-                        Control
-                      </h1>
-                      <Select
-                        options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
-                        }
-                        placeholder='Assign Control'
-                        onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
-                      />
-                    </div>)}
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Image
+                      Location Manager
                     </h1>
-                    <Input
-                      name='LocationImage'
-                      // value={createLocationFormData.LocationImage}
-                      onChange={handleCreateLocationChange}
-                      type="file"
-                    // required
+                    <Select
+                      options={
+                        userListData?.map(user => {
+                          return { value: user.UserName, label: user.DisplayName }
+                        })
+                      }
+                      placeholder='Select Location Type'
+                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationManager: e.target.value })}
                     />
                   </div>
                 </div>
@@ -500,7 +513,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       name='LocationVideoFeed'
                       value={createLocationFormData.LocationVideoFeed}
                       onChange={handleCreateLocationChange}
-                      required={createLocationFormData.LocationType === 'Property'}
                     />
                   </div>
                   <div className='w-full'>
@@ -511,25 +523,35 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       name='LocationAdvertisementVideo'
                       value={createLocationFormData.LocationAdvertisementVideo}
                       onChange={handleCreateLocationChange}
-                      required={createLocationFormData.LocationType === 'Property'}
                     />
                   </div>
                 </div>
-                <div className='w-1/2 flex justify-between gap-2'>
-                  <div className='w-full'>
+                <div className="w-full flex justify-between gap-2">
+                  <div className='w-full max-w-[50%]'>
                     <h1 className='font-bold text-sm'>
-                      Location Manager
+                      Image
                     </h1>
-                    <Select
-                      options={
-                        userListData?.map(user => {
-                          return { value: user.UserName, label: user.DisplayName }
-                        })
-                      }
-                      placeholder='Select Location Type'
-                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationManager: e.target.value })}
+                    <Input
+                      name='LocationImage'
+                      // value={createLocationFormData.LocationImage}
+                      onChange={handleCreateLocationChange}
+                      type="file"
+                    // required
                     />
                   </div>
+                  {createLocationFormData.LocationType === "Property" &&
+                    (<div className='w-full'>
+                      <h1 className='font-bold text-sm'>
+                        Control
+                      </h1>
+                      <Select
+                        options={
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
+                        }
+                        placeholder='Assign Control'
+                        onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
+                      />
+                    </div>)}
                 </div>
                 <div className="w-full flex justify-between">
                   <div className='w-full flex items-center gap-2'>
@@ -545,9 +567,9 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       }
                     </h1>
                   </div>
-                  <div>
+                  {/* <div>
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
-                  </div>
+                  </div> */}
                 </div>
                 <div className='flex justify-center gap-2 border-t-2 border-t-border pt-4'>
                   <Button text='Save' color='foreground' type='submit' />
@@ -606,30 +628,19 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       defaultValue={selectedLocation!.LocationType}
                     />
                   </div>
-                  {selectedLocation!.LocationType === "Property" &&
-                    (<div className='w-full'>
-                      <h1 className='font-bold text-sm'>
-                        Control
-                      </h1>
-                      <Select
-                        options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
-                        }
-                        placeholder='Assign Control'
-                        onChange={(e) => setSelectedLocation({ ...selectedLocation!, LocationParentID: Number(e.target.value) })}
-                        defaultValue={selectedLocation?.LocationParentID!.toString()}
-                      />
-                    </div>)}
                   <div className='w-full'>
                     <h1 className='font-bold text-sm'>
-                      Image
+                      Location Manager
                     </h1>
-                    <Input
-                      name='LocationImage'
-                      value={selectedLocation!.LocationImage}
-                      onChange={handleEditLocationChange}
-                      type="file"
-                    // required
+                    <Select
+                      options={
+                        userListData?.map(user => {
+                          return { value: user.UserName, label: user.DisplayName }
+                        })
+                      }
+                      placeholder='Select Location Type'
+                      onChange={(e) => setSelectedLocation({ ...selectedLocation, LocationManager: e.target.value })}
+                      defaultValue={selectedLocation?.LocationManager ?? undefined}
                     />
                   </div>
                 </div>
@@ -668,7 +679,6 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       name='LocationVideoFeed'
                       value={selectedLocation.LocationVideoFeed}
                       onChange={handleEditLocationChange}
-                      required
                     />
                   </div>
                   <div className='w-full'>
@@ -679,26 +689,36 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       name='LocationAdvertisementVideo'
                       value={selectedLocation.LocationAdvertisementVideo}
                       onChange={handleEditLocationChange}
-                      required
                     />
                   </div>
                 </div>
-                <div className='w-1/2 flex justify-between gap-2'>
-                  <div className='w-full'>
+                <div className='w-full flex justify-between gap-2'>
+                  <div className='w-full max-w-[50%]'>
                     <h1 className='font-bold text-sm'>
-                      Location Manager
+                      Image
                     </h1>
-                    <Select
-                      options={
-                        userListData?.map(user => {
-                          return { value: user.UserName, label: user.DisplayName }
-                        })
-                      }
-                      placeholder='Select Location Type'
-                      onChange={(e) => setSelectedLocation({ ...selectedLocation, LocationManager: e.target.value })}
-                      defaultValue={selectedLocation?.LocationManager ?? undefined}
+                    <Input
+                      name='LocationImage'
+                      value={selectedLocation!.LocationImage}
+                      onChange={handleEditLocationChange}
+                      type="file"
+                    // required
                     />
                   </div>
+                  {selectedLocation!.LocationType === "Property" &&
+                    (<div className='w-full'>
+                      <h1 className='font-bold text-sm'>
+                        Control
+                      </h1>
+                      <Select
+                        options={
+                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
+                        }
+                        placeholder='Assign Control'
+                        onChange={(e) => setSelectedLocation({ ...selectedLocation!, LocationParentID: Number(e.target.value) })}
+                        defaultValue={selectedLocation?.LocationParentID!.toString()}
+                      />
+                    </div>)}
                 </div>
                 <div className="w-full flex justify-between pb-2">
                   <div className='w-full flex gap-2 items-center'>
@@ -715,9 +735,9 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       }
                     </h1>
                   </div>
-                  <div>
+                  {/* <div>
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
-                  </div>
+                  </div> */}
                 </div>
                 <div className="w-full flex justify-between gap-2">
                   {

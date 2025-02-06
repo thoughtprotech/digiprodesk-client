@@ -433,7 +433,7 @@ export default function Index({
             )
           }
         </div>
-        <div className="p-2">
+        <div className="p-2 overflow-auto">
           {children}
         </div>
       </div >

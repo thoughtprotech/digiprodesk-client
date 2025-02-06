@@ -44,7 +44,7 @@ export default function Index() {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -54,8 +54,8 @@ export default function Index() {
 
       if (response.status === 200) {
         const data = await response.json();
-        setLocationList(data);
-        setFilteredLocationList(data);
+        setLocationList(data.filter((loc: Location) => loc.LocationParentID !== 0));
+        setFilteredLocationList(data.filter((loc: Location) => loc.LocationParentID !== 0));
       } else {
         return toast.custom((t: any) => <Toast t={t} content='Failed to fetch location list data' type='error' />)
       }

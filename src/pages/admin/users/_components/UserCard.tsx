@@ -27,7 +27,7 @@ export default function UserCard({ user }: {
         <div className="flex flex-col gap-1 border-l-2 border-l-border pl-2">
           <div className="flex flex-col">
             <h1 className="text-xl font-semibold text-text">{user?.DisplayName}</h1>
-            <h1 className="text-sm text-textAlt font-semibold">{user?.UserName}</h1>
+            <h1 className="text-sm text-textAlt font-semibold text-wrap">{user?.UserName}</h1>
           </div>
           <div className="w-full flex items-center gap-2">
             <div>

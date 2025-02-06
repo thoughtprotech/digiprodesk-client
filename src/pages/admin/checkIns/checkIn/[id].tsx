@@ -142,8 +142,13 @@ export default function Index() {
 
       if (response.status === 200) {
         const data = await response.json();
-        setCallList(data);
-        setFilteredCallList(data);
+        console.log({ data });
+        setCallList(data.sort((a: any, b: any) =>
+          new Date(b.CallStartDateTime).getTime() - new Date(a.CallStartDateTime).getTime()
+        ));
+        setFilteredCallList(data.sort((a: any, b: any) =>
+          new Date(b.CallStartDateTime).getTime() - new Date(a.CallStartDateTime).getTime()
+        ));
       } else {
         return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call list data' type='error' />)
       }

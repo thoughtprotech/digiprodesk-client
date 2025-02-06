@@ -401,7 +401,6 @@ export default function Index() {
       </div>
     }>
       <div className='w-full h-full flex flex-col gap-2 bg-background px-2'>
-        {/* Create a grid to display user cards */}
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w-64 flex gap-1'>
             <SearchInput placeholder='Users' onChange={filterUserList} />
@@ -410,7 +409,7 @@ export default function Index() {
             <Button color="foreground" icon={<Plus className='w-5' />} text='User' onClick={setCreateUserModal.bind(null, true)} />
           </div>
         </div>
-        <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'>
+        <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pb-4'>
           {filteredUserListData.map((user, index) => (
             <div key={index} className='w-full rounded-md cursor-pointer' onClick={handleOpenEditUser.bind(null, user)}>
               <UserCard user={user} />
@@ -569,7 +568,7 @@ export default function Index() {
                             Number(e.target.value)]
                         })}
                         placeholder='No Location Group Selected'
-                        // defaultValue={selectedUser.LocationGroupID?.toString()}
+                      // defaultValue={selectedUser.LocationGroupID?.toString()}
                       />
                     </div>
                   )
