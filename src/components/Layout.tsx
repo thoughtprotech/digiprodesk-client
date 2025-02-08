@@ -266,17 +266,11 @@ export default function Index({
     const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
 
     try {
-      if (!userToken) {
-        router.push("/");
-      } else if (decoded.role === "Guest") {
-        router.push("/guest");
-      } else {
-        const currentTime = Math.floor(Date.now() / 1000);
-        if (decoded.exp < currentTime) {
-          toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
-          console.error("Token has expired");
-          logOut();
-        }
+      const currentTime = Math.floor(Date.now() / 1000);
+      if (decoded.exp < currentTime) {
+        toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
+        console.error("Token has expired");
+        logOut();
       }
     } catch (error) {
       console.error("Error verifying token:", error);
@@ -507,7 +501,7 @@ export default function Index({
           <div className="p-2 overflow-auto">
             {children}
           </div>
-        </div >
+        </div>
       </WithRole>
     )
   }

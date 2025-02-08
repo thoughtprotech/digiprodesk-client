@@ -16,13 +16,12 @@ const userMenuRouteMapping: {
     { menu: "locations", route: "/admin/locations" },
     { menu: "users", route: "/admin/users" },
     { menu: "watch hub", route: "/watchHub" },
-    { menu: "guest locations", route: "/guest" },
-  ]
-
+    { menu: "guest location", route: "/guest" },
+  ];
 
 export default function WithRole({ children }: { children: ReactNode }) {
   const router = useRouter();
-
+  const [showPage, setShowPage] = useState<boolean>(false);
   const [roleDetails, setRoleDetails] = useState<RoleDetail[]>();
   const [user, setUser] = useState<User>();
 
@@ -33,55 +32,67 @@ export default function WithRole({ children }: { children: ReactNode }) {
     const { userName } = decoded as { userName: string };
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
         }
-      });
+      );
       if (response.status === 200) {
         response.json().then((data) => {
           setUser(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, 'userToken');
-        router.push('/');
+        destroyCookie(null, "userToken");
+        router.push("/");
       } else {
-        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Details" />
+        ));
       }
-
     } catch {
-      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Details" />
+      ));
     }
-  }
+  };
 
   const fetchRoleDetails = async () => {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/roleDetails`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/roleDetails`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
         }
-      });
+      );
       if (response.status === 200) {
         response.json().then((data) => {
           setRoleDetails(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, 'userToken');
-        router.push('/');
+        destroyCookie(null, "userToken");
+        router.push("/");
       } else {
-        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching Role Details" />
+        ));
       }
-
     } catch {
-      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching Role Details" />
+      ));
     }
-  }
+  };
 
   useEffect(() => {
     fetchUserDetails();
@@ -89,24 +100,31 @@ export default function WithRole({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const route = router.pathname;
-    const menu = userMenuRouteMapping.find((menu) => menu.route === route)?.menu;
+    const currentPath = router.asPath.split("?")[0];
+    const mapping = userMenuRouteMapping.find((item) =>
+      currentPath.startsWith(item.route)
+    );
+    const menu = mapping?.menu;
 
     if (roleDetails && user) {
-      const permission = roleDetails.find(role =>
-        role.Role.toLowerCase() === user.Role.toLowerCase() &&
-        role.Menu.toLowerCase() === menu &&
-        role.Action.toLowerCase() === "view, edit"
-      )
+      const permission = roleDetails.find(
+        (role) =>
+          role.Role.toLowerCase() === user.Role.toLowerCase() &&
+          role.Menu.toLowerCase() === menu &&
+          role.Action.toLowerCase() === "view, edit"
+      );
 
       if (!permission) {
-        router.push('/checkInHub');
+        if (user.Role.toLowerCase() === "guest") {
+          router.push("/guest");
+        } else {
+          router.push("/checkInHub");
+        }
+      } else {
+        setShowPage(true);
       }
     }
+  }, [user, roleDetails, router.asPath]);
 
-  }, [user, roleDetails]);
-
-  return (
-    <> {children} </>
-  )
+  return <>{showPage && children}</>;
 }

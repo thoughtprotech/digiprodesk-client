@@ -15,6 +15,7 @@ import Input from "@/components/ui/Input";
 import Tooltip from "@/components/ui/ToolTip";
 import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
+import WithRole from "@/components/WithRole";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -468,197 +469,199 @@ export default function Index() {
   }, [userId, currentRoomId]);
 
   return (
-    <div className="w-full h-screen bg-background flex flex-col text-white">
-      <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
-        <div>
-          {
-            location?.LocationLogo ? (
-              <img
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
-                alt="Logo"
-                width={1000}
-                height={1000}
-                className="w-28"
-              />
-            ) : (
-              <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-                ORION.
-              </h1>
-            )
-          }
-        </div>
-        <div className="absolute left-1/2 transform -translate-x-1/2">
-          <h1 className="font-bold text-[46px]">Welcome To {location?.LocationName}</h1>
-        </div>
-      </div>
-      {!inCall && callStatus === "notInCall" && (
-        <div className="w-full h-full flex relative">
-          {/* Video Section (75% of the width) */}
-          <div className="w-3/4 h-full">
-            {location?.LocationVideoFeed && location?.LocationVideoFeed?.length > 0 ? (
-              <video
-                src={`${location?.LocationVideoFeed}`}
-                autoPlay
-                loop
-                muted
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              location?.LocationImage && (
-                <img
-                  src={
-                    location?.LocationImage && location?.LocationImage !== ""
-                      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
-                      : "/images/background.png"
-                  }
-                  alt="Background"
-                  className="w-full h-full object-cover"
-                />
-              )
-            )}
-          </div>
-
-          {/* Receptionist Section (25% of the width) */}
-          <div className="w-1/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-            {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
-            <div
-              className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 hover:bg-highlight duration-300 rounded-md p-4 cursor-pointer"
-              onClick={initiateCall}
-            >
-              <img
-                src={
-                  location?.LocationReceptionistPhoto &&
-                    location?.LocationReceptionistPhoto !== ""
-                    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
-                    : "/images/receptionist.png"
-                }
-                alt="Receptionist"
-                className="w-28 rounded-full"
-              />
-              <h1 className="text-xl font-bold text-white whitespace-nowrap">
-                Meet Virtual Receptionist
-              </h1>
-            </div>
-          </div>
-        </div>
-      )}
-      {inCall && callStatus === "inProgress" && (
-        <div className="w-full h-full relative">
-          <div className="flex flex-col items-center absolute bottom-2 right-2">
-            <video ref={currentUserVideoRef} autoPlay muted className="rounded-lg shadow-lg w-64 h-48 object-cover" />
-          </div>
+    <WithRole>
+      <div className="w-full h-screen bg-background flex flex-col text-white">
+        <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
           <div>
-            <video ref={remoteVideoRef} autoPlay className="w-full h-screen rounded-lg shadow-lg object-cover" />
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-foreground p-2 rounded-md">
-              {/* Volume Slider */}
-              <div className="w-44 flex items-center gap-2 border-r-2 border-r-border pr-3">
-                {
-                  volume === 0 && (
-                    <VolumeX className="w-9 h-9" />
-                  )
-                }
-                {
-                  volume > 0 && volume < 0.5 && (
-                    <Volume1 className="w-9 h-9" />
-                  )
-                }
-                {
-                  volume >= 0.5 && (
-                    <Volume2 className="w-9 h-9" />
-                  )
-                }
-                <Tooltip className="mb-2 -translate-x-28" tooltip="Volume">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.1"
-                    value={volume}
-                    onChange={handleVolumeChange}
-                    className="cursor-pointer appearance-none w-full h-2 bg-zinc-400 rounded-lg focus:outline-none focus:ring-offset-2 accent-indigo-600 transition-all"
-                  />
-                </Tooltip>
-              </div>
-              <div className="w-16">
-                <Button
-                  className={isMuted ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
-                    : "bg-zinc-500/30 border border-zinc-500 hover:bg-zinc-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"}
-                  color={!isMuted ? "zinc" : null}
-                  icon={<Tooltip className="mb-4" tooltip={isMuted ? "Unmute Mic" : "Mute Mic"}>
-                    {
-                      !isMuted ?
-                        <Mic className="w-6 h-6" />
-                        :
-                        <MicOff className="w-6 h-6" />
-                    }
-                  </Tooltip>} onClick={toggleMute} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {
-        callStatus === 'calling' && (
-          <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">Calling Virtual Receptionist...</h1>
-          </div>
-        )
-      }
-      {
-        callStatus === 'onHold' && (
-          <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">Call On Hold, Thank you for your patience. We&apos;ll be with you shortly.</h1>
-          </div>
-        )
-      }
-      <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
-        <div className="flex items-center gap-1">
-          <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
             {
-              user?.UserPhoto === "" && (
-                <h1 className="text-textAlt font-bold">
-                  {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+              location?.LocationLogo ? (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
+                  alt="Logo"
+                  width={1000}
+                  height={1000}
+                  className="w-28"
+                />
+              ) : (
+                <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                  ORION.
                 </h1>
               )
             }
-            {user?.UserPhoto !== "" &&
-              (
-                <img
-                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
-                  alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
-                  className="w-full h-full object-cover rounded-full flex items-center justify-center"
+          </div>
+          <div className="absolute left-1/2 transform -translate-x-1/2">
+            <h1 className="font-bold text-[46px]">Welcome To {location?.LocationName}</h1>
+          </div>
+        </div>
+        {!inCall && callStatus === "notInCall" && (
+          <div className="w-full h-full flex relative">
+            {/* Video Section (75% of the width) */}
+            <div className="w-3/4 h-full">
+              {location?.LocationVideoFeed && location?.LocationVideoFeed?.length > 0 ? (
+                <video
+                  src={`${location?.LocationVideoFeed}`}
+                  autoPlay
+                  loop
+                  muted
+                  className="w-full h-full object-cover"
                 />
-              )
-            }
+              ) : (
+                location?.LocationImage && (
+                  <img
+                    src={
+                      location?.LocationImage && location?.LocationImage !== ""
+                        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
+                        : "/images/background.png"
+                    }
+                    alt="Background"
+                    className="w-full h-full object-cover"
+                  />
+                )
+              )}
+            </div>
+
+            {/* Receptionist Section (25% of the width) */}
+            <div className="w-1/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
+              {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
+              <div
+                className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 hover:bg-highlight duration-300 rounded-md p-4 cursor-pointer"
+                onClick={initiateCall}
+              >
+                <img
+                  src={
+                    location?.LocationReceptionistPhoto &&
+                      location?.LocationReceptionistPhoto !== ""
+                      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
+                      : "/images/receptionist.png"
+                  }
+                  alt="Receptionist"
+                  className="w-28 rounded-full"
+                />
+                <h1 className="text-xl font-bold text-white whitespace-nowrap">
+                  Meet Virtual Receptionist
+                </h1>
+              </div>
+            </div>
+          </div>
+        )}
+        {inCall && callStatus === "inProgress" && (
+          <div className="w-full h-full relative">
+            <div className="flex flex-col items-center absolute bottom-2 right-2">
+              <video ref={currentUserVideoRef} autoPlay muted className="rounded-lg shadow-lg w-64 h-48 object-cover" />
+            </div>
+            <div>
+              <video ref={remoteVideoRef} autoPlay className="w-full h-screen rounded-lg shadow-lg object-cover" />
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-foreground p-2 rounded-md">
+                {/* Volume Slider */}
+                <div className="w-44 flex items-center gap-2 border-r-2 border-r-border pr-3">
+                  {
+                    volume === 0 && (
+                      <VolumeX className="w-9 h-9" />
+                    )
+                  }
+                  {
+                    volume > 0 && volume < 0.5 && (
+                      <Volume1 className="w-9 h-9" />
+                    )
+                  }
+                  {
+                    volume >= 0.5 && (
+                      <Volume2 className="w-9 h-9" />
+                    )
+                  }
+                  <Tooltip className="mb-2 -translate-x-28" tooltip="Volume">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.1"
+                      value={volume}
+                      onChange={handleVolumeChange}
+                      className="cursor-pointer appearance-none w-full h-2 bg-zinc-400 rounded-lg focus:outline-none focus:ring-offset-2 accent-indigo-600 transition-all"
+                    />
+                  </Tooltip>
+                </div>
+                <div className="w-16">
+                  <Button
+                    className={isMuted ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
+                      : "bg-zinc-500/30 border border-zinc-500 hover:bg-zinc-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"}
+                    color={!isMuted ? "zinc" : null}
+                    icon={<Tooltip className="mb-4" tooltip={isMuted ? "Unmute Mic" : "Mute Mic"}>
+                      {
+                        !isMuted ?
+                          <Mic className="w-6 h-6" />
+                          :
+                          <MicOff className="w-6 h-6" />
+                      }
+                    </Tooltip>} onClick={toggleMute} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {
+          callStatus === 'calling' && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl">Calling Virtual Receptionist...</h1>
+            </div>
+          )
+        }
+        {
+          callStatus === 'onHold' && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl">Call On Hold, Thank you for your patience. We&apos;ll be with you shortly.</h1>
+            </div>
+          )
+        }
+        <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
+          <div className="flex items-center gap-1">
+            <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
+              {
+                user?.UserPhoto === "" && (
+                  <h1 className="text-textAlt font-bold">
+                    {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                  </h1>
+                )
+              }
+              {user?.UserPhoto !== "" &&
+                (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
+                    alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+                    className="w-full h-full object-cover rounded-full flex items-center justify-center"
+                  />
+                )
+              }
+            </div>
+            <div>
+              <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+            </div>
           </div>
           <div>
-            <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+            <LogOut className="cursor-pointer w-5 h-5" color="red" onClick={handleOpenConfirmLogoutModal} />
           </div>
         </div>
-        <div>
-          <LogOut className="cursor-pointer w-5 h-5" color="red" onClick={handleOpenConfirmLogoutModal} />
-        </div>
-      </div>
-      {
-        confirmLogoutModal && (
-          <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
-            <div className="flex flex-col gap-2 p-2">
-              <div>
-                <h1 className="font-bold">Password</h1>
-              </div>
-              <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
+        {
+          confirmLogoutModal && (
+            <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
+              <div className="flex flex-col gap-2 p-2">
                 <div>
-                  <Input ref={passwordRef} type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                  <h1 className="font-bold">Password</h1>
                 </div>
-                <div className="flex gap-2">
-                  <Button text="Log Out" color="foreground" type="submit" />
-                  <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
-                </div>
-              </form>
-            </div>
-          </Modal>
-        )
-      }
-    </div>
+                <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
+                  <div>
+                    <Input ref={passwordRef} type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button text="Log Out" color="foreground" type="submit" />
+                    <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
+                  </div>
+                </form>
+              </div>
+            </Modal>
+          )
+        }
+      </div>
+    </WithRole>
   )
 }
