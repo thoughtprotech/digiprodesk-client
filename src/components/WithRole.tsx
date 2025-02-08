@@ -16,7 +16,7 @@ const userMenuRouteMapping: {
     { menu: "locations", route: "/admin/locations" },
     { menu: "users", route: "/admin/users" },
     { menu: "watch hub", route: "/watchHub" },
-    { menu: "guest location", route: "/guest" },
+    { menu: "guest hub", route: "/guest" },
   ];
 
 export default function WithRole({ children }: { children: ReactNode }) {
