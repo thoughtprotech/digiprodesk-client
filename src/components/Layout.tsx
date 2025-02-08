@@ -89,12 +89,29 @@ export default function Index({
       });
 
       if (response.status === 200) {
-        setUserOnline(!userOnline);
-        setPassword('');
-        setConfirmToggleModal(false);
-        return toast.custom((t: any) => (<Toast t={t} type="info" content={
-          userOnline ? 'You Are Now Away' : 'You Are Now Online'
-        } />));
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLogs`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify({
+              status: userOnline ? 'Away' : 'Available',
+            })
+          });
+
+          if (response.status === 200) {
+            setUserOnline(!userOnline);
+            setPassword('');
+            setConfirmToggleModal(false);
+            return toast.custom((t: any) => (<Toast t={t} type="info" content={
+              userOnline ? 'You Are Now Away' : 'You Are Now Online'
+            } />));
+          }
+        } catch {
+          return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating User Status" />));
+        }
       } else {
         return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
       }
@@ -122,10 +139,27 @@ export default function Index({
       });
 
       if (response.status === 200) {
-        setLogOutPassword('');
-        setConfirmLogoutModal(false);
-        logOut();
-        return toast.custom((t: any) => (<Toast t={t} type="success" content="Logged Out Successfully" />));
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLogs`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${userToken}`
+            },
+            body: JSON.stringify({
+              status: 'Logged Out',
+            })
+          });
+
+          if (response.status === 200) {
+            setLogOutPassword('');
+            setConfirmLogoutModal(false);
+            logOut();
+            return toast.custom((t: any) => (<Toast t={t} type="success" content="Logged Out Successfully" />));
+          }
+        } catch {
+          return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating User Status" />));
+        }
       } else {
         return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
       }
@@ -191,6 +225,40 @@ export default function Index({
     }
   }
 
+  const fetchUserStatus = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+    const decoded = jwt.decode(userToken);
+    const { userName } = decoded as { userName: string };
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLogs/${userName}/latest`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${userToken}`
+        }
+      });
+      if (response.status === 200) {
+        response.json().then((data) => {
+          if (data.data.Status !== 'Away') {
+            setUserOnline(true);
+          } else {
+            setUserOnline(false);
+          }
+        });
+      } else if (response.status === 401) {
+        destroyCookie(null, 'userToken');
+        router.push('/');
+      } else {
+        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+      }
+
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+    }
+  }
+
   useEffect(() => {
     const cookies = parseCookies();
     const { userToken } = cookies;
@@ -218,6 +286,7 @@ export default function Index({
   useEffect(() => {
     fetchUserDetails();
     fetchRoleDetails();
+    fetchUserStatus();
   }, []);
 
   if (user) {
