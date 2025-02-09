@@ -15,11 +15,13 @@ import Button from "@/components/ui/Button";
 import Peer, { MediaConnection } from "peerjs";
 import { io } from "socket.io-client";
 import { parseCookies } from "nookies";
-import { toTitleCase } from "@/utils/stringFunctions";
+// import { toTitleCase } from "@/utils/stringFunctions";
 import jwt from "jsonwebtoken";
 import { CallContext } from "@/context/CallContext";
 import generateUUID from "@/utils/uuidGenerator";
-import { Call } from "@/utils/types";
+import { CallListContext } from "@/context/CallListContext";
+import { toTitleCase } from "@/utils/stringFunctions";
+// import { useCallRing } from "@/components/ui/CallRing";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -55,12 +57,11 @@ export default function Index() {
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const videoCallRef = useRef<MediaStreamTrack | null>(null);
   const peerInstance = useRef<Peer | null>(null);
-  const [callList, setCallList] = useState<Call[]>([]);
+  const { callList } = useContext(CallListContext);
   const currentRoomId = useRef<string>('');
   const mediaConnectionRef = useRef<MediaConnection | null>(null);
-  const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
+  const uploadedChunks = useRef<string[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const { callId: guestCallId } = useContext(CallContext);
@@ -109,20 +110,6 @@ export default function Index() {
       return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Updating Call Info" />));
     }
   }
-
-  useEffect(() => {
-    // Initialize the audio element
-    audioRef.current = new Audio('/sounds/call-ringtone.wav');
-    audioRef.current.volume = 0.9; // Set volume as needed
-
-    // Cleanup on component unmount
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
 
   const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
     query: {
@@ -295,49 +282,6 @@ export default function Index() {
               },
             ]
           }
-        });
-
-        socket.emit("get-call-list");
-        socket.on("call-list-update", (data: Call[]) => {
-          // Identify new "pending" calls
-          const newPendingCalls = data.filter(
-            (call) =>
-              call.CallStatus === "New" && call.CallPlacedByUserName !== userId &&
-              !callList.some((existingCall) => existingCall.CallID === call.CallID)
-          );
-
-          // Log or handle the new pending calls if needed
-          console.log("Calls:", data);
-          console.log("New pending calls:", newPendingCalls);
-
-          if (newPendingCalls.length > 0) {
-            console.log({ userId });
-            // Handle new pending calls here, e.g., show a notification
-            if (audioRef.current) {
-              audioRef.current.play().catch((error) => {
-                console.error('Error playing audio:', error);
-              });
-            }
-            newPendingCalls.map((call) => {
-              toast.custom((t: any) => (
-                <div className={`w-fit h-fit bg-background border-2 border-orange-500 rounded-md absolute top-[3.6rem] ${t.visible ? 'animate-enter' : 'animate-leave'
-                  }`}>
-                  <div className="w-full p-2 bg-orange-700/40 flex items-center gap-2">
-                    <PhoneIncoming className="w-5 h-5 text-orange-500" />
-                    <h1 className="font-bold">
-                      Incoming Call From {toTitleCase(call.CallPlacedByUserName!)}
-                    </h1>
-                  </div>
-                </div>
-              ), {
-                position: "top-left",
-                duration: 10000,
-              });
-            })
-          }
-
-          // Update the call list state
-          setCallList(data.filter((call: any) => call.from !== userId));
         });
 
         peer.on('open', (id: string) => {
@@ -761,7 +705,7 @@ export default function Index() {
                     <div className="w-full flex justify-between items-center sticky top-0 z-50">
                       <div className="flex flex-col">
                         <Chip text="CALL IN PROGRESS" className="border-green-500 text-green-500" />
-                        {/* <h1 className="font-bold text-lg">{toTitleCase(inCall?.callId || "")}</h1> */}
+                        <h1 className="font-bold text-lg">{toTitleCase(inCall?.callId || "")}</h1>
                       </div>
                       <div className="w-fit">
                         <input
@@ -916,6 +860,7 @@ export default function Index() {
           }
         </div>
       </div>
+      {/* {CallRingComponent} */}
     </Layout>
   );
 }
