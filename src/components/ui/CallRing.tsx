@@ -72,7 +72,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
             <Button
               color="foreground"
               onClick={onClose}
-              text="Dismiss"
+              text="Minimize"
             />
           </div>
         </div>
