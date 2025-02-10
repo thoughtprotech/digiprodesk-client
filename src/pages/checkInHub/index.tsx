@@ -15,13 +15,11 @@ import Button from "@/components/ui/Button";
 import Peer, { MediaConnection } from "peerjs";
 import { io } from "socket.io-client";
 import { parseCookies } from "nookies";
-// import { toTitleCase } from "@/utils/stringFunctions";
 import jwt from "jsonwebtoken";
 import { CallContext } from "@/context/CallContext";
 import generateUUID from "@/utils/uuidGenerator";
 import { CallListContext } from "@/context/CallListContext";
 import { toTitleCase } from "@/utils/stringFunctions";
-// import { useCallRing } from "@/components/ui/CallRing";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -135,7 +133,7 @@ export default function Index() {
       roomId: roomId
     });
     if (socket) {
-      socket.emit("initiate-call", JSON.stringify({ roomId, LocationID: 1, to: guestId }));
+      socket.emit("call-guest", JSON.stringify({ roomId, LocationID: 1, to: guestId }));
     }
   };
 
