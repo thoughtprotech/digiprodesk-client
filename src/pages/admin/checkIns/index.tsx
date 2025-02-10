@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from '@/components/Layout'
-import { Phone } from 'lucide-react'
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Select from '@/components/ui/Select'
@@ -74,6 +73,10 @@ export default function Index() {
     router.push(`/admin/checkIns/checkIn/${locationId}`)
   }
 
+  const handleNotificationClick = (locationId: number) => {
+    router.push(`/admin/notifications/${locationId}`)
+  }
+
   const handleSearchCall = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const filteredData = locationList.filter((data) => data.LocationName.toLowerCase().includes(event.target.value.toLowerCase()));
     setFilteredLocationList(filteredData);
@@ -136,28 +139,78 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2'>
+        <div className='w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2'>
           {filteredLocationList.map((loc) => (
-            <div key={loc.LocationID} onClick={handleCallClick.bind(null, loc.LocationID!)}>
-              <div className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer'>
-                <div>
-                  <h1 className='font-bold text-xl'>{loc.LocationName}</h1>
+            <div key={loc.LocationID}>
+              <div className='w-full h-fit rounded-md bg-foreground border border-border hover:bg-highlight duration-300 p-2 cursor-pointer flex flex-col gap-2'>
+                <div className='flex items-center gap-2 border-b border-b-border pb-2' onClick={handleCallClick.bind(null, loc.LocationID!)}>
+                  <div className='bg-text w-12 h-12 rounded-full flex items-center justify-center'>
+                    <h1 className='text-textAlt font-bold text-2xl'>
+                      {loc.LocationName.split(' ')[0].slice(0, 1) + loc.LocationName.split(' ')[1].slice(0, 1)}
+                    </h1>
+                  </div>
+                  <div>
+                    <h1 className='font-bold text-xl'>{loc.LocationName}</h1>
+                  </div>
                 </div>
-                <div className="w-full flex flex-col gap-1 justify-between">
-                  <div className="w-full flex items-center gap-1 justify-between">
-                    <div className="flex items-center gap-1">
-                      <Phone className="w-4 text-textAlt" />
-                      <h1 className="font-semibold text-sm text-textAlt">
+                <div className="w-full flex gap-1 justify-between" onClick={handleNotificationClick.bind(null, loc.LocationID!)}>
+                  <div className="w-full flex items-center gap-1 justify-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <h1 className="text-text font-bold text-3xl">
                         {
                           callList.filter(call => call.CallPlacedByLocationID === loc.LocationID).length
                         }
-                        {" "}
-                        Check Ins</h1>
+                      </h1>
+                      <h1 className='font-semibold text-sm text-blue-500'>Check Ins</h1>
                     </div>
-                    {/* <div className="flex items-center gap-1">
-                      <FileText className="w-4 text-textAlt" />
-                      <h1 className="font-semibold text-sm text-textAlt">08:00 AM</h1>
-                    </div> */}
+                  </div>
+                  <div className="w-full flex items-center gap-1 justify-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <h1 className="font-bold text-3xl text-text">
+                        {
+                          callList.filter(call => call.CallPlacedByLocationID === loc.LocationID && call.CallStatus === "New").length
+                        }
+                      </h1>
+                      <h1 className="font-semibold text-sm text-orange-500">
+                        Pending
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="w-full flex items-center gap-1 justify-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <h1 className="font-bold text-3xl text-text">
+                        {
+                          callList.filter(call => call.CallPlacedByLocationID === loc.LocationID && call.CallStatus === "In Progress").length
+                        }
+                      </h1>
+                      <h1 className="font-semibold text-sm text-green-500">
+                        In Progress
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="w-full flex items-center gap-1 justify-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <h1 className="font-bold text-3xl text-text">
+                        {
+                          callList.filter(call => call.CallPlacedByLocationID === loc.LocationID && call.CallStatus === "On Hold").length
+                        }
+                      </h1>
+                      <h1 className="font-semibold text-sm text-indigo-500">
+                        On Hold
+                      </h1>
+                    </div>
+                  </div>
+                  <div className="w-full flex items-center gap-1 justify-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <h1 className="font-bold text-3xl text-text">
+                        {
+                          callList.filter(call => call.CallPlacedByLocationID === loc.LocationID && call.CallStatus === "Missed").length
+                        }
+                      </h1>
+                      <h1 className="font-semibold text-sm text-red-500">
+                        Missed
+                      </h1>
+                    </div>
                   </div>
                 </div>
               </div>

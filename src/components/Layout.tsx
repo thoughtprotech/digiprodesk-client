@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Backpack, Cctv, LogOut, MapPinPlus, SmartphoneNfc, Users } from "lucide-react";
+import { Backpack, Cctv, FileText, LogOut, MapPinPlus, SmartphoneNfc, Users } from "lucide-react";
 import { ReactNode, useContext, useEffect, useRef, useState } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
@@ -355,6 +355,24 @@ export default function Index({
                     <div className="flex items-center gap-2">
                       {roleDetails && (
                         <>
+                          {
+                            roleDetails.find(role =>
+                              role.Role.toLowerCase() === user.Role.toLowerCase() &&
+                              role.Menu.toLowerCase() === "reports" &&
+                              role.Action.toLowerCase() === "view, edit"
+                            ) &&
+                            (
+                              <div className={
+                                `${router.pathname === '/admin/reports' ? 'bg-highlight' : 'hover:bg-highlight'} rounded-md p-1 cursor-pointer`
+                              }
+                                onClick={() => router.push('/admin/reports')}
+                              >
+                                <Tooltip tooltip="Reports" position="bottom">
+                                  <FileText className="w-5 h-5" />
+                                </Tooltip>
+                              </div>
+                            )
+                          }
                           {
                             roleDetails.find(role =>
                               role.Role.toLowerCase() === user.Role.toLowerCase() &&

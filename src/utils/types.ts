@@ -155,6 +155,7 @@ export interface Call {
     | "Completed"
     | "Cancelled"
     | "Purged"
+    | "Missed"
     | "Error";
   CallPlacedByUserName?: string | null;
   CallPlacedByLocationID?: number;
