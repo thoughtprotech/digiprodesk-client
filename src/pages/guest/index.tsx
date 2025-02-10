@@ -23,7 +23,7 @@ export default function Index() {
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerInstance = useRef<Peer | null>(null);
   const mediaConnectionRef = useRef<MediaConnection | null>(null); // Ref to store the current call
-  const [currentRoomId, setCurrentRoomId] = useState<string>('');
+  const currentRoomId = useRef<string>('');
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<string>('notInCall');
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -92,7 +92,7 @@ export default function Index() {
 
           const formData = new FormData();
           formData.append("videoChunk", chunk!, "chunk.mp4");
-          formData.append("sessionId", currentRoomId);
+          formData.append("sessionId", currentRoomId.current);
           formData.append("user", "guest");
 
           try {
@@ -140,7 +140,7 @@ export default function Index() {
 
   const initiateCall = () => {
     const roomId = generateUUID();
-    setCurrentRoomId(roomId);
+    currentRoomId.current = roomId;
     setInCall(true);
     setCallStatus('calling');
     if (socketRef.current) {
@@ -386,27 +386,27 @@ export default function Index() {
       socketRef.current = socket; // Store socket in ref
 
       socket.on("call-joined", (data) => {
-        if (data.CallID === currentRoomId) {
+        if (data.CallID === currentRoomId.current) {
           call(data.CallAssignedTo);
           setCallStatus("inProgress");
         }
       });
 
       socket.on("call-on-hold", (data) => {
-        if (data.CallID === currentRoomId) {
+        if (data.CallID === currentRoomId.current) {
           setCallStatus("onHold");
         }
       });
 
       socket.on("call-resumed", (data) => {
-        if (data.CallID === currentRoomId) {
+        if (data.CallID === currentRoomId.current) {
           call(data.CallAssignedTo);
           setCallStatus("inProgress");
         }
       });
 
       socket.on("call-ended", async (data) => {
-        if (data.CallID === currentRoomId) {
+        if (data.CallID === currentRoomId.current) {
           if (mediaConnectionRef.current) {
             mediaConnectionRef.current.close();
             mediaConnectionRef.current = null;
@@ -427,12 +427,12 @@ export default function Index() {
         }
       });
 
-      socket.on("call-list-update", (data) => {
-        console.log({ data });
-        const incomingCall = data.find((call: any) => call.to === userId && call.status === "pending");
-        if (incomingCall) {
-          call(incomingCall.from);
-          setCurrentRoomId(incomingCall.roomId);
+      socket.on("incoming-host-call", (data) => {
+        const { roomId, from, to } = data;
+        console.log({ hostCall: data });
+        if (to === userId) {
+          call(from);
+          currentRoomId.current = roomId;
           setInCall(true);
           setCallStatus("inProgress");
         }
@@ -466,7 +466,7 @@ export default function Index() {
         peerInstance.current?.destroy();
       };
     }
-  }, [userId, currentRoomId]);
+  }, [userId]);
 
   return (
     <WithRole>
