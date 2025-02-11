@@ -7,64 +7,9 @@ import { parseCookies } from 'nookies';
 import toast from 'react-hot-toast';
 import Toast from '@/components/ui/Toast';
 import { Call, Location } from '@/utils/types';
-import { ArrowLeft, Clock, User } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import ElapsedTime from '@/components/ui/ElapsedTime';
 
-const callMapping: {
-  [key: string]: {
-    text: string;
-    bg: string;
-    color: string;
-  };
-} = {
-  Start: {
-    text: "Call Accepted",
-    bg: "bg-green-500/30",
-    color: "text-green-500"
-  },
-  Initiated: {
-    text: "Call Initiated",
-    bg: "bg-orange-500/30",
-    color: "text-orange-500"
-  },
-  "On Hold": {
-    text: "Call On Hold",
-    bg: "bg-indigo-500/30",
-    color: "text-indigo-500"
-  },
-  Resume: {
-    text: "Call Resumed",
-    bg: "bg-sky-500/30",
-    color: "text-sky-500"
-  },
-  End: {
-    text: "Call Ended",
-    bg: "bg-red-500/30",
-    color: "text-red-500"
-  }
-}
-
-export function TimelineCard({ timestamp, status }: {
-  timestamp: string | Date;
-  status: string;
-}) {
-  return (
-    <div className='w-full flex flex-col gap-1'>
-      <div className='w-full flex flex-col gap-1'>
-        <div className={`w-full flex items-center justify-between gap-2 ${callMapping[status].bg} p-1 px-2 rounded-md`}>
-          <div>
-            <h1 className='font-bold text-text text-xs'>{callMapping[status].text}</h1>
-          </div>
-          <div>
-            <h1 className={`text-[0.6rem] ${callMapping[status].color} font-bold whitespace-nowrap`}>{
-              new Date(timestamp).toLocaleTimeString()
-            }</h1>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 export default function Index() {
   const [, setCallList] = useState<Call[]>([]);
@@ -145,7 +90,7 @@ export default function Index() {
         </div>
       </div>
     }>
-      <div className='w-full h-[90vh] flex flex-col gap-2 overflow-hidden bg-foreground rounded-md p-2'>
+      <div className='w-full h-[90vh] flex flex-col gap-2 overflow-hidden rounded-md p-2'>
         <div className='w-full border-b border-b-border pb-2 flex items-center gap-2'>
           <div>
             <ArrowLeft className='w-8 h-8 cursor-pointer' onClick={() => {
@@ -156,128 +101,49 @@ export default function Index() {
             <h1 className='font-bold text-3xl'>{location?.LocationName}</h1>
           </div>
         </div>
-        {
-          filteredCallList.filter(call => call.CallStatus !== "Completed").length !== 0 ? (
-            <div className='w-full h-full flex overflow-y-auto'>
-              {filteredCallList.filter(call => call.CallStatus === "New").length !== 0 && (
-                <div className='w-1/4 h-full flex flex-col gap-2 p-2'>
-                  <>
-                    {filteredCallList.filter((call) => call.CallStatus === 'New').map((call) => (
-                      <div key={call.CallID} className='w-full p-2 rounded-md bg-background flex flex-col gap-1'>
-                        <div className='w-full flex items-center justify-between border-b border-b-border pb-2'>
-                          <div>
-                            <h1 className='font-bold text-orange-500'>Pending</h1>
-                          </div>
-                          <div>
-                            <ElapsedTime startTime={call.CallStartDateTime!} />
-                          </div>
-                        </div>
-                        <div className='w-full flex gap-2 items-center justify-between'>
-                          <div className='flex items-center gap-1'>
-                            <Clock className='w-4 h-4' />
-                            <h1 className='font-medium'>{new Date(call.CallStartDateTime!).toLocaleTimeString()}</h1>
-                          </div>
-                          <div className='flex items-center gap-1'>
-                            <User className='w-4 h-4' />
-                            <h1 className='font-medium'>{call.CallAssignedTo}</h1>
-                          </div>
-                        </div>
+        <table className="bg-background w-full">
+          <thead className="bg-foreground">
+            <tr>
+              <th className="py-2 px-4 text-left border-b border-b-border">Call ID</th>
+              <th className="py-2 px-4 text-left border-b border-b-border">Assigned To</th>
+              <th className="py-2 px-4 text-left border-b border-b-border">Call Placed Time</th>
+              <th className="py-2 px-4 text-left border-b border-b-border">Time Elapsed</th>
+              <th className="py-2 px-4 text-left border-b border-b-border">Status</th>
+            </tr>
+          </thead>
+          {
+            filteredCallList.filter(call => call.CallStatus !== "Completed").length !== 0 ? (
+              <tbody>
+                {filteredCallList.filter(call => call.CallStatus !== "Completed").map((row) => (
+                  <tr key={row.CallID} className="">
+                    <td className="w-1/5 py-2 px-4 border-b border-b-border text-sm">{row.CallID}</td>
+                    <td className="w-1/5 py-2 px-4 border-b border-b-border">{row.CallAssignedTo}</td>
+                    <td className="w-1/5 py-2 px-4 border-b border-b-border">{row?.CallStartDateTime ? new Date(row.CallStartDateTime).toLocaleTimeString() : 'N/A'}</td>
+                    <td className="w-1/5 py-2 px-4 border-b border-b-border">
+                      <ElapsedTime startTime={row?.CallStartDateTime || ""} />
+                    </td>
+                    <td className={`w-1/5 py-2 px-4 border-b border-b-border`}>
+                      <div className={`w-fit px-4 rounded-md font-medium 
+                  ${row.CallStatus === "New" ? "text-orange-600 bg-orange-600/20"
+                          : row.CallStatus === "In Progress" ? "text-green-500 bg-green-600/20"
+                            : row.CallStatus === "On Hold" ? "text-blue-500 bg-blue-600/20" : "text-red-600 bg-red-600/20"}`}>
+                        {row.CallStatus}
                       </div>
-                    ))}
-                  </>
-                </div>
-              )}
-              {filteredCallList.filter(call => call.CallStatus === "In Progress").length !== 0 && (
-                <div className='w-1/4 h-full flex flex-col gap-2 p-2'>
-                  <>
-                    {filteredCallList.filter((call) => call.CallStatus === 'In Progress').map((call) => (
-                      <div key={call.CallID} className='w-full p-2 rounded-md bg-background flex flex-col gap-1'>
-                        <div className='w-full flex items-center justify-between border-b border-b-border pb-2'>
-                          <div>
-                            <h1 className='font-bold text-green-500'>In Progress</h1>
-                          </div>
-                          <div>
-                            <ElapsedTime startTime={call.CallStartDateTime!} />
-                          </div>
-                        </div>
-                        <div className='w-full flex gap-2 items-center justify-between'>
-                          <div className='flex items-center gap-1'>
-                            <Clock className='w-4 h-4' />
-                            <h1 className='font-medium'>{new Date(call.CallStartDateTime!).toLocaleTimeString()}</h1>
-                          </div>
-                          <div className='flex items-center gap-1'>
-                            <User className='w-4 h-4' />
-                            <h1 className='font-medium'>{call.CallAssignedTo}</h1>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                </div>
-              )}
-              {filteredCallList.filter(call => call.CallStatus === "On Hold").length !== 0 && (
-                <div className='w-1/4 h-full flex flex-col gap-2 p-2'>
-                  <>
-                    {filteredCallList.filter((call) => call.CallStatus === 'On Hold').map((call) => (
-                      <div key={call.CallID} className='w-full p-2 rounded-md bg-background flex flex-col gap-1'>
-                        <div className='w-full flex items-center justify-between border-b border-b-border pb-2'>
-                          <div>
-                            <h1 className='font-bold text-indigo-500'>On Hold</h1>
-                          </div>
-                          <div>
-                            <ElapsedTime startTime={call.CallStartDateTime!} />
-                          </div>
-                        </div>
-                        <div className='w-full flex gap-2 items-center justify-between'>
-                          <div className='flex items-center gap-1'>
-                            <Clock className='w-4 h-4' />
-                            <h1 className='font-medium'>{new Date(call.CallStartDateTime!).toLocaleTimeString()}</h1>
-                          </div>
-                          <div className='flex items-center gap-1'>
-                            <User className='w-4 h-4' />
-                            <h1 className='font-medium'>{call.CallAssignedTo}</h1>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                </div>
-              )}
-              {filteredCallList.filter(call => call.CallStatus === "Missed").length !== 0 && (
-                <div className='w-1/4 h-full flex flex-col gap-2 p-2'>
-                  <>
-                    {filteredCallList.filter((call) => call.CallStatus === 'Missed').map((call) => (
-                      <div key={call.CallID} className='w-full p-2 rounded-md bg-background flex flex-col gap-1'>
-                        <div className='w-full flex items-center justify-between border-b border-b-border pb-2'>
-                          <div>
-                            <h1 className='font-bold text-red-500'>Missed</h1>
-                          </div>
-                          <div>
-                            <ElapsedTime startTime={call.CallStartDateTime!} />
-                          </div>
-                        </div>
-                        <div className='w-full flex gap-2 items-center justify-between'>
-                          <div className='flex items-center gap-1'>
-                            <Clock className='w-4 h-4' />
-                            <h1 className='font-medium'>{new Date(call.CallStartDateTime!).toLocaleTimeString()}</h1>
-                          </div>
-                          <div className='flex items-center gap-1'>
-                            <User className='w-4 h-4' />
-                            <h1 className='font-medium'>{call.CallAssignedTo}</h1>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className='w-full h-full flex items-center justify-center'>
-              <h1 className='font-bold text-textAlt'>No Active Call Data To Be Shown</h1>
-            </div>
-          )
-        }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            ) : (
+              <tbody>
+                <tr>
+                  <td className="w-full py-2 px-4 border-b border-b-border text-center" colSpan={4}>
+                    <h1 className="font-bold text-lg">No Notifications</h1>
+                  </td>
+                </tr>
+              </tbody>
+            )
+          }
+        </table>
       </div>
     </Layout >
   )
