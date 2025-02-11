@@ -35,6 +35,11 @@ export default function Index() {
   const [location, setLocation] = useState<Location>();
   const [user, setUser] = useState<User>();
   const passwordRef = useRef<HTMLInputElement>(null);
+  const callRingTone = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    callRingTone.current = new Audio("/sounds/guest-call-ringtone.mp3");
+  }, [])
 
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [formData, setFormData] = useState({
@@ -435,6 +440,13 @@ export default function Index() {
           currentRoomId.current = roomId;
           setInCall(true);
           setCallStatus("inProgress");
+          callRingTone?.current?.play();
+          setTimeout(() => {
+            callRingTone?.current?.pause();
+            if (callRingTone.current) {
+              callRingTone.current.currentTime = 0;
+            }
+          }, 4000);
         }
       });
 
