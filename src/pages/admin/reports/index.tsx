@@ -1,6 +1,16 @@
 import Layout from '@/components/Layout'
+import Tabs from '@/components/ui/Tabs';
+import Locations from './_components/locations/Locations';
+import Calls from './_components/calls/Calls';
+import Users from './_components/users/Users';
 
 export default function Index() {
+  const tabData = [
+    { label: "Locations", content: <Locations /> },
+    { label: "Calls", content: <Calls /> },
+    { label: "Users", content: <Users /> },
+  ];
+
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
@@ -12,10 +22,8 @@ export default function Index() {
         </div>
       </div>
     }>
-      <div className='w-full h-full flex flex-col gap-2 bg-background p-2'>
-        <div>
-          <h1 className='font-bold'>User Settings Coming Soon</h1>
-        </div>
+      <div className='w-full min-h-screen h-fit px-2'>
+        <Tabs tabs={tabData} />
       </div>
     </Layout>
   )
