@@ -162,8 +162,8 @@ export default function Users() {
           ) : (
             <tbody>
               <tr>
-                <td className="w-full py-2 px-4 border-b border-b-border text-center" colSpan={4}>
-                  <h1 className="font-bold text-lg">No Notifications</h1>
+                <td className="w-full py-2 px-4 border-b border-b-border text-center" colSpan={5}>
+                  <h1 className="font-bold text-lg">No Data</h1>
                 </td>
               </tr>
             </tbody>
