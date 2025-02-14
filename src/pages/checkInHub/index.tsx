@@ -28,7 +28,7 @@ export default function Index() {
     callId: string;
     roomId: string;
   }>({
-    status: true,
+    status: false,
     callId: "",
     roomId: ""
   });
