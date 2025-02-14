@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext, useEffect, useRef, useState } from "react";
-import { FilePlus2, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, Trash, Video, VideoOff } from "lucide-react";
+import { FilePlus2, Mic, MicOff, PanelRightClose, PanelRightOpen, Pause, Phone, PhoneIncoming, PhoneOff, PhoneOutgoing, Trash, Video, VideoOff } from "lucide-react";
 import Tooltip from "@/components/ui/ToolTip";
 import Layout from "@/components/Layout";
 import ScreenshotComponent from "@/components/ui/Screenshotcomponent";
@@ -20,6 +20,7 @@ import { CallContext } from "@/context/CallContext";
 import generateUUID from "@/utils/uuidGenerator";
 import { CallListContext } from "@/context/CallListContext";
 import { toTitleCase } from "@/utils/stringFunctions";
+import Select from "@/components/ui/Select";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -27,7 +28,7 @@ export default function Index() {
     callId: string;
     roomId: string;
   }>({
-    status: false,
+    status: true,
     callId: "",
     roomId: ""
   });
@@ -61,6 +62,8 @@ export default function Index() {
   const uploadedChunks = useRef<string[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [transferCallModal, setTransferCallModal] = useState(false);
 
   const { callId: guestCallId } = useContext(CallContext);
 
@@ -522,6 +525,14 @@ export default function Index() {
     return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Commenced" />));
   }
 
+  const handleCallTransfer = () => {
+    setTransferCallModal(true);
+  }
+
+  const handleTransferCall = async (callId: string) => {
+    console.log({ callId });
+  }
+
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
@@ -792,6 +803,9 @@ export default function Index() {
                             <VideoOff className="w-6 h-6" />
                           }
                         </Tooltip>} onClick={handleToggleCamera} />
+                      <Button color="cyan" icon={<Tooltip tooltip="Transfer  Call">
+                        <PhoneOutgoing className="w-6 h-6" />
+                      </Tooltip>} onClick={handleCallTransfer} />
                       <Button color="indigo" icon={<Tooltip tooltip="Hold Call">
                         <Pause className="w-6 h-6" />
                       </Tooltip>} onClick={handleCallHold} />
@@ -851,6 +865,39 @@ export default function Index() {
                   <div className="w-full flex justify-between gap-2 border-t-2 border-t-border pt-4">
                     <Button text="Hold Call" color="indigo" icon={<PhoneOff className="w-6 h-6" />} onClick={() => handleConfirmHoldCall(confirmEndCall.callId, confirmEndCall.roomId)} />
                     <Button text="End Call" color="red" icon={<PhoneOff className="w-6 h-6" />} onClick={() => handleConfirmEndCall(confirmEndCall.callId, confirmEndCall.roomId)} />
+                  </div>
+                </div>
+              </Modal>
+            )
+          }
+          {
+            transferCallModal && (
+              <Modal title="Transfer Call" onClose={() => setTransferCallModal(false)}>
+                <div className="w-full h-full flex flex-col justify-center">
+                  <div className="mt-2">
+                    <h1 className="font-medium">Choose Manager To Transfer Call To</h1>
+                  </div>
+                  <div>
+                    <Select
+                      options={[
+                        {
+                          label: "Manager 1",
+                          value: "manager1"
+                        }, {
+                          label: "Manager 2",
+                          value: "manager2"
+                        }, {
+                          label: "Manager 3",
+                          value: "manager3"
+                        }
+                      ]}
+                      placeholder="Select Manager"
+                      onChange={(selectedOption) => console.log(selectedOption)}
+                    />
+                  </div>
+                  <div className="w-full flex justify-between gap-2 border-t-2 border-t-border pt-4 mt-2">
+                    <Button text="Transfer" color="cyan" icon={<PhoneOutgoing className="w-6 h-6" />} onClick={() => handleTransferCall(confirmEndCall.callId)} />
+                    <Button text="Cancel" color="foreground" onClick={() => setTransferCallModal(false)} />
                   </div>
                 </div>
               </Modal>

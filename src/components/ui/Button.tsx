@@ -37,6 +37,9 @@ const colorClasses = {
   foreground: {
     base: 'bg-background border-border hover:bg-border',
   },
+  cyan : {
+    base: 'bg-cyan-500/30 border-cyan-500 hover:bg-cyan-500',
+  }
   // Add more colors as needed
 };
 

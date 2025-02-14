@@ -2,66 +2,74 @@
 import Layout from '@/components/Layout'
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import Select from '@/components/ui/Select'
 import SearchInput from '@/components/ui/Search';
 import { Call, Location } from '@/utils/types';
 import toast from 'react-hot-toast';
 import Toast from '@/components/ui/Toast';
 import { parseCookies } from 'nookies';
+import DateRangeSelect from '@/components/ui/DateRangeSelect';
+import formatDate from '@/utils/formatDate';
 
 export default function Index() {
   const [callList, setCallList] = useState<Call[]>([]);
   const [locationList, setLocationList] = useState<Location[]>([]);
   const [filteredLocationList, setFilteredLocationList] = useState<Location[]>([]);
 
-  const fetchCallListData = async () => {
+  const fetchCallListData = async (startDate?: string, endDate?: string) => {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call`, {
-        method: 'GET',
+      // Construct query parameters if startDate and endDate are provided
+      const queryParams = startDate && endDate ? `?startDate=${startDate}&endDate=${endDate}` : "";
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call${queryParams}`, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      })
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
 
       if (response.status === 200) {
         const data = await response.json();
         setCallList(data);
       } else {
-        return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call list data' type='error' />)
+        return toast.custom((t: any) => <Toast t={t} content="Failed to fetch call list data" type="error" />);
       }
     } catch {
-      return toast.custom((t: any) => <Toast t={t} content='Failed to fetch call list data' type='error' />)
+      return toast.custom((t: any) => <Toast t={t} content="Failed to fetch call list data" type="error" />);
     }
-  }
+  };
 
-  const fetchLocationList = async () => {
+  const fetchLocationList = async (startDate?: string, endDate?: string) => {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`, {
-        method: 'GET',
+      // Construct query parameters if startDate and endDate are provided
+      const queryParams = startDate && endDate ? `?startDate=${startDate}&endDate=${endDate}` : "";
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList${queryParams}`, {
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
-        }
-      })
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
 
       if (response.status === 200) {
         const data = await response.json();
         setLocationList(data.filter((loc: Location) => loc.LocationParentID !== 0));
         setFilteredLocationList(data.filter((loc: Location) => loc.LocationParentID !== 0));
       } else {
-        return toast.custom((t: any) => <Toast t={t} content='Failed to fetch location list data' type='error' />)
+        return toast.custom((t: any) => <Toast t={t} content="Failed to fetch location list data" type="error" />);
       }
     } catch {
-      return toast.custom((t: any) => <Toast t={t} content='Failed to fetch location list data' type='error' />)
+      return toast.custom((t: any) => <Toast t={t} content="Failed to fetch location list data" type="error" />);
     }
-  }
+  };
+
 
   // const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   //   setSearchParam(event.target.value)
@@ -82,11 +90,57 @@ export default function Index() {
     setFilteredLocationList(filteredData);
   }
 
-  useEffect(() => {
-    fetchCallListData();
-    fetchLocationList();
-  }, [])
+  const handleDateRangeChange = (value: "today" | "sevenDays" | "fifteenDays" | "thirtyDays" | "sixtyDays" | "custom") => {
+    const now = new Date();
+    let startDate: Date;
+    const endDate: Date = now;
 
+    switch (value) {
+      case "today":
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        break;
+      case "sevenDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "fifteenDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 15);
+        break;
+      case "thirtyDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case "sixtyDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 60);
+        break;
+      case "custom":
+        // Handle custom date selection based on user input
+        console.log("Custom date range selected");
+        return;
+      default:
+        throw new Error("Invalid date range selection");
+    }
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    console.log("Start Date:", formatDate(startDate), "End Date:", formatDate(endDate));
+    fetchCallListData(startDate.toISOString(), endDate.toISOString());
+  };
+
+
+useEffect(() => {
+  const now = new Date();
+  const startDate = new Date(now);
+  startDate.setDate(now.getDate() - 1);
+
+
+  fetchCallListData(startDate.toISOString(), now.toISOString());
+  fetchLocationList();
+}, []);
+  
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
@@ -98,44 +152,14 @@ export default function Index() {
         </div>
       </div>
     }>
-      <div className='w-full h-full flex flex-col gap-2 bg-background px-2'>
+      <div className='w-full h-full min-h-screen flex flex-col gap-2 bg-background px-2'>
         <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
           <div className='w52'>
             <SearchInput placeholder='Locations' onChange={handleSearchCall} />
           </div>
           <div className='flex gap-2'>
             <div>
-              <Select
-                className="hover:bg-highlight duration-300"
-                options={[
-                  {
-                    label: "Today",
-                    value: "today"
-                  },
-                  {
-                    label: "Last 7 Days",
-                    value: "sevenDays"
-                  },
-                  {
-                    label: "Last 15 Days",
-                    value: "fifteenDays"
-                  },
-                  {
-                    label: "Last 30 Days",
-                    value: "thirtyDays"
-                  },
-                  {
-                    label: "Last 60 Days",
-                    value: "sixtyDays"
-                  },
-                  {
-                    label: "Custom",
-                    value: "custom"
-                  },
-                ]}
-                placeholder="Select Range" onChange={(value) => console.log(value)}
-                defaultValue='today'
-              />
+              <DateRangeSelect callBack={(value) => handleDateRangeChange(value)} />
             </div>
           </div>
         </div>

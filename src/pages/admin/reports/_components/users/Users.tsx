@@ -154,7 +154,9 @@ export default function Users() {
                     </div>
                   </td>
                   <td className={`w-1/5 py-2 px-4 border-b border-b-border`}>
-                    {row.TotalAvailableDuration}
+                    <div className="px-4 rounded-md font-medium bg-highlight w-fit">
+                      {row.TotalAvailableDuration}
+                    </div>
                   </td>
                 </tr>
               ))}

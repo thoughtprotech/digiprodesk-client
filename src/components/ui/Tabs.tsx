@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 const Tabs = ({ tabs }: { tabs: any }) => {
-  const [activeTab, setActiveTab] = useState(2);
+  const [activeTab, setActiveTab] = useState(1);
 
   return (
     <div className="w-full h-full mx-auto">
