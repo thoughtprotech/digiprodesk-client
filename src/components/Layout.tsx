@@ -13,10 +13,10 @@ import jwt from "jsonwebtoken";
 import { Call, RoleDetail, User } from "@/utils/types";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
-import WithRole from "./WithRole";
 import { io } from "socket.io-client";
 import { useCallRing } from "./ui/CallRing";
 import { CallListContext } from "@/context/CallListContext";
+import WithRole from "./WithRole";
 
 export default function Index({
   header,
@@ -42,7 +42,7 @@ export default function Index({
 
   const [userId, setUserId] = useState<string>();
   const { CallRingComponent, showCallRing } = useCallRing();
-  const { callList, setCallList } = useContext(CallListContext);
+  const { callList, setCallList, setCallToPickUp } = useContext(CallListContext);
 
   useEffect(() => {
     if (confirmToggleModal) {
@@ -319,7 +319,10 @@ export default function Index({
           if (newPendingCalls.length > 0 && router.query.from !== "push") {
             console.log({ userId });
             newPendingCalls.map((call) => {
-              showCallRing(call, () => router.push("/checkInHub"));
+              showCallRing(call, () => {
+                setCallToPickUp(call);
+                router.push("/checkInHub");
+              });
             })
           }
 

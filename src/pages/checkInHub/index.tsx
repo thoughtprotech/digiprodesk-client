@@ -56,7 +56,7 @@ export default function Index() {
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const videoCallRef = useRef<MediaStreamTrack | null>(null);
   const peerInstance = useRef<Peer | null>(null);
-  const { callList } = useContext(CallListContext);
+  const { callList, callToPickUp, setCallToPickUp } = useContext(CallListContext);
   const currentRoomId = useRef<string>('');
   const mediaConnectionRef = useRef<MediaConnection | null>(null);
   const uploadedChunks = useRef<string[]>([]);
@@ -387,6 +387,28 @@ export default function Index() {
       console.error("Invalid or expired token", error);
     }
   }, [userId]);
+
+  useEffect(() => {
+    if (callToPickUp && userId) {
+      if (inCall.status) {
+        return setConfirmEndCall({
+          status: true,
+          callId: callToPickUp.CallPlacedByUserName || "",
+          roomId: callToPickUp.CallID
+        });
+      }
+
+      setInCall({
+        status: true,
+        callId: callToPickUp.CallPlacedByUserName || "",
+        roomId: callToPickUp.CallID
+      });
+      joinCall(callToPickUp.CallID);
+
+      setCallToPickUp(null);
+      toast.custom((t: any) => (<Toast t={t} type="info" content="Call Commenced" />));
+    }
+  }, [callToPickUp, userId])
 
   const handleToggleCamera = () => {
     console.log(mediaConnectionRef.current?.localStream.getVideoTracks());
