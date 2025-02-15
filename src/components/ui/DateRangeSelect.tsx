@@ -1,12 +1,48 @@
 import { useState } from "react";
 import Select from "./Select";
+import formatDate from "@/utils/formatDate";
 
-export default function DateRangeSelect({ callBack }: { callBack: (value: "today" | "sevenDays" | "fifteenDays" | "thirtyDays" | "sixtyDays" | "custom") => void }) {
+export default function DateRangeSelect({ callBack }: { callBack: (startTime: string, endTime: string) => void }) {
   const [dateRange, setDateRange] = useState<"today" | "sevenDays" | "fifteenDays" | "thirtyDays" | "sixtyDays" | "custom">("today");
 
+
   const handleChangeDateRange = (value: "today" | "sevenDays" | "fifteenDays" | "thirtyDays" | "sixtyDays" | "custom") => {
+    const now = new Date();
+    let startDate: Date;
+    const endDate: Date = now;
+
+    switch (value) {
+      case "today":
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        break;
+      case "sevenDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 7);
+        break;
+      case "fifteenDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 15);
+        break;
+      case "thirtyDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 30);
+        break;
+      case "sixtyDays":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 60);
+        break;
+      case "custom":
+        // Handle custom date selection based on user input
+        console.log("Custom date range selected");
+        return;
+      default:
+        throw new Error("Invalid date range selection");
+    }
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
     setDateRange(value);
-    callBack(value);
+    callBack(startDate.toISOString(), endDate.toISOString());
   }
 
   return (

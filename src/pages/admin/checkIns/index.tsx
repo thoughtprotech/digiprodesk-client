@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 import Toast from '@/components/ui/Toast';
 import { parseCookies } from 'nookies';
 import DateRangeSelect from '@/components/ui/DateRangeSelect';
-import formatDate from '@/utils/formatDate';
 
 export default function Index() {
   const [callList, setCallList] = useState<Call[]>([]);
@@ -90,57 +89,23 @@ export default function Index() {
     setFilteredLocationList(filteredData);
   }
 
-  const handleDateRangeChange = (value: "today" | "sevenDays" | "fifteenDays" | "thirtyDays" | "sixtyDays" | "custom") => {
-    const now = new Date();
-    let startDate: Date;
-    const endDate: Date = now;
+  const handleDateRangeChange = (startDate: string, endDate: string) => {
 
-    switch (value) {
-      case "today":
-        startDate = new Date(now.setHours(0, 0, 0, 0));
-        break;
-      case "sevenDays":
-        startDate = new Date();
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case "fifteenDays":
-        startDate = new Date();
-        startDate.setDate(now.getDate() - 15);
-        break;
-      case "thirtyDays":
-        startDate = new Date();
-        startDate.setDate(now.getDate() - 30);
-        break;
-      case "sixtyDays":
-        startDate = new Date();
-        startDate.setDate(now.getDate() - 60);
-        break;
-      case "custom":
-        // Handle custom date selection based on user input
-        console.log("Custom date range selected");
-        return;
-      default:
-        throw new Error("Invalid date range selection");
-    }
-
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(23, 59, 59, 999);
-
-    console.log("Start Date:", formatDate(startDate), "End Date:", formatDate(endDate));
-    fetchCallListData(startDate.toISOString(), endDate.toISOString());
+    console.log("Start Date:", startDate, "End Date:", endDate);
+    fetchCallListData(startDate, endDate);
   };
 
 
-useEffect(() => {
-  const now = new Date();
-  const startDate = new Date(now);
-  startDate.setDate(now.getDate() - 1);
+  useEffect(() => {
+    const now = new Date();
+    const startDate = new Date(now);
+    startDate.setDate(now.getDate() - 1);
 
 
-  fetchCallListData(startDate.toISOString(), now.toISOString());
-  fetchLocationList();
-}, []);
-  
+    fetchCallListData(startDate.toISOString(), now.toISOString());
+    fetchLocationList();
+  }, []);
+
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
@@ -159,7 +124,7 @@ useEffect(() => {
           </div>
           <div className='flex gap-2'>
             <div>
-              <DateRangeSelect callBack={(value) => handleDateRangeChange(value)} />
+              <DateRangeSelect callBack={(startDate, endDate) => handleDateRangeChange(startDate, endDate)} />
             </div>
           </div>
         </div>
