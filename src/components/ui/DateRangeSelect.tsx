@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Select from "./Select";
-import formatDate from "@/utils/formatDate";
 
 export default function DateRangeSelect({ callBack }: { callBack: (startTime: string, endTime: string) => void }) {
   const [dateRange, setDateRange] = useState<"today" | "sevenDays" | "fifteenDays" | "thirtyDays" | "sixtyDays" | "custom">("today");
