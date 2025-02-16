@@ -92,7 +92,7 @@ export default function Users() {
       </div>
       <table className="bg-background w-full">
         <thead className="bg-foreground">
-          <tr>
+          <tr className="text-xs">
             <th className="py-2 px-4 text-left border-b border-b-border">User</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Away Duration</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Available Duration</th>
@@ -106,7 +106,7 @@ export default function Users() {
           filteredUserList.filter(call => call.Role !== "Guest").length !== 0 ? (
             <tbody>
               {filteredUserList.filter(call => call.Role !== "Guest").map((row, index) => (
-                <tr key={row.UserName} className={`${index !== filteredUserList.filter(call => call.Role !== "Guest").length - 1 ? 'border-b border-b-border' : ''}`}>
+                <tr key={row.UserName} className={`text-sm ${index !== filteredUserList.filter(call => call.Role !== "Guest").length - 1 ? 'border-b border-b-border' : ''}`}>
                   <td className="py-2 px-4 font-medium">{row.UserName}</td>
                   <td className="py-2 px-4">
                     <div className="px-4 rounded-md font-medium bg-highlight w-fit">
@@ -135,7 +135,7 @@ export default function Users() {
             <tbody>
               <tr>
                 <td className="w-full py-2 px-4 text-center" colSpan={7}>
-                  <h1 className="font-bold text-lg">No Data</h1>
+                  <h1 className="font-bold text-sm">No Data</h1>
                 </td>
               </tr>
             </tbody>

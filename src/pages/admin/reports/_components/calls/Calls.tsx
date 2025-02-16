@@ -92,9 +92,9 @@ export default function Calls() {
           <Button color="foreground" icon={<FileDown className='w-5' />} text='Export' onClick={handleExportData} />
         </div>
       </div>
-      <table className="bg-background w-full">
+      <table className="bg-background w-full h-full">
         <thead className="bg-foreground">
-          <tr>
+          <tr className="text-xs">
             <th className="py-2 px-4 text-left border-b border-b-border">Location</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Check-Ins</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Missed</th>
@@ -113,7 +113,7 @@ export default function Calls() {
           filteredCallData.length !== 0 ? (
             <tbody>
               {filteredCallData.map((row, index) => (
-                <tr key={row.CallPlacedByLocationID} className={`${index !== filteredCallData.length - 1 ? 'border-b border-b-border' : ''}`}>
+                <tr key={row.CallPlacedByLocationID} className={`text-sm ${index !== filteredCallData.length - 1 ? 'border-b border-b-border' : ''}`}>
                   <td className="py-2 px-4 font-medium">{row.LocationName}</td>
                   <td className="py-2 px-4">
                     {row.TotalCalls}
@@ -153,7 +153,7 @@ export default function Calls() {
             <tbody>
               <tr>
                 <td className="w-full py-2 px-4 text-center" colSpan={12}>
-                  <h1 className="font-bold text-lg">No Data</h1>
+                  <h1 className="font-bold text-sm">No Data</h1>
                 </td>
               </tr>
             </tbody>
