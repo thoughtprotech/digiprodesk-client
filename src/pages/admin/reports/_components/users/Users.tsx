@@ -7,52 +7,20 @@ import toast from "react-hot-toast";
 import Button from "@/components/ui/Button";
 import { FileDown } from "lucide-react";
 import exportToExcel from "@/utils/exportToExcel";
+import DateRangeSelect from "@/components/ui/DateRangeSelect";
+import formatDuration from "@/utils/formatSeconds";
 
 interface UserReport {
   UserName: string;
   DisplayName: string;
   Role: string;
-  Region: string;
-  Language: string;
-  IsActive: string;
-  TotalAwayDuration: string;
   TotalAvailableDuration: string;
+  TotalAwayDuration: string;
+  TotalCalls: number;
+  TotalCallDurationSeconds: number;
+  AverageCallDurationSeconds: number;
+  NumberOfCallsTransferred: number;
   LatestStatus: 'Logged In' | 'Available' | 'Away' | 'Logged Out' | 'Session Terminated' | 'InCall' | 'Ready' | 'No Logs';
-}
-
-const statusMapping = {
-  'Logged In': {
-    color: 'bg-green-500/30',
-    text: 'text-green-500'
-  },
-  'Available': {
-    color: 'bg-green-500/30',
-    text: 'text-green-500'
-  },
-  'Away': {
-    color: 'bg-yellow-500/30',
-    text: 'text-yellow-500'
-  },
-  'Logged Out': {
-    color: 'bg-red-500/30',
-    text: 'text-red-500'
-  },
-  'Session Terminated': {
-    color: 'bg-red-500/30',
-    text: 'text-red-500'
-  },
-  'InCall': {
-    color: 'bg-blue-500/30',
-    text: 'text-blue-500'
-  },
-  'Ready': {
-    color: 'bg-green-500/30',
-    text: 'text-green-500'
-  },
-  'No Logs': {
-    color: 'bg-gray-500/30',
-    text: 'text-gray-500'
-  }
 }
 
 export default function Users() {
@@ -65,12 +33,18 @@ export default function Users() {
     setFilteredUserList(filteredUserList)
   }
 
-  const fetchUserListData = async () => {
+  const fetchUserListData = async (startDate?: string, endDate?: string) => {
     const cookies = parseCookies();
     const { userToken } = cookies;
+    let queryParams = '';
+
+    if (startDate && endDate) {
+      // Construct query parameters if startDate and endDate are provided
+      queryParams = `?startDate=${startDate}&endDate=${endDate}`;
+    }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users${queryParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application',
@@ -95,15 +69,22 @@ export default function Users() {
     exportToExcel(filteredUserList, `users-${new Date().toISOString()}.xlsx`);
   };
 
+  const handleDateRangeChange = (startDate: string, endDate: string) => {
+
+    console.log("Start Date:", startDate, "End Date:", endDate);
+    fetchUserListData(startDate, endDate);
+  };
+
   useEffect(() => {
     fetchUserListData();
   }, [])
 
   return (
-    <div className='w-full h-full flex flex-col gap-2 bg-background p-2'>
+    <div className='w-full h-full flex flex-col gap-2 bg-background p-2 rounded-md'>
       <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
         <div className='w-64 flex gap-1'>
           <SearchInput placeholder='Users' onChange={filterUserList} />
+          <DateRangeSelect callBack={(startDate, endDate) => handleDateRangeChange(startDate, endDate)} />
         </div>
         <div>
           <Button color="foreground" icon={<FileDown className='w-5' />} text='Export' onClick={handleExportData} />
@@ -113,50 +94,39 @@ export default function Users() {
         <thead className="bg-foreground">
           <tr>
             <th className="py-2 px-4 text-left border-b border-b-border">User</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Role</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Status</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Away Duration</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Available Duration</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Total Calls</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Total Call Duration</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Average Call Duration</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Calls Transferred</th>
           </tr>
         </thead>
         {
           filteredUserList.filter(call => call.Role !== "Guest").length !== 0 ? (
             <tbody>
-              {filteredUserList.filter(call => call.Role !== "Guest").map((row) => (
-                <tr key={row.UserName} className="">
-                  <td className="w-1/5 py-2 px-4 border-b border-b-border font-medium">{row.UserName}</td>
-                  <td className="w-1/5 py-2 px-4 border-b border-b-border font-medium">{row.Role}</td>
-                  <td className={`w-1/5 py-2 px-4 border-b border-b-border font-medium`}>
-                    <div className={`w-fit px-4 rounded-md ${statusMapping[row.LatestStatus]?.color}`}>
-                      {row.LatestStatus === 'No Logs' ? (
-                        <h1 className={`${statusMapping[row.LatestStatus]?.text} font-medium`}>
-                          --
-                        </h1>
-                      ) : row.LatestStatus === "Session Terminated" ? (
-                        <h1 className={`${statusMapping[row.LatestStatus]?.text} font-medium`}>
-                          Logged Out
-                        </h1>
-                      ) : row.LatestStatus === "Ready" || row.LatestStatus === "Logged In" ? (
-                        <h1 className={`${statusMapping[row.LatestStatus]?.text} font-medium`}>
-                          Available
-                        </h1>
-                      ) : (
-                        <h1 className={`${statusMapping[row.LatestStatus]?.text} font-medium`}>
-                          {row?.LatestStatus}
-                        </h1>
-                      )
-                      }
-                    </div>
-                  </td>
-                  <td className="w-1/5 py-2 px-4 border-b border-b-border">
+              {filteredUserList.filter(call => call.Role !== "Guest").map((row, index) => (
+                <tr key={row.UserName} className={`${index !== filteredUserList.filter(call => call.Role !== "Guest").length - 1 ? 'border-b border-b-border' : ''}`}>
+                  <td className="py-2 px-4 font-medium">{row.UserName}</td>
+                  <td className="py-2 px-4">
                     <div className="px-4 rounded-md font-medium bg-highlight w-fit">
                       {row.TotalAwayDuration}
                     </div>
                   </td>
-                  <td className={`w-1/5 py-2 px-4 border-b border-b-border`}>
+                  <td className={`py-2 px-4`}>
                     <div className="px-4 rounded-md font-medium bg-highlight w-fit">
                       {row.TotalAvailableDuration}
                     </div>
+                  </td>
+                  <td className="py-2 px-4 font-medium">{row.TotalCalls}</td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {formatDuration(row.TotalCallDurationSeconds)}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {formatDuration(row.AverageCallDurationSeconds)}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.NumberOfCallsTransferred}
                   </td>
                 </tr>
               ))}
@@ -164,7 +134,7 @@ export default function Users() {
           ) : (
             <tbody>
               <tr>
-                <td className="w-full py-2 px-4 border-b border-b-border text-center" colSpan={5}>
+                <td className="w-full py-2 px-4 text-center" colSpan={7}>
                   <h1 className="font-bold text-lg">No Data</h1>
                 </td>
               </tr>

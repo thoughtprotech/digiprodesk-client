@@ -59,7 +59,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
           <div className="w-20 flex gap-2">
             {action && (
               <Button
-                text="Attend"
+                text="Connect"
                 color="green"
                 onClick={() => {
                   action();

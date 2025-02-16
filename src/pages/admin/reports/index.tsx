@@ -1,13 +1,11 @@
 import Layout from '@/components/Layout'
 import Tabs from '@/components/ui/Tabs';
-import Locations from './_components/locations/Locations';
 import Calls from './_components/calls/Calls';
 import Users from './_components/users/Users';
 
 export default function Index() {
   const tabData = [
-    { label: "Locations", content: <Locations /> },
-    { label: "Calls", content: <Calls /> },
+    { label: "Check ins", content: <Calls /> },
     { label: "Users", content: <Users /> },
   ];
 
