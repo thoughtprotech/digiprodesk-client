@@ -220,27 +220,26 @@ export default function Index() {
                 urls: "stun:stun.relay.metered.ca:80",
               },
               {
-                urls: "turn:global.relay.metered.ca:80",
+                urls: "turn:asia.relay.metered.ca:80",
                 username: "2efd6dd190df5a17a144cea9",
                 credential: "rIpY3l4NPm14F+Nf",
               },
               {
-                urls: "turn:global.relay.metered.ca:80?transport=tcp",
+                urls: "turn:asia.relay.metered.ca:80?transport=tcp",
                 username: "2efd6dd190df5a17a144cea9",
                 credential: "rIpY3l4NPm14F+Nf",
               },
               {
-                urls: "turn:global.relay.metered.ca:443",
+                urls: "turn:asia.relay.metered.ca:443",
                 username: "2efd6dd190df5a17a144cea9",
                 credential: "rIpY3l4NPm14F+Nf",
               },
               {
-                urls: "turns:global.relay.metered.ca:443?transport=tcp",
+                urls: "turns:asia.relay.metered.ca:443?transport=tcp",
                 username: "2efd6dd190df5a17a144cea9",
                 credential: "rIpY3l4NPm14F+Nf",
               },
             ],
-
           }
         });
 
