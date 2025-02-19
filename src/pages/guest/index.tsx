@@ -312,27 +312,9 @@ export default function Index() {
         config: {
           iceServers: [
             {
-              urls: "stun:stun.relay.metered.ca:80",
-            },
-            {
-              urls: "turn:asia.relay.metered.ca:80",
-              username: "2efd6dd190df5a17a144cea9",
-              credential: "rIpY3l4NPm14F+Nf",
-            },
-            {
-              urls: "turn:asia.relay.metered.ca:80?transport=tcp",
-              username: "2efd6dd190df5a17a144cea9",
-              credential: "rIpY3l4NPm14F+Nf",
-            },
-            {
-              urls: "turn:asia.relay.metered.ca:443",
-              username: "2efd6dd190df5a17a144cea9",
-              credential: "rIpY3l4NPm14F+Nf",
-            },
-            {
-              urls: "turns:asia.relay.metered.ca:443?transport=tcp",
-              username: "2efd6dd190df5a17a144cea9",
-              credential: "rIpY3l4NPm14F+Nf",
+              urls: process.env.NEXT_PUBLIC_TURN_SERVER_URL,
+              username: process.env.NEXT_PUBLIC_TURN_SERVER_USERNAME,
+              credential: process.env.NEXT_PUBLIC_TURN_SERVER_CREDENTIAL,
             },
           ],
         }
