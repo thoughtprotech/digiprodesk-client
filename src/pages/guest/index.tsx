@@ -58,7 +58,7 @@ export default function Index() {
   const call = (remotePeerId: string) => {
     console.log("Calling peer with ID: ", remotePeerId);
     // Use modern getUserMedia method
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    navigator?.mediaDevices?.getUserMedia({ video: true, audio: true })
       .then((mediaStream: MediaStream) => {
         if (currentUserVideoRef.current) {
           currentUserVideoRef.current.srcObject = mediaStream;

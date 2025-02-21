@@ -231,7 +231,7 @@ export default function Index() {
 
         peer.on('call', (call: MediaConnection) => {
           console.log({ call });
-          navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+          navigator?.mediaDevices?.getUserMedia({ video: true, audio: true })
             .then((mediaStream: MediaStream) => {
               if (currentUserVideoRef.current) {
                 currentUserVideoRef.current.srcObject = mediaStream;
