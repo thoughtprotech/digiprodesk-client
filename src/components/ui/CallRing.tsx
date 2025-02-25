@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect, useCallback } from "react";
 import Button from "./Button";
-import { Call } from "@/utils/types";
+import { CallQueue } from "@/utils/types";
 
 interface CallRingProps {
-  incomingCall: Call;
+  incomingCall: CallQueue;
   onClose: () => void;
   action?: () => void;
 }
@@ -82,9 +82,9 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
 };
 
 export const useCallRing = () => {
-  const [callRing, setCallRing] = useState<{ incomingCall: Call; action?: () => void } | null>(null);
+  const [callRing, setCallRing] = useState<{ incomingCall: CallQueue; action?: () => void } | null>(null);
 
-  const showCallRing = useCallback((incomingCall: Call, action?: () => void) => {
+  const showCallRing = useCallback((incomingCall: CallQueue, action?: () => void) => {
     setCallRing({ incomingCall, action });
   }, []);
 

@@ -189,3 +189,31 @@ export interface CallLog {
   CallTimeStamp: Date;
   EndTime: Date;
 }
+
+export interface CallQueue {
+  ID?: string;
+  CallID: string;
+  CallType?: "New" | "Escalated" | "On Hold";
+  Status?:
+    | "Active"
+    | "In Progress"
+    | "On Hold"
+    | "Completed"
+    | "Error"
+    | "Terminated";
+  AssignedTime?: string;
+  LastUpdatedTime?: string;
+  AssignedToUserName?: string | null;
+  CallPlacedByUserName?: string;
+  CallStartDateTime?: string;
+  CallStatus?:
+    | "New"
+    | "In Progress"
+    | "On Hold"
+    | "Completed"
+    | "Cancelled"
+    | "Purged"
+    | "Missed"
+    | "Error";
+  CallPlacedByLocation: Location | null;
+}

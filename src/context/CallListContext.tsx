@@ -1,11 +1,11 @@
-import { Call } from '@/utils/types';
+import { CallQueue } from '@/utils/types';
 import { createContext, useState } from 'react';
 
 interface CallListContextProps {
-  callList: Call[];
-  setCallList: (callList: Call[]) => void;
-  callToPickUp: Call | null;
-  setCallToPickUp: (call: Call | null) => void;
+  callList: CallQueue[];
+  setCallList: (callList: CallQueue[]) => void;
+  callToPickUp: CallQueue | null;
+  setCallToPickUp: (call: CallQueue | null) => void;
 }
 
 export const CallListContext = createContext<CallListContextProps>({
@@ -16,8 +16,8 @@ export const CallListContext = createContext<CallListContextProps>({
 });
 
 export const CallListProvider = ({ children }: { children: React.ReactNode }) => {
-  const [callList, setCallList] = useState<Call[]>([]);
-  const [callToPickUp, setCallToPickUp] = useState<Call | null>(null);
+  const [callList, setCallList] = useState<CallQueue[]>([]);
+  const [callToPickUp, setCallToPickUp] = useState<CallQueue | null>(null);
 
   return (
     <CallListContext.Provider value={{ callList, setCallList, callToPickUp, setCallToPickUp }}>

@@ -370,7 +370,7 @@ export default function Index() {
 
   const filteredData = callList.filter((card) => {
     if (filter === "all") return true;
-    return card.CallStatus === filter;
+    return card.CallType === filter;
   });
 
   const handleScreenshot = (image: string) => {
@@ -452,7 +452,7 @@ export default function Index() {
       roomId
     });
     const call = callList.find((call) => call.CallID === roomId);
-    if (call?.CallStatus === "New") {
+    if (call?.CallType === "New") {
       joinCall(roomId)
     } else {
       resumeCall(roomId);
@@ -478,7 +478,7 @@ export default function Index() {
       roomId
     });
     const call = callList.find((call) => call.CallID === roomId);
-    if (call?.CallStatus === "New") {
+    if (call?.CallType === "New") {
       joinCall(roomId)
     } else {
       resumeCall(roomId);
@@ -572,7 +572,7 @@ export default function Index() {
                       <Phone className="w-5 h-5 text-sky-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold" || call.CallStatus === "New").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold" || call.CallType === "New").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">CHECK INS</h1>
                     </div>
                   </div>
@@ -586,7 +586,7 @@ export default function Index() {
                       <Pause className="w-5 h-5 text-indigo-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">ON HOLD</h1>
                     </div>
                   </div>
@@ -600,7 +600,7 @@ export default function Index() {
                       <PhoneIncoming className="w-5 h-5 text-orange-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "New").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "New").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">INCOMING</h1>
                     </div>
                   </div>
@@ -613,8 +613,8 @@ export default function Index() {
                   {filter === "all" && (
                     <>
                       {(() => {
-                        const incomingCalls = callList.filter((card) => card.CallStatus === "New");
-                        const holdCalls = callList.filter((card) => card.CallStatus === "On Hold");
+                        const incomingCalls = callList.filter((card) => card.CallType === "New");
+                        const holdCalls = callList.filter((card) => card.CallType === "On Hold");
 
                         const interleavedCalls: typeof callList = [];
                         const maxLength = Math.max(incomingCalls.length, holdCalls.length);
@@ -629,7 +629,7 @@ export default function Index() {
                             <CallingCard
                               key={index}
                               title={card.CallPlacedByUserName || ""}
-                              status={card.CallStatus || ""}
+                              status={card.CallType || ""}
                               inCall={inCall}
                               setInCall={setInCall}
                               setConfirmEndCall={setConfirmEndCall}
@@ -653,7 +653,7 @@ export default function Index() {
                         <CallingCard
                           key={index}
                           title={card.CallPlacedByUserName || ""}
-                          status={card.CallStatus || ""}
+                          status={card.CallType || ""}
                           inCall={inCall}
                           setInCall={setInCall}
                           setConfirmEndCall={setConfirmEndCall}
@@ -789,7 +789,7 @@ export default function Index() {
                     handleFilterChange("all");
                   }}>
                     <Phone className="w-5 h-5 text-sky-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold" || call.CallStatus === "New").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold" || call.CallType === "New").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="On Hold" position="left">
@@ -798,7 +798,7 @@ export default function Index() {
                     handleFilterChange("On Hold");
                   }}>
                     <Pause className="w-5 h-5 text-indigo-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="Incoming" position="left">
@@ -807,7 +807,7 @@ export default function Index() {
                     handleFilterChange("incoming");
                   }}>
                     <PhoneIncoming className="w-5 h-5 text-orange-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "New").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "New").length}</h1>
                   </div>
                 </Tooltip>
               </div>
