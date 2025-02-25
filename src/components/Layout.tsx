@@ -306,15 +306,16 @@ export default function Index({
         socket.emit("get-call-list");
         socket.on("call-list-update", (data: CallQueue[]) => {
           // Identify new "pending" calls
+          console.log({ "CALL QUEUE": data });
           const newPendingCalls = data.filter(
             (call) =>
-              call.Status === "Active" && call.CallPlacedByUserName !== userId && call.AssignedToUserName === userId
+              call.CallStatus === "New" && call.CallPlacedByUserName !== userId && call.AssignedToUserName === userId
               && !callList.some((existingCall) => existingCall.CallID === call.CallID)
           );
 
           // Log or handle the new pending calls if needed
           console.log("ROUTER", router);
-          console.log({ data });
+          console.log({ "CALL LIST": data });
 
           if (newPendingCalls.length > 0 && router.query.from !== "push") {
             newPendingCalls.map((call) => {
@@ -325,10 +326,8 @@ export default function Index({
             })
           }
 
-          console.log({ data });
-
           // Update the call list state
-          setCallList(data.filter((call) => call.AssignedToUserName === userId && call.Status !== "Active" && call.CallPlacedByUserName !== userId));
+          setCallList(data.filter((call) => call.AssignedToUserName === userId && call.CallPlacedByUserName !== userId));
         });
       }
     } catch {

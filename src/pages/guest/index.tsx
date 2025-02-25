@@ -25,7 +25,9 @@ export default function Index() {
   const mediaConnectionRef = useRef<MediaConnection | null>(null); // Ref to store the current call
   const currentRoomId = useRef<string>('');
   const [inCall, setInCall] = useState<boolean>(false);
-  const [callStatus, setCallStatus] = useState<string>('notInCall');
+  const [callStatus, setCallStatus] = useState<
+    "notInCall" | "calling" | "inProgress" | "onHold" | "transferred"
+  >('notInCall');
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
@@ -343,6 +345,12 @@ export default function Index() {
         }
       });
 
+      socket.on("call-transferred", (data) => {
+        if (data.CallID === currentRoomId.current) {
+          setCallStatus("transferred");
+        }
+      });
+
       socket.on("call-resumed", (data) => {
         if (data.CallID === currentRoomId.current) {
           call(data.CallAssignedTo);
@@ -562,6 +570,13 @@ export default function Index() {
           callStatus === 'onHold' && (
             <div className="w-full h-full flex items-center justify-center">
               <h1 className="font-bold text-xl">Call On Hold, Thank you for your patience. We&apos;ll be with you shortly.</h1>
+            </div>
+          )
+        }
+        {
+          callStatus === 'transferred' && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl">Your Call Is Being Transferred, Thank you for your patience. We&apos;ll be with you shortly.</h1>
             </div>
           )
         }

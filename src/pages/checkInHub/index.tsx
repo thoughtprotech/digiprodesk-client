@@ -63,9 +63,39 @@ export default function Index() {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [managerList, setManagerList] = useState<{
+    UserName: string;
+    Displayname: string;
+  }[]>([]);
+  const [selectedManager, setSelectedManager] = useState<string>("");
   const [transferCallModal, setTransferCallModal] = useState(false);
 
   const { callId: guestCallId } = useContext(CallContext);
+
+  const fetchManagerList = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+      const decoded = jwt.decode(userToken);
+      const { userName } = decoded as { userName: string };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/locationMangers/${userName}`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setManagerList(data);
+        console.log("MANAGER LIST", data)
+      } else {
+        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching Manager List" />));
+      }
+    } catch {
+      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching Manager List" />));
+    }
+  }
 
   const updateCallInfo = async (roomId: string, bookingId: string, notes: string, documents?: string[]) => {
     try {
@@ -179,6 +209,10 @@ export default function Index() {
     }
   }
 
+  const transferCall = (roomId: string, locationManager: string) => {
+    socket.emit("transfer-call", JSON.stringify({ roomId, locationManager }));
+  }
+
   const holdCall = (roomId: string) => {
     socket.emit("hold-call", JSON.stringify({ roomId }));
 
@@ -209,6 +243,18 @@ export default function Index() {
     const { userName } = decoded as { userName: string };
     setUserId(userName);
   }, []);
+
+  useEffect(() => {
+    fetchManagerList();
+  }, [userId]);
+
+  useEffect(() => {
+    console.log({ managerList })
+  }, [managerList]);
+
+  useEffect(() => {
+    console.log({ callList });
+  }, [callList]);
 
   useEffect(() => {
     try {
@@ -370,7 +416,7 @@ export default function Index() {
 
   const filteredData = callList.filter((card) => {
     if (filter === "all") return true;
-    return card.CallType === filter;
+    return card.CallStatus === filter;
   });
 
   const handleScreenshot = (image: string) => {
@@ -420,6 +466,35 @@ export default function Index() {
     return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Ended" />));
   }
 
+  const handleCallTransferCallback = (locationManager: string) => {
+    if (mediaConnectionRef.current) {
+      mediaConnectionRef.current.close();
+      mediaConnectionRef.current = null;
+    }
+    if (currentUserVideoRef.current) {
+      currentUserVideoRef.current.srcObject = null;
+    }
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop(); // Stop recording
+      mediaRecorderRef.current = null;
+    }
+
+    setScreenshotImage([]);
+    setTakeScreenshot(false);
+    setBookingId("");
+    setCallNotes("");
+    setInCall({
+      status: false,
+      callId: "",
+      roomId: ""
+    });
+    setMicMuted(false);
+    setCameraOff(false);
+    transferCall(inCall.roomId, locationManager);
+    setTransferCallModal(false);
+    return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Transferred" />));
+  }
+
   const handleCallHold = () => {
     setScreenshotImage([]);
     setTakeScreenshot(false);
@@ -452,7 +527,7 @@ export default function Index() {
       roomId
     });
     const call = callList.find((call) => call.CallID === roomId);
-    if (call?.CallType === "New") {
+    if (call?.CallStatus === "New") {
       joinCall(roomId)
     } else {
       resumeCall(roomId);
@@ -478,7 +553,7 @@ export default function Index() {
       roomId
     });
     const call = callList.find((call) => call.CallID === roomId);
-    if (call?.CallType === "New") {
+    if (call?.CallStatus === "New") {
       joinCall(roomId)
     } else {
       resumeCall(roomId);
@@ -491,9 +566,9 @@ export default function Index() {
     setTransferCallModal(true);
   }
 
-  const handleTransferCall = async (callId: string) => {
-    console.log({ callId });
-  }
+  // const handleTransferCall = async (callId: string) => {
+  //   console.log({ callId });
+  // }
 
   return (
     <Layout headerTitle={
@@ -572,7 +647,7 @@ export default function Index() {
                       <Phone className="w-5 h-5 text-sky-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold" || call.CallType === "New").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold" || call.CallStatus === "New").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">CHECK INS</h1>
                     </div>
                   </div>
@@ -586,7 +661,7 @@ export default function Index() {
                       <Pause className="w-5 h-5 text-indigo-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">ON HOLD</h1>
                     </div>
                   </div>
@@ -600,7 +675,7 @@ export default function Index() {
                       <PhoneIncoming className="w-5 h-5 text-orange-500" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "New").length}</h1>
+                      <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "New").length}</h1>
                       <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">INCOMING</h1>
                     </div>
                   </div>
@@ -610,11 +685,11 @@ export default function Index() {
                 {/* Grid Section */}
                 <div className={`w-full h-full pb-2 grid grid-cols-2 gap-2 auto-rows-min overflow-x-hidden`}>
                   {/* Show Incoming and On Hold Calls in 2 columns when filter is "all" */}
-                  {filter === "all" && (
+                  {filter === "all" && callList.length !== 0 && (
                     <>
                       {(() => {
-                        const incomingCalls = callList.filter((card) => card.CallType === "New");
-                        const holdCalls = callList.filter((card) => card.CallType === "On Hold");
+                        const incomingCalls = callList.filter((card) => card.CallStatus === "New");
+                        const holdCalls = callList.filter((card) => card.CallStatus === "On Hold");
 
                         const interleavedCalls: typeof callList = [];
                         const maxLength = Math.max(incomingCalls.length, holdCalls.length);
@@ -629,7 +704,7 @@ export default function Index() {
                             <CallingCard
                               key={index}
                               title={card.CallPlacedByUserName || ""}
-                              status={card.CallType || ""}
+                              status={card.CallStatus || ""}
                               inCall={inCall}
                               setInCall={setInCall}
                               setConfirmEndCall={setConfirmEndCall}
@@ -647,13 +722,13 @@ export default function Index() {
                     </>
                   )}
 
-                  {filter !== "all" && (
+                  {filter !== "all" && callList.length !== 0 && (
                     filteredData.length > 0 ? (
                       filteredData.map((card, index) => (
                         <CallingCard
                           key={index}
                           title={card.CallPlacedByUserName || ""}
-                          status={card.CallType || ""}
+                          status={card.CallStatus || ""}
                           inCall={inCall}
                           setInCall={setInCall}
                           setConfirmEndCall={setConfirmEndCall}
@@ -789,7 +864,7 @@ export default function Index() {
                     handleFilterChange("all");
                   }}>
                     <Phone className="w-5 h-5 text-sky-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold" || call.CallType === "New").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold" || call.CallStatus === "New").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="On Hold" position="left">
@@ -798,7 +873,7 @@ export default function Index() {
                     handleFilterChange("On Hold");
                   }}>
                     <Pause className="w-5 h-5 text-indigo-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "On Hold").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "On Hold").length}</h1>
                   </div>
                 </Tooltip>
                 <Tooltip tooltip="Incoming" position="left">
@@ -807,7 +882,7 @@ export default function Index() {
                     handleFilterChange("incoming");
                   }}>
                     <PhoneIncoming className="w-5 h-5 text-orange-500" />
-                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallType === "New").length}</h1>
+                    <h1 className="font-bold text-xl">{callList.filter(call => call.CallStatus === "New").length}</h1>
                   </div>
                 </Tooltip>
               </div>
@@ -841,24 +916,13 @@ export default function Index() {
                   </div>
                   <div>
                     <Select
-                      options={[
-                        {
-                          label: "Manager 1",
-                          value: "manager1"
-                        }, {
-                          label: "Manager 2",
-                          value: "manager2"
-                        }, {
-                          label: "Manager 3",
-                          value: "manager3"
-                        }
-                      ]}
+                      options={managerList.map(manager => ({ value: manager.UserName, label: manager.Displayname }))}
                       placeholder="Select Manager"
-                      onChange={(selectedOption) => console.log(selectedOption)}
+                      onChange={(selectedOption) => setSelectedManager(selectedOption.target.value)}
                     />
                   </div>
                   <div className="w-full flex justify-between gap-2 border-t-2 border-t-border pt-4 mt-2">
-                    <Button text="Transfer" color="cyan" icon={<PhoneOutgoing className="w-6 h-6" />} onClick={() => handleTransferCall(confirmEndCall.callId)} />
+                    <Button text="Transfer" color="cyan" icon={<PhoneOutgoing className="w-6 h-6" />} onClick={() => handleCallTransferCallback(selectedManager)} />
                     <Button text="Cancel" color="foreground" onClick={() => setTransferCallModal(false)} />
                   </div>
                 </div>

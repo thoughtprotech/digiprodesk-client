@@ -25,7 +25,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
   const FallbackImage = () => (
     <div className="w-16 h-16 bg-text flex items-center justify-center rounded-full">
       <h1 className="text-textAlt text-4xl font-bold">
-        {incomingCall?.CallPlacedByLocation?.LocationName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+        {incomingCall?.CallPlacedByLocation?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
       </h1>
     </div>
   );
@@ -53,7 +53,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
               )}
             </div>
             <div>
-              <h1 className="text-center text-text text-2xl font-semibold">{incomingCall?.CallPlacedByLocation?.LocationName}</h1>
+              <h1 className="text-center text-text text-2xl font-semibold">{incomingCall?.CallPlacedByLocation}</h1>
             </div>
           </div>
           <div className="w-20 flex gap-2">

@@ -215,5 +215,5 @@ export interface CallQueue {
     | "Purged"
     | "Missed"
     | "Error";
-  CallPlacedByLocation: Location | null;
+  CallPlacedByLocation: string;
 }
