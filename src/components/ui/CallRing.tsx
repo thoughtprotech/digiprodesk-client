@@ -1,10 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 import { useState, useEffect, useCallback } from "react";
 import Button from "./Button";
-import { Call } from "@/utils/types";
+import { CallQueue } from "@/utils/types";
 
 interface CallRingProps {
-  incomingCall: Call;
+  incomingCall: CallQueue;
   onClose: () => void;
   action?: () => void;
 }
@@ -25,7 +25,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
   const FallbackImage = () => (
     <div className="w-16 h-16 bg-text flex items-center justify-center rounded-full">
       <h1 className="text-textAlt text-4xl font-bold">
-        {incomingCall?.CallPlacedByLocation?.LocationName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
+        {incomingCall?.CallPlacedByLocation?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
       </h1>
     </div>
   );
@@ -53,7 +53,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
               )}
             </div>
             <div>
-              <h1 className="text-center text-text text-2xl font-semibold">{incomingCall?.CallPlacedByLocation?.LocationName}</h1>
+              <h1 className="text-center text-text text-2xl font-semibold">{incomingCall?.CallPlacedByLocation}</h1>
             </div>
           </div>
           <div className="w-20 flex gap-2">
@@ -82,9 +82,9 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
 };
 
 export const useCallRing = () => {
-  const [callRing, setCallRing] = useState<{ incomingCall: Call; action?: () => void } | null>(null);
+  const [callRing, setCallRing] = useState<{ incomingCall: CallQueue; action?: () => void } | null>(null);
 
-  const showCallRing = useCallback((incomingCall: Call, action?: () => void) => {
+  const showCallRing = useCallback((incomingCall: CallQueue, action?: () => void) => {
     setCallRing({ incomingCall, action });
   }, []);
 
