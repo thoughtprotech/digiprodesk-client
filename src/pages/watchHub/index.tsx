@@ -113,7 +113,7 @@ export default function Index() {
                 <Button text="Call" color="green" icon={<PhoneOutgoing className="w-5 h-5" />} onClick={handleCallGuest.bind(null, location.LocationID!)} />
               }
             >
-              <WatchCard title={location.LocationName} onClick={handleCallGuest.bind(null, location.LocationID!)} />
+              <WatchCard title={location.LocationName} src={location?.LocationVideoFeed} onClick={handleCallGuest.bind(null, location.LocationID!)} />
             </VideoViewer>
           ))}
         </div>
