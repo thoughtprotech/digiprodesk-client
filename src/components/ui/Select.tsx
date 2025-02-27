@@ -13,20 +13,33 @@ interface CustomSelectProps {
   placeholder?: string;
   name?: string;
   className?: string;
+  disabled?: boolean;
 }
 
-const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, placeholder, name, className }) => {
+const Select: React.FC<CustomSelectProps> = ({
+  options,
+  defaultValue,
+  onChange,
+  placeholder,
+  name,
+  className,
+  disabled = false,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<Option | null>(
     options.find((option) => option.value === defaultValue) || null
   );
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   useOutsideClick({
     ref: dropdownRef,
-    handler: () => setIsOpen(false),
+    handler: () => {
+      if (!disabled) setIsOpen(false);
+    },
   });
 
   const handleOptionClick = (option: Option) => {
+    if (disabled) return;
     setSelectedOption(option);
     setIsOpen(false);
 
@@ -44,22 +57,30 @@ const Select: React.FC<CustomSelectProps> = ({ options, defaultValue, onChange, 
   };
 
   return (
-    <div ref={dropdownRef} className="w-full relative inline-block min-w-44">
+    <div
+      ref={dropdownRef}
+      className={`w-full relative inline-block min-w-44 ${disabled ? "opacity-50 cursor-not-allowed" : ""
+        }`}
+    >
       {/* Selected Option */}
       <div
         className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none cursor-pointer ${className}`}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!disabled) setIsOpen(!isOpen);
+        }}
       >
-        <h1 className={`"font-bold text-textAlt text-sm"`}>
-          {selectedOption ?
+        <h1 className="font-bold text-textAlt text-sm">
+          {selectedOption ? (
             <span className="text-text font-bold text-sm">
               {selectedOption.label}
             </span>
-            : placeholder ?
-              <span className="text-zinc-600 text-sm font-bold">
-                {placeholder}
-              </span>
-              : "Select an Option"}
+          ) : placeholder ? (
+            <span className="text-zinc-600 text-sm font-bold">
+              {placeholder}
+            </span>
+          ) : (
+            "Select an Option"
+          )}
         </h1>
       </div>
 

@@ -116,7 +116,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
         ))
       }
 
-      if (createLocationFormData?.LocationManager === null) {
+      if (createLocationFormData?.LocationType === "Control" && createLocationFormData?.LocationManager === null) {
         return toast.custom((t: any) => (
           <Toast type='warning' content='Select a location manager' t={t} />
         ))
@@ -214,7 +214,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
       ))
     }
 
-    if (selectedLocation?.LocationManager === null) {
+    if (selectedLocation.LocationType === "Control" && selectedLocation?.LocationManager === null) {
       return toast.custom((t: any) => (
         <Toast type='warning' content='Select a location manager' t={t} />
       ))
@@ -475,6 +475,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       }
                       placeholder='Select Location Type'
                       onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationManager: e.target.value })}
+                      disabled={createLocationFormData.LocationType === "Control" ? false : true}
                     />
                   </div>
                 </div>
@@ -539,19 +540,19 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     // required
                     />
                   </div>
-                  {createLocationFormData.LocationType === "Property" &&
-                    (<div className='w-full'>
-                      <h1 className='font-bold text-sm'>
-                        Control
-                      </h1>
-                      <Select
-                        options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
-                        }
-                        placeholder='Assign Control'
-                        onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
-                      />
-                    </div>)}
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Control
+                    </h1>
+                    <Select
+                      options={
+                        locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
+                      }
+                      placeholder='Assign Control'
+                      onChange={(e) => setCreateLocationFormData({ ...createLocationFormData, LocationParentID: Number(e.target.value) })}
+                      disabled={createLocationFormData.LocationType === "Property" ? false : true}
+                    />
+                  </div>
                 </div>
                 <div className="w-full flex justify-between">
                   <div className='w-full flex items-center gap-2'>
@@ -641,6 +642,7 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                       placeholder='Select Location Type'
                       onChange={(e) => setSelectedLocation({ ...selectedLocation, LocationManager: e.target.value })}
                       defaultValue={selectedLocation?.LocationManager ?? undefined}
+                      disabled={selectedLocation.LocationType === "Control" ? false : true}
                     />
                   </div>
                 </div>
@@ -705,20 +707,20 @@ export default function Locations({ locationData, fetchLocationData, fetchLocati
                     // required
                     />
                   </div>
-                  {selectedLocation!.LocationType === "Property" &&
-                    (<div className='w-full'>
-                      <h1 className='font-bold text-sm'>
-                        Control
-                      </h1>
-                      <Select
-                        options={
-                          locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
-                        }
-                        placeholder='Assign Control'
-                        onChange={(e) => setSelectedLocation({ ...selectedLocation!, LocationParentID: Number(e.target.value) })}
-                        defaultValue={selectedLocation?.LocationParentID!.toString()}
-                      />
-                    </div>)}
+                  <div className='w-full'>
+                    <h1 className='font-bold text-sm'>
+                      Control
+                    </h1>
+                    <Select
+                      options={
+                        locationData.filter(location => location.LocationType === "Control").map(location => ({ value: location.LocationID!.toString(), label: location.LocationName }))
+                      }
+                      placeholder='Assign Control'
+                      onChange={(e) => setSelectedLocation({ ...selectedLocation!, LocationParentID: Number(e.target.value) })}
+                      defaultValue={selectedLocation?.LocationParentID!.toString()}
+                      disabled={selectedLocation.LocationType === "Property" ? false : true}
+                    />
+                  </div>
                 </div>
                 <div className="w-full flex justify-between pb-2">
                   <div className='w-full flex gap-2 items-center'>

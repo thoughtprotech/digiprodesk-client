@@ -38,42 +38,54 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
             <h1 className="text-center text-orange-500 uppercase font-bold">Incoming Call</h1>
           </div>
         </div>
-        <div className="w-full flex justify-between gap-4 items-center">
-          <div className="w-full flex items-center gap-2">
-            <div className="w-16 h-16">
-              {imgError ? (
-                <FallbackImage />
-              ) : (
-                <img
-                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/user/${incomingCall?.CallPlacedByUserName}/ProfilePic.png`}
-                  alt="User Profile"
-                  onError={() => setImgError(true)}
-                  className="w-full h-full object-cover rounded-full"
+        <div className="w-full flex flex-col justify-between gap-4 items-center">
+          <div className="w-full flex items-center justify-between">
+            <div className="w-3/5 flex items-center gap-2">
+              <div className="w-16 h-16">
+                {imgError ? (
+                  <FallbackImage />
+                ) : (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}/images/user/${incomingCall?.CallPlacedByUserName}/ProfilePic.png`}
+                    alt="User Profile"
+                    onError={() => setImgError(true)}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                )}
+              </div>
+              <div>
+                <h1 className="text-center text-text text-2xl font-semibold">{incomingCall?.CallPlacedByLocation}</h1>
+              </div>
+            </div>
+            <div className="w-2/5">
+              <img
+                src={`/images/incomingCall.gif`}
+                alt="User Profile"
+                onError={() => setImgError(true)}
+                className="w-32 h-32 object-cover rounded-full"
+              />
+            </div>
+          </div>
+          <div className="w-full flex gap-2">
+            <div className="w-44 flex gap-2">
+              {action && (
+                <Button
+                  text="Connect"
+                  color="green"
+                  onClick={() => {
+                    action();
+                    onClose();
+                  }}
                 />
               )}
             </div>
-            <div>
-              <h1 className="text-center text-text text-2xl font-semibold">{incomingCall?.CallPlacedByLocation}</h1>
-            </div>
-          </div>
-          <div className="w-20 flex gap-2">
-            {action && (
+            <div className="w-44 flex gap-2">
               <Button
-                text="Connect"
-                color="green"
-                onClick={() => {
-                  action();
-                  onClose();
-                }}
+                color="foreground"
+                onClick={onClose}
+                text="Minimize"
               />
-            )}
-          </div>
-          <div className="w-20 flex gap-2">
-            <Button
-              color="foreground"
-              onClick={onClose}
-              text="Minimize"
-            />
+            </div>
           </div>
         </div>
       </div>

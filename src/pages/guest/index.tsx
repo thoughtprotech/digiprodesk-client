@@ -38,6 +38,11 @@ export default function Index() {
   const [user, setUser] = useState<User>();
   const passwordRef = useRef<HTMLInputElement>(null);
   const callRingTone = useRef<HTMLAudioElement | null>(null);
+  const ringTone = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    ringTone.current = new Audio("/sounds/guestRingTone.mp3");
+  }, []);
 
   useEffect(() => {
     callRingTone.current = new Audio("/sounds/guest-call-ringtone.mp3");
@@ -152,6 +157,7 @@ export default function Index() {
     setCallStatus('calling');
     if (socketRef.current) {
       socketRef.current.emit("initiate-call", JSON.stringify({ roomId, LocationID: location?.LocationID }));
+      ringTone?.current?.play();
     }
   };
 
@@ -336,6 +342,10 @@ export default function Index() {
         if (data.CallID === currentRoomId.current) {
           call(data.CallAssignedTo);
           setCallStatus("inProgress");
+          ringTone?.current?.pause();
+          if (ringTone.current) {
+            ringTone.current.currentTime = 0;
+          }
         }
       });
 
