@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
 import Tooltip from "@/components/ui/ToolTip";
 import { Phone, Play } from "lucide-react";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import Button from "@/components/ui/Button";
 import { toTitleCase } from "@/utils/stringFunctions";
+import ElapsedTime from "@/components/ui/ElapsedTime";
 
 export default function CallingCard({
   title,
@@ -15,7 +15,8 @@ export default function CallingCard({
   setConfirmEndCall,
   joinCall,
   resumeCall,
-  roomId
+  roomId,
+  startTime
 }: {
   title: string;
   status: string;
@@ -28,23 +29,8 @@ export default function CallingCard({
   joinCall: (roomId: string) => void;
   resumeCall: (roomId: string) => void;
   roomId: string;
+  startTime: string | undefined;
 }) {
-  const [elapsedTime, setElapsedTime] = useState(0); // Time in seconds
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setElapsedTime((prev) => prev + 1);
-    }, 1000); // Increment every second
-
-    return () => clearInterval(timer); // Cleanup interval on unmount
-  }, []);
-
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
-  };
-
   const handleJoinCall = () => {
     if (inCall.status) {
       return setConfirmEndCall({
@@ -95,9 +81,7 @@ export default function CallingCard({
           </div>
           <div>
             {/* Timer */}
-            <h1 className="w-fit text-[0.65rem] font-bold rounded bg-highlight text-text px-2">
-              {formatTime(elapsedTime)}
-            </h1>
+            <ElapsedTime startTime={startTime!} />
           </div>
         </div>
         <div className="h-fit flex justify-between items-start space-x-3">

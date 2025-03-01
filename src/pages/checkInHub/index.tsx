@@ -711,6 +711,7 @@ export default function Index() {
                               joinCall={joinCall}
                               resumeCall={resumeCall}
                               roomId={card.CallID}
+                              startTime={card.CallStartDateTime}
                             />
                           ))
                         ) : (
@@ -735,6 +736,7 @@ export default function Index() {
                           joinCall={joinCall}
                           resumeCall={resumeCall}
                           roomId={card.CallID}
+                          startTime={card.CallStartDateTime}
                         />
                       ))
                     ) : (
