@@ -47,6 +47,11 @@ const callMapping: {
     text: "Call Ended",
     bg: "bg-red-500/30",
     color: "text-red-500"
+  },
+  Transfer: {
+    text: "Call Transferred",
+    bg: "bg-yellow-500/30",
+    color: "text-yellow-500"
   }
 }
 
