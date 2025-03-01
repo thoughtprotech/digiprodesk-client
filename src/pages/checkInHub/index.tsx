@@ -162,7 +162,7 @@ export default function Index() {
     currentRoomId.current = roomId;
     setInCall({
       status: true,
-      callId: userId!,
+      callId: guestId!,
       roomId: roomId
     });
     if (socket) {
