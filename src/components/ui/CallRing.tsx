@@ -40,7 +40,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
         </div>
         <div className="w-full flex flex-col justify-between gap-4 items-center">
           <div className="w-full flex items-center justify-between">
-            <div className="w-3/5 flex items-center gap-2">
+            <div className="w-3/5 flex flex-col items-start gap-2">
               <div className="w-16 h-16">
                 {imgError ? (
                   <FallbackImage />
@@ -62,7 +62,7 @@ const CallRing: React.FC<CallRingProps> = ({ incomingCall, onClose, action }) =>
                 src={`/images/incomingCall.gif`}
                 alt="User Profile"
                 onError={() => setImgError(true)}
-                className="w-32 h-32 object-cover rounded-full"
+                className="w-28 h-28 object-cover rounded-full"
               />
             </div>
           </div>

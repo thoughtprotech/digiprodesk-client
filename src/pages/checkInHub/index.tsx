@@ -62,6 +62,7 @@ export default function Index() {
   const uploadedChunks = useRef<string[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hostCallingRingTone = useRef<HTMLAudioElement | null>(null);
 
   const [managerList, setManagerList] = useState<{
     UserName: string;
@@ -166,6 +167,12 @@ export default function Index() {
       roomId: roomId
     });
     if (socket) {
+      hostCallingRingTone.current = new Audio("/sounds/guestRingTone.mp3");
+      hostCallingRingTone.current?.play();
+      setTimeout(() => {
+        hostCallingRingTone.current?.pause();
+        hostCallingRingTone!.current!.currentTime = 0;
+      }, 3000);
       socket.emit("call-guest", JSON.stringify({ roomId, LocationID: 1, to: guestId }));
     }
   };
