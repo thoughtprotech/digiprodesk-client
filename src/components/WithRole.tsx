@@ -28,12 +28,11 @@ export default function WithRole({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>();
 
   const fetchUserDetails = async () => {
-    const cookies = parseCookies();
-    const { userToken } = cookies;
-    const decoded = jwt.decode(userToken);
-    const { userName } = decoded as { userName: string };
-
     try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+      const decoded = jwt.decode(userToken);
+      const { userName } = decoded as { userName: string };
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`,
         {
@@ -57,6 +56,7 @@ export default function WithRole({ children }: { children: ReactNode }) {
         ));
       }
     } catch {
+      router.push("/");
       return toast.custom((t: any) => (
         <Toast t={t} type="error" content="Error Fetching User Details" />
       ));
@@ -90,6 +90,7 @@ export default function WithRole({ children }: { children: ReactNode }) {
         ));
       }
     } catch {
+      router.push("/");
       return toast.custom((t: any) => (
         <Toast t={t} type="error" content="Error Fetching Role Details" />
       ));

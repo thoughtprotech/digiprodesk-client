@@ -267,12 +267,11 @@ export default function Index({
   }
 
   useEffect(() => {
-    const cookies = parseCookies();
-    const { userToken } = cookies;
-    const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
-    const { userName } = decoded as { userName: string };
-
     try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+      const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
+      const { userName } = decoded as { userName: string };
       const currentTime = Math.floor(Date.now() / 1000);
       if (decoded.exp < currentTime) {
         toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
