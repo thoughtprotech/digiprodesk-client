@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import DateRangeSelect from '@/components/ui/DateRangeSelect';
 import { Calendar, Clock, User, X } from 'lucide-react';
 import { parseCookies } from 'nookies';
-import React, { ReactNode, use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 type DrawerProps = {
@@ -104,7 +105,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
                             <h1 className='text-xl font-bold'>Call History</h1>
                         </div>
                         <div>
-                            <DateRangeSelect callBack={(startDate, endDate) => fetchCallData(startDate)} />
+                            <DateRangeSelect callBack={(startDate) => fetchCallData(startDate)} />
                         </div>
                     </div>
                     {

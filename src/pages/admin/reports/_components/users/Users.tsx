@@ -8,7 +8,6 @@ import Button from "@/components/ui/Button";
 import { FileDown } from "lucide-react";
 import exportToExcel from "@/utils/exportToExcel";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
-import formatDuration from "@/utils/formatSeconds";
 import Drawer from "./_components/Drawer";
 
 interface UserReport {
