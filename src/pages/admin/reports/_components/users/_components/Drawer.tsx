@@ -43,14 +43,17 @@ interface CallData {
 const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
     const [callData, setCallData] = useState<CallData[]>();
 
-    const fetchCallData = async (startDate?: string) => {
+    const fetchCallData = async (startDate?: string, endDate?: string) => {
         const cookies = parseCookies();
         const { userToken } = cookies;
 
         if (startDate === '' || startDate === undefined) {
             startDate = new Date().toISOString();
         }
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users/${user}?startDate=${startDate}`, {
+        if (endDate === '' || endDate === undefined) {
+            endDate = new Date().toISOString();
+        }
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users/${user}?startDate=${startDate}&endDate=${endDate}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application',

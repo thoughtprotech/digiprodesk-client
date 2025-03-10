@@ -98,6 +98,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
       ))
     }
 
+    if (count === 0) {
+      return toast.custom((t: any) => (
+        <Toast type='warning' content='No Control Assigned To Location Group' t={t} />
+      ))
+    }
+
     const dataToSend = {
       LocationGroupName: createLocationGroupFormData.LocationGroupName,
       IsActive: createLocationGroupFormData.IsActive,
@@ -167,6 +173,12 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
       if (count > 1) {
         return toast.custom((t: any) => (
           <Toast type='warning' content='Only 1 Control Can Be Assigned Per Location Group' t={t} />
+        ))
+      }
+
+      if (count === 0) {
+        return toast.custom((t: any) => (
+          <Toast type='warning' content='No Control Assigned To Location Group' t={t} />
         ))
       }
 
