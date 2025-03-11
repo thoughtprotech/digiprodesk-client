@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import { FileDown } from "lucide-react";
 import exportToExcel from "@/utils/exportToExcel";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
-import formatDuration from "@/utils/formatSeconds";
+import Drawer from "./_components/Drawer";
 
 interface UserReport {
   UserName: string;
@@ -21,11 +21,19 @@ interface UserReport {
   AverageCallDurationSeconds: number;
   NumberOfCallsTransferred: number;
   LatestStatus: 'Logged In' | 'Available' | 'Away' | 'Logged Out' | 'Session Terminated' | 'InCall' | 'Ready' | 'No Logs';
+  NumberOfMissedCalls: number;
+  CallsWithOnHold: number;
+  CallsWithoutOnHold: number;
+  LongestCallDuration: string;
+  ShortestCallDuration: string;
+  TotalHoldDuration: string;
 }
 
 export default function Users() {
   const [userList, setUserList] = useState<UserReport[]>([]);
   const [filteredUserList, setFilteredUserList] = useState<UserReport[]>([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [selectedUserName, setSelectedUserName] = useState('');
 
   const filterUserList = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const searchValue = event.target.value
@@ -75,6 +83,11 @@ export default function Users() {
     fetchUserListData(startDate, endDate);
   };
 
+  const handleDrawerOpen = (user: any) => {
+    setSelectedUserName(user.UserName);
+    setDrawerOpen(true);
+  }
+
   useEffect(() => {
     fetchUserListData();
   }, [])
@@ -100,13 +113,19 @@ export default function Users() {
             <th className="py-2 px-4 text-left border-b border-b-border">Total Call Duration</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Average Call Duration</th>
             <th className="py-2 px-4 text-left border-b border-b-border">Calls Transferred</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Missed Calls</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Calls With On Hold</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Calls Without On Hold</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Longest Call Duration</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Shortest Call Duration</th>
+            <th className="py-2 px-4 text-left border-b border-b-border">Total Hold Duration</th>
           </tr>
         </thead>
         {
           filteredUserList.filter(call => call.Role !== "Guest").length !== 0 ? (
             <tbody>
               {filteredUserList.filter(call => call.Role !== "Guest").map((row, index) => (
-                <tr key={row.UserName} className={`text-sm ${index !== filteredUserList.filter(call => call.Role !== "Guest").length - 1 ? 'border-b border-b-border' : ''}`}>
+                <tr key={row.UserName} className={`text-sm cursor-pointer ${index !== filteredUserList.filter(call => call.Role !== "Guest").length - 1 ? 'border-b border-b-border' : ''}`} onClick={handleDrawerOpen.bind(null, row)}>
                   <td className="py-2 px-4 font-medium">{row.UserName}</td>
                   <td className="py-2 px-4">
                     <div className="px-4 rounded-md font-medium bg-highlight w-fit">
@@ -120,13 +139,31 @@ export default function Users() {
                   </td>
                   <td className="py-2 px-4 font-medium">{row.TotalCalls}</td>
                   <td className={`py-2 px-4 font-medium`}>
-                    {formatDuration(row.TotalCallDurationSeconds)}
+                    {row.TotalCallDurationSeconds}
                   </td>
                   <td className={`py-2 px-4 font-medium`}>
-                    {formatDuration(row.AverageCallDurationSeconds)}
+                    {row.AverageCallDurationSeconds}
                   </td>
                   <td className={`py-2 px-4 font-medium`}>
                     {row.NumberOfCallsTransferred}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.NumberOfMissedCalls}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.CallsWithOnHold}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.CallsWithoutOnHold}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.LongestCallDuration}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.ShortestCallDuration}
+                  </td>
+                  <td className={`py-2 px-4 font-medium`}>
+                    {row.TotalHoldDuration}
                   </td>
                 </tr>
               ))}
@@ -142,6 +179,7 @@ export default function Users() {
           )
         }
       </table>
+      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} user={selectedUserName} />
     </div>
   );
 }

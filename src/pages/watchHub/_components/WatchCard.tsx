@@ -19,7 +19,7 @@ export default function Index({ title, src, onClick }: { title: string; src?: an
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-foreground">
             <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center">
-              <h1 className="font-bold text-5xl text-textAlt">{title.split(' ').slice(0, 2).slice(0, 2).map(word => word[0]).join('').toUpperCase()}</h1>
+              <h1 className="font-bold text-5xl text-textAlt">{title?.split(' ')?.slice(0, 2)?.slice(0, 2)?.map(word => word[0])?.join('')?.toUpperCase()}</h1>
             </div>
           </div>
         )}
