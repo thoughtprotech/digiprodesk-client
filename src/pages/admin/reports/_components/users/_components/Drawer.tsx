@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import Button from "@/components/ui/Button";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
-import { Calendar, Clock, User, X } from "lucide-react";
+import exportToExcel from "@/utils/exportToExcel";
+import { FileDown, X } from "lucide-react";
 import { parseCookies } from "nookies";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -33,7 +35,7 @@ interface LocationInfo {
 
 interface CallData {
   CallStartDateTime: string; // ISO date string
-  CallEndDateTime: string | null;
+  CallEndDateTime: string;
   CallPlacedByUserName: string;
   CallTransferredTo: string;
   CallStatus: string;
@@ -74,6 +76,10 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
     }
   };
 
+  const handleExportData = () => {
+    exportToExcel(callData!, `users-${new Date().toISOString()}.xlsx`);
+  };
+
   useEffect(() => {
     fetchCallData();
     console.log(user);
@@ -93,7 +99,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
 
       {/* Drawer panel */}
       <div
-        className={`fixed z-[999] top-0 right-0 h-full w-1/2 bg-background shadow-lg transform transition-transform duration-300 ${
+        className={`fixed z-[999] top-0 right-0 h-full min-w-[60%] w-fit bg-background shadow-lg transform transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -112,81 +118,103 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
             <div>
               <h1 className="text-xl font-bold">Call History</h1>
             </div>
-            <div>
+            <div className="flex gap-2 items-center">
               <DateRangeSelect
                 callBack={(startDate) => fetchCallData(startDate)}
+              />
+              <Button
+                color="foreground"
+                icon={<FileDown className="w-5" />}
+                text="Export"
+                onClick={handleExportData}
               />
             </div>
           </div>
           {callData?.length !== 0 ? (
-            <div className="w-full h-full flex flex-col gap-2 overflow-y-auto">
-              {callData?.map((call, index) => (
-                <div
-                  key={index}
-                  className="w-full bg-foreground rounded-md p-2 flex flex-col gap-2"
-                >
-                  <div className="w-full flex gap-5">
-                    <div className="flex items-center gap-2">
-                      <h1 className="font-bold text-xl">
-                        {call?.LocationInfo?.LocationName}
-                      </h1>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar className="text-textAlt w-6 h-6" />
-                      <h1 className="font-bold text-textAlt">
-                        {new Date(call?.CallStartDateTime).toLocaleDateString()}
-                      </h1>
-                      <h1 className="font-bold text-textAlt">
-                        {new Date(call?.CallStartDateTime).toLocaleTimeString()}{" "}
-                        -{" "}
-                        {call?.CallEndDateTime
-                          ? new Date(call?.CallEndDateTime).toLocaleTimeString()
-                          : "N/A"}
-                      </h1>
-                    </div>
-                    {/* Show call duration in minutes and seconds */}
-                    <div className="flex items-center gap-2">
-                      <Clock className="text-textAlt w-6 h-6" />
-                      <h1 className="font-bold text-textAlt">
-                        {call?.CallEndDateTime
-                          ? new Date(call?.CallEndDateTime).getMinutes() -
-                            new Date(call?.CallStartDateTime).getMinutes()
-                          : "N/A"}{" "}
-                        m{" "}
-                        {call?.CallEndDateTime
-                          ? new Date(call?.CallEndDateTime).getSeconds() -
-                            new Date(call?.CallStartDateTime).getSeconds()
-                          : "N/A"}{" "}
-                        s
-                      </h1>
-                    </div>
-                    {call?.CallTransferredTo && (
-                      <div className="flex items-center gap-2">
-                        <User className="text-textAlt w-6 h-6" />
-                        <div>
-                          <h1 className="font-bold text-textAlt">
-                            {call?.CallTransferredTo}
-                          </h1>
-                        </div>
-                      </div>
-                    )}
-                    {call.CallStatus === "Missed" && (
-                      <div className="flex items-center gap-2">
-                        <h1 className="font-bold text-textAlt">Missed</h1>
-                      </div>
-                    )}
-                    <div>
-                      {call?.CallAnalytics && (
-                        <div className="flex items-center gap-2">
-                          <h1 className="font-bold text-textAlt">
-                            {call?.CallAnalytics}
-                          </h1>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="w-full overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead className="bg-foreground">
+                  <tr className="text-xs">
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Location
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Date
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Start Time
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      End Time
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Duration
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Transferred To
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Status
+                    </th>
+                    <th className="py-2 px-4 border-b border-b-border text-left">
+                      Analytics
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  {callData?.map((call, index) => {
+                    const callStart = new Date(call?.CallStartDateTime);
+                    const callEnd = call?.CallEndDateTime
+                      ? new Date(call?.CallEndDateTime)
+                      : null;
+                    const dateString = callStart.toLocaleDateString();
+                    // Calculate duration in minutes and seconds
+                    let duration = "N/A";
+                    if (callEnd) {
+                      const minutes =
+                        callEnd.getMinutes() - callStart.getMinutes();
+                      const seconds =
+                        callEnd.getSeconds() - callStart.getSeconds();
+                      duration = `${minutes}:${seconds}`;
+                    }
+
+                    return (
+                      <tr key={index} className="hover:bg-muted">
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {call?.LocationInfo?.LocationName}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {dateString}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {new Date(
+                            call.CallStartDateTime
+                          ).toLocaleTimeString()}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {new Date(
+                            call.CallEndDateTime
+                          ).toLocaleTimeString() || "--"}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {duration}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {call?.CallTransferredTo
+                            ? call?.CallTransferredTo
+                            : "--"}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {call.CallStatus}
+                        </td>
+                        <td className="py-2 px-4 border-b border-b-border">
+                          {call?.CallAnalytics ? call?.CallAnalytics : "--"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div className="w-full h-full flex items-center justify-center">
