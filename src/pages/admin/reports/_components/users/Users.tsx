@@ -20,7 +20,15 @@ interface UserReport {
   TotalCallDurationSeconds: number;
   AverageCallDurationSeconds: number;
   NumberOfCallsTransferred: number;
-  LatestStatus: 'Logged In' | 'Available' | 'Away' | 'Logged Out' | 'Session Terminated' | 'InCall' | 'Ready' | 'No Logs';
+  LatestStatus:
+    | "Logged In"
+    | "Available"
+    | "Away"
+    | "Logged Out"
+    | "Session Terminated"
+    | "InCall"
+    | "Ready"
+    | "No Logs";
   NumberOfMissedCalls: number;
   CallsWithOnHold: number;
   CallsWithoutOnHold: number;
@@ -33,18 +41,22 @@ export default function Users() {
   const [userList, setUserList] = useState<UserReport[]>([]);
   const [filteredUserList, setFilteredUserList] = useState<UserReport[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedUserName, setSelectedUserName] = useState('');
+  const [selectedUserName, setSelectedUserName] = useState("");
 
-  const filterUserList = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const searchValue = event.target.value
-    const filteredUserList = userList.filter(user => user.DisplayName.toLowerCase().includes(searchValue.toLowerCase()))
-    setFilteredUserList(filteredUserList)
-  }
+  const filterUserList = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const searchValue = event.target.value;
+    const filteredUserList = userList.filter((user) =>
+      user.UserName.toLowerCase().includes(searchValue.toLowerCase())
+    );
+    setFilteredUserList(filteredUserList);
+  };
 
   const fetchUserListData = async (startDate?: string, endDate?: string) => {
     const cookies = parseCookies();
     const { userToken } = cookies;
-    let queryParams = '';
+    let queryParams = "";
 
     if (startDate && endDate) {
       // Construct query parameters if startDate and endDate are provided
@@ -52,33 +64,35 @@ export default function Users() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users${queryParams}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application',
-          'Authorization': `Bearer ${userToken}`
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users${queryParams}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application",
+            Authorization: `Bearer ${userToken}`,
+          },
         }
-      });
+      );
       const data = await response.json();
-      setUserList(data.filter((user: UserReport) => user.Role !== 'Super Admin'));
-      setFilteredUserList(data.filter((user: UserReport) => user.Role !== 'Super Admin'));
+      setUserList(
+        data.filter((user: UserReport) => user.Role !== "Super Admin")
+      );
+      setFilteredUserList(
+        data.filter((user: UserReport) => user.Role !== "Super Admin")
+      );
     } catch {
       toast.custom((t: any) => (
-        <Toast
-          t={t}
-          content="Something went wrong."
-          type='error'
-        />
+        <Toast t={t} content="Something went wrong." type="error" />
       ));
     }
-  }
+  };
 
   const handleExportData = () => {
     exportToExcel(filteredUserList, `users-${new Date().toISOString()}.xlsx`);
   };
 
   const handleDateRangeChange = (startDate: string, endDate: string) => {
-
     console.log("Start Date:", startDate, "End Date:", endDate);
     fetchUserListData(startDate, endDate);
   };
@@ -86,100 +100,153 @@ export default function Users() {
   const handleDrawerOpen = (user: any) => {
     setSelectedUserName(user.UserName);
     setDrawerOpen(true);
-  }
+  };
 
   useEffect(() => {
     fetchUserListData();
-  }, [])
+  }, []);
 
   return (
-    <div className='w-full h-full flex flex-col gap-2 bg-background p-2 rounded-md'>
-      <div className='w-full flex justify-between items-center gap-2 border-b border-b-border pb-2'>
-        <div className='w-64 flex gap-1'>
-          <SearchInput placeholder='Users' onChange={filterUserList} />
-          <DateRangeSelect callBack={(startDate, endDate) => handleDateRangeChange(startDate, endDate)} />
+    <div className="w-full h-full flex flex-col gap-2 bg-background p-2 rounded-md">
+      <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
+        <div className="w-64 flex gap-1">
+          <SearchInput placeholder="Users" onChange={filterUserList} />
+          <DateRangeSelect
+            callBack={(startDate, endDate) =>
+              handleDateRangeChange(startDate, endDate)
+            }
+          />
         </div>
         <div>
-          <Button color="foreground" icon={<FileDown className='w-5' />} text='Export' onClick={handleExportData} />
+          <Button
+            color="foreground"
+            icon={<FileDown className="w-5" />}
+            text="Export"
+            onClick={handleExportData}
+          />
         </div>
       </div>
-      <table className="bg-background w-full">
-        <thead className="bg-foreground">
-          <tr className="text-xs">
-            <th className="py-2 px-4 text-left border-b border-b-border">User</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Away Duration</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Available Duration</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Total Calls</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Total Call Duration</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Average Call Duration</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Calls Transferred</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Missed Calls</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Calls With On Hold</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Calls Without On Hold</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Longest Call Duration</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Shortest Call Duration</th>
-            <th className="py-2 px-4 text-left border-b border-b-border">Total Hold Duration</th>
-          </tr>
-        </thead>
-        {
-          filteredUserList.filter(call => call.Role !== "Guest").length !== 0 ? (
+      <div className="w-full overflow-x-auto">
+        <table className="bg-background w-full">
+          <thead className="bg-foreground">
+            <tr className="text-xs">
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                User
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Away Duration
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Available Duration
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Total Calls
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Total Call Duration
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Average Call Duration
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Calls Transferred
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Missed Calls
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Calls With On Hold
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Calls Without On Hold
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Longest Call Duration
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Shortest Call Duration
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
+                Total Hold Duration
+              </th>
+            </tr>
+          </thead>
+          {filteredUserList.filter((call) => call.Role !== "Guest").length !==
+          0 ? (
             <tbody>
-              {filteredUserList.filter(call => call.Role !== "Guest").map((row, index) => (
-                <tr key={row.UserName} className={`text-sm cursor-pointer ${index !== filteredUserList.filter(call => call.Role !== "Guest").length - 1 ? 'border-b border-b-border' : ''}`} onClick={handleDrawerOpen.bind(null, row)}>
-                  <td className="py-2 px-4 font-medium">{row.UserName}</td>
-                  <td className="py-2 px-4">
-                    <div className="px-4 rounded-md font-medium bg-highlight w-fit">
-                      {row.TotalAwayDuration}
-                    </div>
-                  </td>
-                  <td className={`py-2 px-4`}>
-                    <div className="px-4 rounded-md font-medium bg-highlight w-fit">
-                      {row.TotalAvailableDuration}
-                    </div>
-                  </td>
-                  <td className="py-2 px-4 font-medium">{row.TotalCalls}</td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.TotalCallDurationSeconds}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.AverageCallDurationSeconds}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.NumberOfCallsTransferred}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.NumberOfMissedCalls}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.CallsWithOnHold}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.CallsWithoutOnHold}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.LongestCallDuration}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.ShortestCallDuration}
-                  </td>
-                  <td className={`py-2 px-4 font-medium`}>
-                    {row.TotalHoldDuration}
-                  </td>
-                </tr>
-              ))}
+              {filteredUserList
+                .filter((call) => call.Role !== "Guest")
+                .map((row, index) => (
+                  <tr
+                    key={row.UserName}
+                    className={`text-sm cursor-pointer ${
+                      index !==
+                      filteredUserList.filter((call) => call.Role !== "Guest")
+                        .length -
+                        1
+                        ? "border-b border-b-border"
+                        : ""
+                    }`}
+                    onClick={handleDrawerOpen.bind(null, row)}
+                  >
+                    <td className="py-2 px-4 font-medium">{row.UserName}</td>
+                    <td className="py-2 px-4">
+                      <div className="">
+                        {row.TotalAwayDuration}
+                      </div>
+                    </td>
+                    <td className={`py-2 px-4`}>
+                      <div className="">
+                        {row.TotalAvailableDuration}
+                      </div>
+                    </td>
+                    <td className="py-2 px-4 font-medium">{row.TotalCalls}</td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.TotalCallDurationSeconds}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.AverageCallDurationSeconds}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.NumberOfCallsTransferred}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.NumberOfMissedCalls}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.CallsWithOnHold}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.CallsWithoutOnHold}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.LongestCallDuration}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.ShortestCallDuration}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.TotalHoldDuration}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           ) : (
             <tbody>
               <tr>
-                <td className="w-full py-2 px-4 text-center" colSpan={7}>
+                <td className="w-full py-2 px-4 text-center" colSpan={13}>
                   <h1 className="font-bold text-sm">No Data</h1>
                 </td>
               </tr>
             </tbody>
-          )
-        }
-      </table>
-      <Drawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} user={selectedUserName} />
+          )}
+        </table>
+      </div>
+      <Drawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        user={selectedUserName}
+      />
     </div>
   );
 }
