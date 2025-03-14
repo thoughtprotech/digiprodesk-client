@@ -24,7 +24,7 @@ export default function Index({ title, src, onClick }: { title: string; src?: an
           </div>
         )}
         {/* Header */}
-        <div className="w-full h-8 flex justify-between items-center absolute top-0 left-0 px-2 py-2 bg-black/30 rounded-t-md">
+        <div className="w-full h-8 flex justify-between items-center absolute top-0 left-0 px-2 py-2 bg-black/75 rounded-t-md">
           <div>
             <h1 className="font-bold text-lg text-white">{title}</h1>
           </div>
