@@ -23,11 +23,11 @@ export default function Index() {
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const peerInstance = useRef<Peer | null>(null);
   const mediaConnectionRef = useRef<MediaConnection | null>(null); // Ref to store the current call
-  const currentRoomId = useRef<string>('');
+  const currentRoomId = useRef<string>("");
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<
     "notInCall" | "calling" | "inProgress" | "onHold" | "transferred"
-  >('notInCall');
+  >("notInCall");
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
@@ -46,11 +46,11 @@ export default function Index() {
 
   useEffect(() => {
     callRingTone.current = new Audio("/sounds/guest-call-ringtone.mp3");
-  }, [])
+  }, []);
 
   const [confirmLogoutModal, setConfirmLogoutModal] = useState<boolean>(false);
   const [formData, setFormData] = useState({
-    password: ''
+    password: "",
   });
 
   const router = useRouter();
@@ -59,13 +59,13 @@ export default function Index() {
     if (confirmLogoutModal) {
       passwordRef.current?.focus();
     }
-  },
-    [confirmLogoutModal]);
+  }, [confirmLogoutModal]);
 
   const call = (remotePeerId: string) => {
     console.log("Calling peer with ID: ", remotePeerId);
     // Use modern getUserMedia method
-    navigator?.mediaDevices?.getUserMedia({ video: true, audio: true })
+    navigator?.mediaDevices
+      ?.getUserMedia({ video: true, audio: true })
       .then((mediaStream: MediaStream) => {
         if (currentUserVideoRef.current) {
           currentUserVideoRef.current.srcObject = mediaStream;
@@ -83,10 +83,22 @@ export default function Index() {
           });
         }
 
-        const mimeType = 'video/mp4; codecs=avc1.64001E, mp4a.40.2';
+        let mimeType;
+        if (MediaRecorder.isTypeSupported("video/mp4;codecs=avc1,mp4a.40.2")) {
+          mimeType = "video/mp4;codecs=avc1,mp4a.40.2";
+        } else if (
+          MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
+        ) {
+          mimeType = "video/webm;codecs=vp9,opus";
+        } else {
+          // Fallback – omit mimeType to let the browser choose.
+          mimeType = "";
+        }
 
         if (!MediaRecorder.isTypeSupported(mimeType)) {
-          console.warn('VP8 not supported, falling back to default WebM settings');
+          console.warn(
+            "VP8 not supported, falling back to default WebM settings"
+          );
         }
 
         // Recording Start
@@ -108,10 +120,13 @@ export default function Index() {
           formData.append("user", "guest");
 
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`, {
-              method: "POST",
-              body: formData
-            });
+            const response = await fetch(
+              `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`,
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
             const result = await response.json();
             uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
           } catch (error) {
@@ -135,9 +150,8 @@ export default function Index() {
         recordingIntervalRef.current = setInterval(() => {
           if (mediaRecorder.state === "recording") {
             mediaRecorder.requestData();
-            mediaRecorder.stop();  // Stop to trigger ondataavailable event
+            mediaRecorder.stop(); // Stop to trigger ondataavailable event
             setTimeout(() => {
-
               mediaRecorder.start(); // Start again for the next chunk
             }, 100);
           }
@@ -154,9 +168,12 @@ export default function Index() {
     const roomId = generateUUID();
     currentRoomId.current = roomId;
     setInCall(true);
-    setCallStatus('calling');
+    setCallStatus("calling");
     if (socketRef.current) {
-      socketRef.current.emit("initiate-call", JSON.stringify({ roomId, LocationID: location?.LocationID }));
+      socketRef.current.emit(
+        "initiate-call",
+        JSON.stringify({ roomId, LocationID: location?.LocationID })
+      );
       ringTone?.current?.play();
     }
   };
@@ -172,39 +189,48 @@ export default function Index() {
     const { userName } = decoded;
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/verifyUser`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${userToken}`
-        },
-        body: JSON.stringify({ userName, password: formData.password })
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/verifyUser`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({ userName, password: formData.password }),
+        }
+      );
 
       if (response.status === 200) {
         destroyCookie(null, "userToken");
         router.push("/");
-        return toast.custom((t: any) => <Toast content="Logged Out Successfully" type="success" t={t} />);
+        return toast.custom((t: any) => (
+          <Toast content="Logged Out Successfully" type="success" t={t} />
+        ));
       } else {
-        return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
+        return toast.custom((t: any) => (
+          <Toast content="Invalid Credentials!" type="error" t={t} />
+        ));
       }
     } catch {
-      return toast.custom((t: any) => <Toast content="Something Went Wrong" type="error" t={t} />);
+      return toast.custom((t: any) => (
+        <Toast content="Something Went Wrong" type="error" t={t} />
+      ));
     }
-  }
+  };
 
   const logOut = () => {
     destroyCookie(null, "userToken");
     router.push("/");
-  }
+  };
 
   const handleOpenConfirmLogoutModal = () => {
     setConfirmLogoutModal(true);
-  }
+  };
 
   const handleCloseConfirmLogoutModal = () => {
     setConfirmLogoutModal(false);
-  }
+  };
 
   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(event.target.value);
@@ -223,7 +249,8 @@ export default function Index() {
 
   const toggleMute = () => {
     console.log(mediaConnectionRef.current?.localStream.getAudioTracks());
-    const audioTracks = mediaConnectionRef.current?.localStream.getAudioTracks();
+    const audioTracks =
+      mediaConnectionRef.current?.localStream.getAudioTracks();
     audioTracks![0].enabled = !audioTracks![0].enabled;
     setIsMuted(!isMuted);
   };
@@ -233,26 +260,33 @@ export default function Index() {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${userToken}`
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
         }
-      });
+      );
 
       if (response.status === 200) {
         const data = await response.json();
         console.log({ data });
         setLocation(data[0]);
       } else {
-        return toast.custom((t: any) => <Toast content="Error fetching location data" type="error" t={t} />);
+        return toast.custom((t: any) => (
+          <Toast content="Error fetching location data" type="error" t={t} />
+        ));
       }
     } catch (error) {
       console.error("Error fetching location data:", error);
-      return toast.custom((t: any) => <Toast content="Something Went Wrong" type="error" t={t} />);
+      return toast.custom((t: any) => (
+        <Toast content="Something Went Wrong" type="error" t={t} />
+      ));
     }
-  }
+  };
 
   const fetchUserDetails = async () => {
     const cookies = parseCookies();
@@ -261,28 +295,34 @@ export default function Index() {
     const { userName } = decoded as { userName: string };
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken}`
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
         }
-      });
+      );
       if (response.status === 200) {
         response.json().then((data) => {
           setUser(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, 'userToken');
-        router.push('/');
+        destroyCookie(null, "userToken");
+        router.push("/");
       } else {
-        return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Details" />
+        ));
       }
-
     } catch {
-      return toast.custom((t: any) => (<Toast t={t} type="error" content="Error Fetching User Details" />));
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Details" />
+      ));
     }
-  }
+  };
 
   useEffect(() => {
     const cookies = parseCookies();
@@ -290,29 +330,33 @@ export default function Index() {
 
     try {
       if (!userToken) {
-        router.push("/");  // Redirect if token doesn't exist
+        router.push("/"); // Redirect if token doesn't exist
       } else {
-        const decoded = jwt.decode(userToken) as { userName: string, exp: number };
+        const decoded = jwt.decode(userToken) as {
+          userName: string;
+          exp: number;
+        };
         console.log({ decoded });
 
-        const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
+        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
         if (decoded.exp < currentTime) {
-          toast.custom((t: any) => (<Toast t={t} type="error" content="Token has expired" />));
+          toast.custom((t: any) => (
+            <Toast t={t} type="error" content="Token has expired" />
+          ));
           console.error("Token has expired");
-          logOut();  // Log out if token has expired
+          logOut(); // Log out if token has expired
         } else {
           const { userName } = decoded;
-          setUserId(userName);  // Set userId from token if valid
+          setUserId(userName); // Set userId from token if valid
           fetchLocationData();
           fetchUserDetails();
         }
       }
     } catch (error) {
       console.error("Error verifying token:", error);
-      router.push("/");  // Redirect to login on error
+      router.push("/"); // Redirect to login on error
     }
   }, []);
-
 
   useEffect(() => {
     if (userId !== "") {
@@ -325,7 +369,7 @@ export default function Index() {
               credential: process.env.NEXT_PUBLIC_TURN_SERVER_CREDENTIAL,
             },
           ],
-        }
+        },
       });
       peerInstance.current = peer;
 
@@ -409,7 +453,8 @@ export default function Index() {
       });
 
       peer.on("call", (call: MediaConnection) => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        navigator.mediaDevices
+          .getUserMedia({ video: true, audio: true })
           .then((mediaStream: MediaStream) => {
             if (currentUserVideoRef.current) {
               currentUserVideoRef.current.srcObject = mediaStream;
@@ -443,31 +488,32 @@ export default function Index() {
       <div className="w-full h-screen bg-background flex flex-col text-white">
         <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
           <div>
-            {
-              location?.LocationLogo ? (
-                <img
-                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
-                  alt="Logo"
-                  width={1000}
-                  height={1000}
-                  className="w-28"
-                />
-              ) : (
-                <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-                  ORION.
-                </h1>
-              )
-            }
+            {location?.LocationLogo ? (
+              <img
+                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
+                alt="Logo"
+                width={1000}
+                height={1000}
+                className="w-28"
+              />
+            ) : (
+              <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                ORION.
+              </h1>
+            )}
           </div>
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="font-bold text-[46px]">Welcome To {location?.LocationName}</h1>
+            <h1 className="font-bold text-[46px]">
+              Welcome To {location?.LocationName}
+            </h1>
           </div>
         </div>
         {!inCall && callStatus === "notInCall" && (
           <div className="w-full h-full flex relative">
             {/* Video Section (75% of the width) */}
             <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-              {location?.LocationVideoFeed && location?.LocationVideoFeed?.length > 0 ? (
+              {location?.LocationVideoFeed &&
+              location?.LocationVideoFeed?.length > 0 ? (
                 <video
                   src={`${location?.LocationVideoFeed}`}
                   autoPlay
@@ -500,7 +546,7 @@ export default function Index() {
                 <img
                   src={
                     location?.LocationReceptionistPhoto &&
-                      location?.LocationReceptionistPhoto !== ""
+                    location?.LocationReceptionistPhoto !== ""
                       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
                       : "/images/receptionist.png"
                   }
@@ -517,28 +563,27 @@ export default function Index() {
         {inCall && callStatus === "inProgress" && (
           <div className="w-full h-full relative">
             <div className="flex flex-col items-center absolute bottom-2 right-2">
-              <video ref={currentUserVideoRef} autoPlay muted className="rounded-lg shadow-lg w-64 h-48 object-cover" />
+              <video
+                ref={currentUserVideoRef}
+                autoPlay
+                muted
+                className="rounded-lg shadow-lg w-64 h-48 object-cover"
+              />
             </div>
             <div>
-              <video ref={remoteVideoRef} autoPlay className="w-full h-screen rounded-lg shadow-lg object-cover" />
+              <video
+                ref={remoteVideoRef}
+                autoPlay
+                className="w-full h-screen rounded-lg shadow-lg object-cover"
+              />
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-foreground p-2 rounded-md">
                 {/* Volume Slider */}
                 <div className="w-44 flex items-center gap-2 border-r-2 border-r-border pr-3">
-                  {
-                    volume === 0 && (
-                      <VolumeX className="w-9 h-9" />
-                    )
-                  }
-                  {
-                    volume > 0 && volume < 0.5 && (
-                      <Volume1 className="w-9 h-9" />
-                    )
-                  }
-                  {
-                    volume >= 0.5 && (
-                      <Volume2 className="w-9 h-9" />
-                    )
-                  }
+                  {volume === 0 && <VolumeX className="w-9 h-9" />}
+                  {volume > 0 && volume < 0.5 && (
+                    <Volume1 className="w-9 h-9" />
+                  )}
+                  {volume >= 0.5 && <Volume2 className="w-9 h-9" />}
                   <Tooltip className="mb-2 -translate-x-28" tooltip="Volume">
                     <input
                       type="range"
@@ -553,92 +598,126 @@ export default function Index() {
                 </div>
                 <div className="w-16">
                   <Button
-                    className={isMuted ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
-                      : "bg-zinc-500/30 border border-zinc-500 hover:bg-zinc-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"}
+                    className={
+                      isMuted
+                        ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
+                        : "bg-zinc-500/30 border border-zinc-500 hover:bg-zinc-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
+                    }
                     color={!isMuted ? "zinc" : null}
-                    icon={<Tooltip className="mb-4" tooltip={isMuted ? "Unmute Mic" : "Mute Mic"}>
-                      {
-                        !isMuted ?
+                    icon={
+                      <Tooltip
+                        className="mb-4"
+                        tooltip={isMuted ? "Unmute Mic" : "Mute Mic"}
+                      >
+                        {!isMuted ? (
                           <Mic className="w-6 h-6" />
-                          :
+                        ) : (
                           <MicOff className="w-6 h-6" />
-                      }
-                    </Tooltip>} onClick={toggleMute} />
+                        )}
+                      </Tooltip>
+                    }
+                    onClick={toggleMute}
+                  />
                 </div>
               </div>
             </div>
           </div>
         )}
-        {
-          callStatus === 'calling' && (
-            <div className="w-full h-full flex items-center justify-center">
-              <h1 className="font-bold text-xl">Calling Virtual Receptionist...</h1>
-            </div>
-          )
-        }
-        {
-          callStatus === 'onHold' && (
-            <div className="w-full h-full flex items-center justify-center">
-              <h1 className="font-bold text-xl">Call On Hold, Thank you for your patience. We&apos;ll be with you shortly.</h1>
-            </div>
-          )
-        }
-        {
-          callStatus === 'transferred' && (
-            <div className="w-full h-full flex items-center justify-center">
-              <h1 className="font-bold text-xl">Your Call Is Being Transferred, Thank you for your patience. We&apos;ll be with you shortly.</h1>
-            </div>
-          )
-        }
+        {callStatus === "calling" && (
+          <div className="w-full h-full flex items-center justify-center">
+            <h1 className="font-bold text-xl">
+              Calling Virtual Receptionist...
+            </h1>
+          </div>
+        )}
+        {callStatus === "onHold" && (
+          <div className="w-full h-full flex items-center justify-center">
+            <h1 className="font-bold text-xl">
+              Call On Hold, Thank you for your patience. We&apos;ll be with you
+              shortly.
+            </h1>
+          </div>
+        )}
+        {callStatus === "transferred" && (
+          <div className="w-full h-full flex items-center justify-center">
+            <h1 className="font-bold text-xl">
+              Your Call Is Being Transferred, Thank you for your patience.
+              We&apos;ll be with you shortly.
+            </h1>
+          </div>
+        )}
         <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
           <div className="flex items-center gap-1">
             <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
-              {
-                user?.UserPhoto === "" && (
-                  <h1 className="text-textAlt font-bold">
-                    {user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
-                  </h1>
-                )
-              }
-              {user?.UserPhoto !== "" &&
-                (
-                  <img
-                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
-                    alt={user?.DisplayName?.split(' ').slice(0, 2).map(word => word[0]).join('').toUpperCase()}
-                    className="w-full h-full object-cover rounded-full flex items-center justify-center"
-                  />
-                )
-              }
+              {user?.UserPhoto === "" && (
+                <h1 className="text-textAlt font-bold">
+                  {user?.DisplayName?.split(" ")
+                    .slice(0, 2)
+                    .map((word) => word[0])
+                    .join("")
+                    .toUpperCase()}
+                </h1>
+              )}
+              {user?.UserPhoto !== "" && (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
+                  alt={user?.DisplayName?.split(" ")
+                    .slice(0, 2)
+                    .map((word) => word[0])
+                    .join("")
+                    .toUpperCase()}
+                  className="w-full h-full object-cover rounded-full flex items-center justify-center"
+                />
+              )}
             </div>
             <div>
               <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
             </div>
           </div>
           <div>
-            <LogOut className="cursor-pointer w-5 h-5" color="red" onClick={handleOpenConfirmLogoutModal} />
+            <LogOut
+              className="cursor-pointer w-5 h-5"
+              color="red"
+              onClick={handleOpenConfirmLogoutModal}
+            />
           </div>
         </div>
-        {
-          confirmLogoutModal && (
-            <Modal onClose={handleCloseConfirmLogoutModal} title="Confirm Log Out">
-              <div className="flex flex-col gap-2 p-2">
-                <div>
-                  <h1 className="font-bold">Password</h1>
-                </div>
-                <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
-                  <div>
-                    <Input ref={passwordRef} type="password" name="password" placeholder="Password" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button text="Log Out" color="foreground" type="submit" />
-                    <Button text="Cancel" color="foreground" type="button" onClick={handleCloseConfirmLogoutModal} />
-                  </div>
-                </form>
+        {confirmLogoutModal && (
+          <Modal
+            onClose={handleCloseConfirmLogoutModal}
+            title="Confirm Log Out"
+          >
+            <div className="flex flex-col gap-2 p-2">
+              <div>
+                <h1 className="font-bold">Password</h1>
               </div>
-            </Modal>
-          )
-        }
+              <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
+                <div>
+                  <Input
+                    ref={passwordRef}
+                    type="password"
+                    name="password"
+                    placeholder="Password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button text="Log Out" color="foreground" type="submit" />
+                  <Button
+                    text="Cancel"
+                    color="foreground"
+                    type="button"
+                    onClick={handleCloseConfirmLogoutModal}
+                  />
+                </div>
+              </form>
+            </div>
+          </Modal>
+        )}
       </div>
     </WithRole>
-  )
+  );
 }
