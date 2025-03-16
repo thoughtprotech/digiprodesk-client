@@ -87,6 +87,53 @@ export default function Index() {
   >([]);
   const [selectedManager, setSelectedManager] = useState<string>("");
   const [transferCallModal, setTransferCallModal] = useState(false);
+  const [userLocationGroupId, setUserLocationGroupId] = useState<number | null>(null);
+
+  const fetchUserLocationGroupId = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(
+          "LocList Data",
+          data.filter((loc: any) => loc.LocationType === "Control")[0]
+            .LocationID
+        );
+        setUserLocationGroupId(
+          data.filter((loc: any) => loc.LocationType === "Control")[0]
+            .LocationID
+        );
+      } else {
+        return toast.custom((t: any) => (
+          <Toast
+            t={t}
+            type="error"
+            content="Error Fetching User Location List 1"
+          />
+        ));
+      }
+    } catch (error: any) {
+      console.log("Error", error);
+      return toast.custom((t: any) => (
+        <Toast
+          t={t}
+          type="error"
+          content="Error Fetching User Location List 2"
+        />
+      ));
+    }
+  };
 
   const { callId: guestCallId } = useContext(CallContext);
 
@@ -109,7 +156,6 @@ export default function Index() {
       if (response.ok) {
         const data = await response.json();
         setManagerList(data);
-        console.log("MANAGER LIST", data);
       } else {
         return toast.custom((t: any) => (
           <Toast t={t} type="error" content="Error Fetching Manager List" />
@@ -190,11 +236,10 @@ export default function Index() {
   });
 
   useEffect(() => {
-    console.log({ guestCallId });
-    if (guestCallId && userId) {
+    if (guestCallId && userId && userLocationGroupId) {
       initiateCall(guestCallId);
     }
-  }, [guestCallId, userId]);
+  }, [guestCallId, userId, userLocationGroupId]);
 
   const initiateCall = (guestId: string) => {
     const roomId = generateUUID();
@@ -211,9 +256,10 @@ export default function Index() {
         hostCallingRingTone.current?.pause();
         hostCallingRingTone!.current!.currentTime = 0;
       }, 3000);
+      console.log({ roomId, LocationID: userLocationGroupId, to: guestId });
       socket.emit(
         "call-guest",
-        JSON.stringify({ roomId, LocationID: 1, to: guestId })
+        JSON.stringify({ roomId, LocationID: userLocationGroupId, to: guestId })
       );
     }
   };
@@ -297,16 +343,9 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    fetchUserLocationGroupId();
     fetchManagerList();
   }, [userId]);
-
-  useEffect(() => {
-    console.log({ managerList });
-  }, [managerList]);
-
-  useEffect(() => {
-    console.log({ callList });
-  }, [callList]);
 
   useEffect(() => {
     try {
@@ -328,7 +367,6 @@ export default function Index() {
         });
 
         peer.on("call", (call: MediaConnection) => {
-          console.log({ call });
           navigator?.mediaDevices
             ?.getUserMedia({ video: true, audio: true })
             .then((mediaStream: MediaStream) => {
@@ -340,7 +378,7 @@ export default function Index() {
               videoCallRef.current = mediaStream.getVideoTracks()[0];
 
               call.answer(mediaStream);
-              
+
               call.on("stream", (remoteStream: MediaStream) => {
                 if (remoteVideoRef.current) {
                   remoteVideoRef.current.srcObject = remoteStream;
@@ -471,7 +509,6 @@ export default function Index() {
   }, [callToPickUp, userId]);
 
   const handleToggleCamera = () => {
-    console.log(mediaConnectionRef.current?.localStream.getVideoTracks());
     const videoTracks =
       mediaConnectionRef.current?.localStream.getVideoTracks();
     videoTracks![0].enabled = !videoTracks![0].enabled;
@@ -479,7 +516,6 @@ export default function Index() {
   };
 
   const handleToggleMic = () => {
-    console.log(mediaConnectionRef.current?.localStream.getAudioTracks());
     const audioTracks =
       mediaConnectionRef.current?.localStream.getAudioTracks();
     audioTracks![0].enabled = !audioTracks![0].enabled;
@@ -654,10 +690,6 @@ export default function Index() {
   const handleCallTransfer = () => {
     setTransferCallModal(true);
   };
-
-  // const handleTransferCall = async (callId: string) => {
-  //   console.log({ callId });
-  // }
 
   return (
     <Layout
