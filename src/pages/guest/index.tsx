@@ -536,7 +536,7 @@ export default function Index() {
             )}
           </div>
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="font-bold text-[46px]">
+            <h1 className="font-bold text-[36px]">
               Welcome To {location?.LocationName}
             </h1>
           </div>
