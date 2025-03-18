@@ -463,6 +463,7 @@ export default function Index() {
           }
           setInCall(false);
           setCallStatus("notInCall");
+          router.reload();
         }
       });
 

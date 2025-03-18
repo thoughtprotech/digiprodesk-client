@@ -226,8 +226,6 @@ export default function Index() {
   };
 
   const endCall = (roomId: string) => {
-    socket.emit("end-call", JSON.stringify({ roomId }));
-
     if (bookingId.length > 50) {
       return toast.custom((t: any) => (
         <Toast t={t} type="warning" content="Booking ID Is Too Long" />
@@ -267,6 +265,7 @@ export default function Index() {
       stream.getTracks().forEach((track) => track.stop());
       currentUserVideoRef.current.srcObject = null;
     }
+    socket.emit("end-call", JSON.stringify({ roomId }));
   };
 
   const transferCall = (roomId: string, locationManager: string) => {
