@@ -1,6 +1,14 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LogOut, Mic, MicOff, Volume1, Volume2, VolumeX } from "lucide-react";
+import {
+  Disc,
+  LogOut,
+  Mic,
+  MicOff,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import { useRouter } from "next/router";
 import { destroyCookie, parseCookies } from "nookies";
 import Peer, { MediaConnection } from "peerjs";
@@ -16,6 +24,7 @@ import Tooltip from "@/components/ui/ToolTip";
 import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
+import ElapsedTime from "@/components/ui/ElapsedTime";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -75,7 +84,7 @@ export default function Index() {
         const peerCall = peerInstance.current?.call(remotePeerId, mediaStream);
         if (peerCall) {
           mediaConnectionRef.current = peerCall; // Store the current call in the ref
-          peerCall.on('stream', (remoteStream: MediaStream) => {
+          peerCall.on("stream", (remoteStream: MediaStream) => {
             if (remoteVideoRef.current) {
               remoteVideoRef.current.srcObject = remoteStream;
               remoteVideoRef.current.play();
@@ -220,8 +229,23 @@ export default function Index() {
   };
 
   const logOut = () => {
+    // Remove the cookie
     destroyCookie(null, "userToken");
-    router.push("/");
+
+    // Start polling every 100ms to see if the cookie is gone.
+    const intervalId = setInterval(() => {
+      const cookies = parseCookies();
+      if (!cookies.userToken) {
+        clearInterval(intervalId);
+        router.push("/");
+      }
+    }, 100);
+
+    // Fallback: if after 5 seconds the cookie still exists, clear the interval and redirect.
+    setTimeout(() => {
+      clearInterval(intervalId);
+      router.push("/");
+    }, 5000);
   };
 
   const handleOpenConfirmLogoutModal = () => {
@@ -425,12 +449,21 @@ export default function Index() {
             mediaRecorderRef.current.stop(); // Stop recording
             mediaRecorderRef.current = null;
           }
-          clearInterval(recordingIntervalRef.current!); // Clear the interval
-          recordingIntervalRef.current = null;
-          // if (recordingIntervalRef.current) {
-          // }
+          if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current); // Clear the interval
+            recordingIntervalRef.current = null;
+          }
+          if (
+            currentUserVideoRef.current &&
+            currentUserVideoRef.current.srcObject
+          ) {
+            const stream = currentUserVideoRef.current.srcObject as MediaStream;
+            stream.getTracks().forEach((track) => track.stop());
+            currentUserVideoRef.current.srcObject = null;
+          }
           setInCall(false);
           setCallStatus("notInCall");
+          router.reload();
         }
       });
 
@@ -503,7 +536,7 @@ export default function Index() {
             )}
           </div>
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="font-bold text-[46px]">
+            <h1 className="font-bold text-[36px]">
               Welcome To {location?.LocationName}
             </h1>
           </div>
@@ -562,6 +595,14 @@ export default function Index() {
         )}
         {inCall && callStatus === "inProgress" && (
           <div className="w-full h-full relative">
+            <div className="absolute top-20 right-4">
+              <Tooltip tooltip="Recording" position="bottom">
+                <div className="flex items-center gap-2">
+                  <ElapsedTime startTime={new Date()} />
+                  <Disc className="text-red-500 w-8 h-8" />
+                </div>
+              </Tooltip>
+            </div>
             <div className="flex flex-col items-center absolute bottom-2 right-2">
               <video
                 ref={currentUserVideoRef}

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useContext, useEffect, useRef, useState } from "react";
 import {
+  Disc,
   FilePlus2,
   Mic,
   MicOff,
@@ -35,6 +36,7 @@ import generateUUID from "@/utils/uuidGenerator";
 import { CallListContext } from "@/context/CallListContext";
 import { toTitleCase } from "@/utils/stringFunctions";
 import Select from "@/components/ui/Select";
+import ElapsedTime from "@/components/ui/ElapsedTime";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -270,8 +272,6 @@ export default function Index() {
   };
 
   const endCall = (roomId: string) => {
-    socket.emit("end-call", JSON.stringify({ roomId }));
-
     if (bookingId.length > 50) {
       return toast.custom((t: any) => (
         <Toast t={t} type="warning" content="Booking ID Is Too Long" />
@@ -305,6 +305,13 @@ export default function Index() {
       clearInterval(recordingIntervalRef.current); // Clear the interval
       recordingIntervalRef.current = null;
     }
+
+    if (currentUserVideoRef.current && currentUserVideoRef.current.srcObject) {
+      const stream = currentUserVideoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach((track) => track.stop());
+      currentUserVideoRef.current.srcObject = null;
+    }
+    socket.emit("end-call", JSON.stringify({ roomId }));
   };
 
   const transferCall = (roomId: string, locationManager: string) => {
@@ -737,6 +744,14 @@ export default function Index() {
         >
           {inCall.status ? (
             <div className="w-full h-full bg-black rounded-md relative z-0">
+              <div className="absolute top-2 right-2">
+                <Tooltip tooltip="Recording" position="bottom">
+                  <div className="flex items-center gap-2">
+                    <ElapsedTime startTime={new Date()} />
+                    <Disc className="text-red-500 w-8 h-8" />
+                  </div>
+                </Tooltip>
+              </div>
               <div className="w-full h-full">
                 <video
                   autoPlay
