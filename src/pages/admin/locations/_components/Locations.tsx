@@ -442,21 +442,23 @@ export default function Locations({
                           )}
                         </div>
                       </div>
-                      {location.LocationParentID !== "" && (
-                        <div className="w-full flex gap-1 items-center">
-                          <h1 className="font-bold text-sm text-textAlt">
-                            Control
-                          </h1>
-                          <h1 className="font-bold text-sm text-text">
-                            {
-                              locationData.find(
-                                (loc) =>
-                                  loc.LocationID === location?.LocationParentID
-                              )?.LocationName
-                            }
-                          </h1>
-                        </div>
-                      )}
+                      {location.LocationType === "Property" &&
+                        location.LocationParentID !== "" && (
+                          <div className="w-full flex gap-1 items-center">
+                            <h1 className="font-bold text-sm text-textAlt">
+                              Control
+                            </h1>
+                            <h1 className="font-bold text-sm text-text">
+                              {location?.LocationParentID?.split(",")
+                                .map((controlID) => {
+                                  return locationData.find(
+                                    (loc) => loc.LocationID === +controlID
+                                  )?.LocationName;
+                                })
+                                .join(", ")}
+                            </h1>
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -592,6 +594,7 @@ export default function Locations({
                   <Select
                     options={locationData
                       .filter((location) => location.LocationType === "Control")
+                      .filter((location) => location.IsActive === 1)
                       .filter(
                         (location) =>
                           !createLocationFormData.LocationParentID?.split(
@@ -837,6 +840,7 @@ export default function Locations({
                   <Select
                     options={locationData
                       .filter((location) => location.LocationType === "Control")
+                      .filter((location) => location.IsActive === 1)
                       .map((location) => ({
                         value: location.LocationID!.toString(),
                         label: location.LocationName,
