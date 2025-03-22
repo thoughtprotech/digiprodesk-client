@@ -1,25 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { RoleDetail, User } from "@/utils/types";
 import { useRouter } from "next/router";
-import { destroyCookie, parseCookies } from "nookies";
+import { parseCookies } from "nookies";
 import { ReactNode, useEffect, useState } from "react";
 import jwt from "jsonwebtoken";
 import Toast from "./ui/Toast";
 import toast from "react-hot-toast";
+import logOut from "@/utils/logOut";
 
 const userMenuRouteMapping: {
   menu: string;
   route: string;
 }[] = [
-    { menu: "check-in hub", route: "/checkInHub" },
-    { menu: "check-in trails", route: "/admin/checkIns" },
-    { menu: "locations", route: "/admin/locations" },
-    { menu: "users", route: "/admin/users" },
-    { menu: "watch hub", route: "/watchHub" },
-    { menu: "guest hub", route: "/guest" },
-    { menu: "reports", route: "/admin/reports" },
-    { menu: "notifications", route: "/admin/notifications" },
-  ];
+  { menu: "check-in hub", route: "/checkInHub" },
+  { menu: "check-in trails", route: "/admin/checkIns" },
+  { menu: "locations", route: "/admin/locations" },
+  { menu: "users", route: "/admin/users" },
+  { menu: "watch hub", route: "/watchHub" },
+  { menu: "guest hub", route: "/guest" },
+  { menu: "reports", route: "/admin/reports" },
+  { menu: "notifications", route: "/admin/notifications" },
+];
 
 export default function WithRole({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -48,17 +49,24 @@ export default function WithRole({ children }: { children: ReactNode }) {
           setUser(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
       } else {
         return toast.custom((t: any) => (
-          <Toast t={t} type="error" content="Error Fetching User Details" />
+          <Toast
+            t={t}
+            type="error"
+            content="Error Fetching User Details role 1"
+          />
         ));
       }
     } catch {
       router.push("/");
       return toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Fetching User Details" />
+        <Toast
+          t={t}
+          type="error"
+          content="Error Fetching User Details role 2"
+        />
       ));
     }
   };
@@ -82,8 +90,7 @@ export default function WithRole({ children }: { children: ReactNode }) {
           setRoleDetails(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
       } else {
         return toast.custom((t: any) => (
           <Toast t={t} type="error" content="Error Fetching Role Details" />
