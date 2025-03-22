@@ -12,7 +12,7 @@ import {
 import { ReactNode, useContext, useEffect, useRef, useState } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
-import { destroyCookie, parseCookies } from "nookies";
+import { parseCookies } from "nookies";
 import Image from "next/image";
 import Input from "./ui/Input";
 import toast from "react-hot-toast";
@@ -25,6 +25,7 @@ import { io } from "socket.io-client";
 import { useCallRing } from "./ui/CallRing";
 import { CallListContext } from "@/context/CallListContext";
 import WithRole from "./WithRole";
+import logOut from "@/utils/logOut";
 
 export default function Index({
   header,
@@ -64,19 +65,6 @@ export default function Index({
 
   const handleLogOutToggle = () => {
     setConfirmLogoutModal(true);
-  };
-
-  const logOut = () => {
-    // Remove the cookie
-    destroyCookie(null, "userToken");
-    // Check if cookie is removed
-    const cookies = parseCookies();
-    if (!cookies.userToken) {
-      // Redirect to the login page
-      router.push("/");
-    } else {
-      logOut();
-    }
   };
 
   const toggleUserAway = () => {
@@ -145,6 +133,8 @@ export default function Index({
                 content={userOnline ? "You Are Now Away" : "You Are Now Online"}
               />
             ));
+          } else if (response.status === 401) {
+            logOut(router);
           }
         } catch {
           return toast.custom((t: any) => (
@@ -207,7 +197,7 @@ export default function Index({
           if (response.status === 200) {
             setLogOutPassword("");
             setConfirmLogoutModal(false);
-            logOut();
+            logOut(router);
             return toast.custom((t: any) => (
               <Toast t={t} type="success" content="Logged Out Successfully" />
             ));
@@ -252,16 +242,15 @@ export default function Index({
           setUser(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
-      } else {
-        return toast.custom((t: any) => (
-          <Toast t={t} type="error" content="Error Fetching User Details" />
-        ));
+        logOut(router);
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Fetching User Details" />
+        <Toast
+          t={t}
+          type="error"
+          content="Error Fetching User Details"
+        />
       ));
     }
   };
@@ -285,16 +274,23 @@ export default function Index({
           setRoleDetails(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
       } else {
         return toast.custom((t: any) => (
-          <Toast t={t} type="error" content="Error Fetching User Details" />
+          <Toast
+            t={t}
+            type="error"
+            content="Error Fetching Role Details"
+          />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Fetching User Details" />
+        <Toast
+          t={t}
+          type="error"
+          content="Error Fetching Role Details"
+        />
       ));
     }
   };
@@ -325,16 +321,24 @@ export default function Index({
           }
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
       } else {
+        console.log({ response });
         return toast.custom((t: any) => (
-          <Toast t={t} type="error" content="Error Fetching User Details" />
+          <Toast
+            t={t}
+            type="error"
+            content="Error Fetching User Status"
+          />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Fetching User Details" />
+        <Toast
+          t={t}
+          type="error"
+          content="Error Fetching User Status"
+        />
       ));
     }
   };
@@ -355,7 +359,7 @@ export default function Index({
           <Toast t={t} type="error" content="Token has expired" />
         ));
         console.error("Token has expired");
-        logOut();
+        logOut(router);
       } else {
         setUserId(userName);
       }
