@@ -97,7 +97,7 @@ export interface Location {
   LocationID?: number;
   LocationName: string;
   LocationCode: string;
-  LocationParentID?: number;
+  LocationParentID?: string;
   LocationType: string;
   LocationManager: string | null;
   LocationTheme?: string;
