@@ -69,21 +69,14 @@ export default function Index({
   const logOut = () => {
     // Remove the cookie
     destroyCookie(null, "userToken");
-
-    // Start polling every 100ms to see if the cookie is gone.
-    const intervalId = setInterval(() => {
-      const cookies = parseCookies();
-      if (!cookies.userToken) {
-        clearInterval(intervalId);
-        router.push("/");
-      }
-    }, 100);
-
-    // Fallback: if after 5 seconds the cookie still exists, clear the interval and redirect.
-    setTimeout(() => {
-      clearInterval(intervalId);
+    // Check if cookie is removed
+    const cookies = parseCookies();
+    if (!cookies.userToken) {
+      // Redirect to the login page
       router.push("/");
-    }, 5000);
+    } else {
+      logOut();
+    }
   };
 
   const toggleUserAway = () => {
@@ -414,7 +407,13 @@ export default function Index({
               });
             });
           }
-          console.log({"CALL LIST TO DISPLAY": data.filter((call) => call.AssignedToUserName === userId && call.CallPlacedByUserName !== userId)});
+          console.log({
+            "CALL LIST TO DISPLAY": data.filter(
+              (call) =>
+                call.AssignedToUserName === userId &&
+                call.CallPlacedByUserName !== userId
+            ),
+          });
           // Update the call list state
           setCallList(
             data.filter(
