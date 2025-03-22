@@ -44,10 +44,14 @@ export default function Index() {
       if (response.status === 200) {
         const data = await response.json();
         setUserLocationListData(
-          data.filter((loc: Location) => loc.LocationParentID !== 0)
+          data.filter((loc: Location) =>
+            loc.LocationParentID?.split(",").map((loc) => Number(loc) !== 0)
+          )
         );
         setFilteredUserLocationData(
-          data.filter((loc: Location) => loc.LocationParentID !== 0)
+          data.filter((loc: Location) =>
+            loc.LocationParentID?.split(",").map((loc) => Number(loc) !== 0)
+          )
         );
       }
     } catch (error) {
