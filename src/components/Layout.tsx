@@ -411,13 +411,7 @@ export default function Index({
               });
             });
           }
-          console.log({
-            "CALL LIST TO DISPLAY": data.filter(
-              (call) =>
-                call.AssignedToUserName === userId &&
-                call.CallPlacedByUserName !== userId
-            ),
-          });
+          console.log({"CALL LIST TO DISPLAY": data.filter((call) => call.AssignedToUserName === userId && call.CallPlacedByUserName !== userId)});
           // Update the call list state
           setCallList(
             data.filter(

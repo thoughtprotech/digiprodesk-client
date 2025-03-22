@@ -10,8 +10,8 @@ import jwt from "jsonwebtoken";
 
 export default function Login() {
   const [formData, setFormData] = useState({
-    userName: "",
-    password: "",
+    userName: '',
+    password: ''
   });
   const userNameInputRef = useRef<HTMLInputElement>(null);
 
@@ -19,82 +19,44 @@ export default function Login() {
 
   const handleLogIn = async (event: React.FormEvent) => {
     event.preventDefault();
-
-    // Basic client-side validation.
-    if (formData.userName.trim() === "") {
-      return toast.custom((t: any) => (
-        <Toast content="Username is required." type="warning" t={t} />
-      ));
+    if (formData.userName === "") {
+      return toast.custom((t: any) => <Toast content="Username is required." type="warning" t={t} />);
     }
-    if (formData.password.trim() === "") {
-      return toast.custom((t: any) => (
-        <Toast content="Password is required." type="warning" t={t} />
-      ));
+    if (formData.password === "") {
+      return toast.custom((t: any) => <Toast content="Password is required." type="warning" t={t} />);
     }
 
     const { userName, password } = formData;
 
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/authentication`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ userName, password }),
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/authentication`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ userName, password })
+    });
+
+    if (response.status === 200) {
+      response.json().then((data) => {
+        setCookie(
+          null, "userToken", data.token, {
+          maxAge: 30 * 24 * 60 * 60,
+        })
+
+        const decoded = jwt.decode(data.token);
+        const { role } = decoded as { role: string };
+        if (role === "Guest") {
+          router.push('/guest');
+        } else {
+          router.push('/checkInHub');
         }
-      );
-
-      // Parse the JSON response.
-      const data = await response.json();
-
-      if (!response.ok) {
-        // If the server returns an error status, show the error message.
-        return toast.custom((t: any) => (
-          <Toast
-            content={data.error || "An error occurred."}
-            type="error"
-            t={t}
-          />
-        ));
-      }
-
-      // On successful authentication, store the token in a cookie.
-
-      // Decode the token to determine the user's role.
-      const decoded = jwt.decode(data.token);
-      const { role } = decoded as { role: string };
-
-      if (role === "Guest") {
-        setCookie(null, "userToken", data.token, {
-          maxAge: 60 * 60 * 24 * 365 * 100, // 100 years
-        });
-      } else {
-        setCookie(null, "userToken", data.token, {
-          maxAge: 30 * 24 * 60 * 60, // 30 days
-        });
-      }
-
-      // Redirect based on role.
-      if (role === "Guest") {
-        router.push("/guest");
-      } else {
-        router.push("/watchHub");
-      }
-
-      // Show a success toast.
-      toast.custom((t: any) => (
-        <Toast content={data.message} type="success" t={t} />
-      ));
-    } catch (error: any) {
-      // Catch network or unexpected errors.
-      console.error("Login error:", error);
-      toast.custom((t: any) => (
-        <Toast content={error.message} type="error" t={t} />
-      ));
+        // router.push('/checkInHub');
+        return toast.custom((t: any) => <Toast content="Logged In Successfully" type="success" t={t} />);
+      })
+    } else {
+      return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
     }
-  };
+  }
 
   useEffect(() => {
     userNameInputRef.current?.focus();
@@ -106,25 +68,21 @@ export default function Login() {
 
     try {
       if (userToken) {
-        const decoded = jwt.decode(userToken) as {
-          userName: string;
-          exp: number;
-          role: string;
-        };
+        const decoded = jwt.decode(userToken) as { userName: string, exp: number, role: string };
 
-        const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+        const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
 
         if (decoded.exp > currentTime) {
           if (decoded.role === "Guest") {
-            router.push("/guest");
+            router.push('/guest');
           } else {
-            router.push("/checkInHub");
+            router.push('/checkInHub');
           }
         }
       }
     } catch (error) {
       console.error("Error verifying token:", error);
-      router.push("/"); // Redirect to login on error
+      router.push("/");  // Redirect to login on error
     }
   }, []);
 
@@ -145,9 +103,7 @@ export default function Login() {
             <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
               ORION.
             </h1>
-            <h1 className="font-bold text-sm text-textAlt">
-              Your Virtual Frontline, Anywhere.
-            </h1>
+            <h1 className="font-bold text-sm text-textAlt">Your Virtual Frontline, Anywhere.</h1>
           </div>
         </div>
         <div className="w-full h-full flex justify-center items-center">
@@ -155,24 +111,19 @@ export default function Login() {
             <div className="w-full flex flex-col border-b-2 border-b-border pb-2">
               <h1 className="font-bold text-lg text-textAlt">WELCOME BACK!</h1>
               <h1 className="font-bold text-4xl">
-                Let&apos;s Get You{" "}
+                Let&apos;s Get You {" "}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">
                   Signed In
                 </span>
               </h1>
             </div>
-            <form
-              onSubmit={handleLogIn}
-              className="w-full flex flex-col space-y-4"
-            >
+            <form onSubmit={handleLogIn} className="w-full flex flex-col space-y-4">
               <div className="w-full">
                 <input
                   type="text"
                   placeholder="Username"
                   value={formData.userName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, userName: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                   className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
                   name="userName"
                   ref={userNameInputRef}
@@ -183,9 +134,7 @@ export default function Login() {
                   type="password"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full p-2 rounded-md border-2 border-border bg-foreground outline-none text-text font-semibold"
                   name="password"
                 />
@@ -202,6 +151,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div >
+  )
 }
