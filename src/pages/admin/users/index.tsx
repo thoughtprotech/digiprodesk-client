@@ -378,11 +378,7 @@ export default function Index() {
       );
       if (response.status === 200) {
         const data: Location[] = await response.json();
-        setLocationListData(
-          data
-            .filter((location) => location.IsActive === 1)
-            .filter((location) => location.LocationType === "Control")
-        );
+        setLocationListData(data.filter((location) => location.IsActive === 1));
       } else {
         throw new Error("Failed to fetch location data");
       }
@@ -517,10 +513,21 @@ export default function Index() {
                 <div className="w-1/2">
                   <h1 className="font-bold text-sm">Location</h1>
                   <Select
-                    options={locationListData.map((location) => ({
-                      value: location.LocationID!.toString(),
-                      label: location.LocationName,
-                    }))}
+                    options={
+                      createUserFormData.Role === "Guest"
+                        ? locationListData
+                            .filter((loc) => loc.LocationType === "Property")
+                            .map((location) => ({
+                              value: location.LocationID!.toString(),
+                              label: location.LocationName,
+                            }))
+                        : locationListData
+                            .filter((loc) => loc.LocationType === "Control")
+                            .map((locationGroup) => ({
+                              value: locationGroup.LocationID!.toString(),
+                              label: locationGroup.LocationName,
+                            }))
+                    }
                     onChange={(e) =>
                       setCreateUserFormData({
                         ...createUserFormData,
@@ -694,10 +701,21 @@ export default function Index() {
                 <div className="w-1/2">
                   <h1 className="font-bold text-sm">Location</h1>
                   <Select
-                    options={locationListData.map((location) => ({
-                      value: location.LocationID!.toString(),
-                      label: location.LocationName,
-                    }))}
+                    options={
+                      selectedUser.Role === "Guest"
+                        ? locationListData
+                            .filter((loc) => loc.LocationType === "Property")
+                            .map((location) => ({
+                              value: location.LocationID!.toString(),
+                              label: location.LocationName,
+                            }))
+                        : locationListData
+                            .filter((loc) => loc.LocationType === "Control")
+                            .map((location) => ({
+                              value: location.LocationID!.toString(),
+                              label: location.LocationName,
+                            }))
+                    }
                     onChange={(e) =>
                       setSelectedUser({
                         ...selectedUser,
