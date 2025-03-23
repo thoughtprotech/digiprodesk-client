@@ -90,7 +90,7 @@ export default function Index() {
         </div>
       </div>
     }>
-      <div className='w-full h-[90vh] flex flex-col gap-2 overflow-hidden rounded-md p-2'>
+      <div className='w-full h-[90vh] flex flex-col gap-2 overflow-x-hidden rounded-md p-2'>
         <div className='w-full border-b border-b-border pb-2 flex items-center gap-2'>
           <div>
             <ArrowLeft className='w-8 h-8 cursor-pointer' onClick={() => {

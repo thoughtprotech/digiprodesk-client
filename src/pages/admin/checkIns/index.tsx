@@ -18,6 +18,7 @@ export default function Index() {
 
   const fetchCallListData = async (startDate?: string, endDate?: string) => {
     try {
+      console.log("Fetching Call Data");
       const cookies = parseCookies();
       const { userToken } = cookies;
 
@@ -39,6 +40,7 @@ export default function Index() {
       );
 
       if (response.status === 200) {
+        console.log("Fetching Call Data Successfull");
         const data = await response.json();
         setCallList(data);
       } else {
@@ -65,7 +67,7 @@ export default function Index() {
           : "";
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList${queryParams}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/property${queryParams}`,
         {
           method: "GET",
           headers: {
@@ -78,14 +80,10 @@ export default function Index() {
       if (response.status === 200) {
         const data = await response.json();
         setLocationList(
-          data.filter((loc: Location) =>
-            loc.LocationParentID?.split(",").map((loc) => Number(loc) !== 0)
-          )
+          data.filter((loc: Location) => loc.LocationType !== "Control")
         );
         setFilteredLocationList(
-          data.filter((loc: Location) =>
-            loc.LocationParentID?.split(",").map((loc) => Number(loc) !== 0)
-          )
+          data.filter((loc: Location) => loc.LocationType !== "Control")
         );
       } else {
         return toast.custom((t: any) => (
