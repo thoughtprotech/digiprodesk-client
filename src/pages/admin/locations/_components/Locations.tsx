@@ -841,6 +841,12 @@ export default function Locations({
                     options={locationData
                       .filter((location) => location.LocationType === "Control")
                       .filter((location) => location.IsActive === 1)
+                      .filter(
+                        (location) =>
+                          !selectedLocation.LocationParentID?.split(
+                            ","
+                          ).includes(location.LocationID?.toString() || "")
+                      )
                       .map((location) => ({
                         value: location.LocationID!.toString(),
                         label: location.LocationName,
