@@ -89,7 +89,7 @@ export default function Index() {
   >([]);
   const [selectedManager, setSelectedManager] = useState<string>("");
   const [transferCallModal, setTransferCallModal] = useState(false);
-  const [userLocationGroupId, setUserLocationGroupId] = useState<number | null>(null);
+  const [userLocationID, setUserLocationID] = useState<number | null>(null);
 
   const fetchUserLocationGroupId = async () => {
     try {
@@ -107,13 +107,12 @@ export default function Index() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(
-          "LocList Data",
-          data.filter((loc: any) => loc.LocationType === "Control")[0]
-            .LocationID
-        );
-        setUserLocationGroupId(
-          data.filter((loc: any) => loc.LocationType === "Control")[0]
+        console.log("USER LOC DATA", data);
+        if (data.length === 0) {
+          setUserLocationID(null);
+        }
+        setUserLocationID(
+          data?.filter((loc: any) => loc.LocationType === "Control")[0]
             .LocationID
         );
       } else {
@@ -126,7 +125,7 @@ export default function Index() {
         ));
       }
     } catch (error: any) {
-      console.log("Error", error);
+      console.log("Error HERE", error);
       return toast.custom((t: any) => (
         <Toast
           t={t}
@@ -238,10 +237,10 @@ export default function Index() {
   });
 
   useEffect(() => {
-    if (guestCallId && userId && userLocationGroupId) {
+    if (guestCallId && userId && userLocationID) {
       initiateCall(guestCallId);
     }
-  }, [guestCallId, userId, userLocationGroupId]);
+  }, [guestCallId, userId, userLocationID]);
 
   const initiateCall = (guestId: string) => {
     const roomId = generateUUID();
@@ -258,10 +257,10 @@ export default function Index() {
         hostCallingRingTone.current?.pause();
         hostCallingRingTone!.current!.currentTime = 0;
       }, 3000);
-      console.log({ roomId, LocationID: userLocationGroupId, to: guestId });
+      console.log({ roomId, LocationID: userLocationID, to: guestId });
       socket.emit(
         "call-guest",
-        JSON.stringify({ roomId, LocationID: userLocationGroupId, to: guestId })
+        JSON.stringify({ roomId, LocationID: userLocationID, to: guestId })
       );
     }
   };

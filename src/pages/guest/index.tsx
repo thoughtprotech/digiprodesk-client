@@ -10,7 +10,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useRouter } from "next/router";
-import { destroyCookie, parseCookies } from "nookies";
+import { parseCookies } from "nookies";
 import Peer, { MediaConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
@@ -25,6 +25,7 @@ import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
 import ElapsedTime from "@/components/ui/ElapsedTime";
+import logOut from "@/utils/logOut";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -211,8 +212,7 @@ export default function Index() {
       );
 
       if (response.status === 200) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
         return toast.custom((t: any) => (
           <Toast content="Logged Out Successfully" type="success" t={t} />
         ));
@@ -226,26 +226,6 @@ export default function Index() {
         <Toast content="Something Went Wrong" type="error" t={t} />
       ));
     }
-  };
-
-  const logOut = () => {
-    // Remove the cookie
-    destroyCookie(null, "userToken");
-
-    // Start polling every 100ms to see if the cookie is gone.
-    const intervalId = setInterval(() => {
-      const cookies = parseCookies();
-      if (!cookies.userToken) {
-        clearInterval(intervalId);
-        router.push("/");
-      }
-    }, 100);
-
-    // Fallback: if after 5 seconds the cookie still exists, clear the interval and redirect.
-    setTimeout(() => {
-      clearInterval(intervalId);
-      router.push("/");
-    }, 5000);
   };
 
   const handleOpenConfirmLogoutModal = () => {
@@ -334,8 +314,7 @@ export default function Index() {
           setUser(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
       } else {
         return toast.custom((t: any) => (
           <Toast t={t} type="error" content="Error Fetching User Details" />
@@ -368,7 +347,7 @@ export default function Index() {
             <Toast t={t} type="error" content="Token has expired" />
           ));
           console.error("Token has expired");
-          logOut(); // Log out if token has expired
+          logOut(router); // Log out if token has expired
         } else {
           const { userName } = decoded;
           setUserId(userName); // Set userId from token if valid

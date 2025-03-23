@@ -886,12 +886,13 @@ export default function Locations({
                       <div className="w-full flex gap-2">
                         {selectedLocation.LocationParentID.split(",").map(
                           (controlID) => {
+                            const trimmedControlID = controlID.trim();
                             const control = locationData.find(
-                              (loc) => loc.LocationID === +controlID
+                              (loc) => loc.LocationID === +trimmedControlID
                             );
                             return (
                               <div
-                                key={controlID}
+                                key={trimmedControlID}
                                 className="w-fit px-2 py-1 rounded-md flex items-center gap-2 bg-background"
                               >
                                 <h1 className="font-bold text-sm">
@@ -901,20 +902,22 @@ export default function Locations({
                                   className="w-5 h-5 cursor-pointer"
                                   onClick={() =>
                                     setSelectedLocation((prev) => {
-                                      // Convert the current LocationParentID to an array (or start with an empty array)
+                                      // Convert the current LocationParentID to an array (trimming values)
                                       const currentValues =
                                         prev?.LocationParentID
-                                          ? prev.LocationParentID.split(
-                                              ","
-                                            ).filter(
-                                              (val) => val.trim() !== controlID
-                                            )
+                                          ? prev.LocationParentID.split(",")
+                                              .map((val) => val.trim())
+                                              .filter(
+                                                (val) =>
+                                                  val !== trimmedControlID
+                                              )
                                           : [];
+                                      console.log({ currentValues });
                                       // Return the updated object with the joined string
                                       return {
                                         ...prev,
                                         LocationParentID:
-                                          currentValues.join(","),
+                                          currentValues.join(", "),
                                       };
                                     })
                                   }

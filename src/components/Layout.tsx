@@ -388,7 +388,6 @@ export default function Index({
         socket.emit("get-call-list");
         socket.on("call-list-update", (data: CallQueue[]) => {
           // Identify new "pending" calls
-          console.log({ "CALL QUEUE": data });
           const newPendingCalls = data.filter(
             (call) =>
               call.CallStatus === "New" &&
@@ -399,10 +398,6 @@ export default function Index({
               )
           );
 
-          // Log or handle the new pending calls if needed
-          console.log("ROUTER", router);
-          console.log({ "CALL LIST": data });
-
           if (newPendingCalls.length > 0 && router.query.from !== "push") {
             newPendingCalls.map((call) => {
               showCallRing(call, () => {
@@ -411,7 +406,6 @@ export default function Index({
               });
             });
           }
-          console.log({"CALL LIST TO DISPLAY": data.filter((call) => call.AssignedToUserName === userId && call.CallPlacedByUserName !== userId)});
           // Update the call list state
           setCallList(
             data.filter(

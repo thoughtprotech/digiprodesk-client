@@ -4,8 +4,8 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
-import { Location, LocationGroup, Role, User } from "@/utils/types";
-import { Plus, X } from "lucide-react";
+import { Location, Role, User } from "@/utils/types";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import UserCard from "./_components/UserCard";
 import { parseCookies } from "nookies";
@@ -51,9 +51,6 @@ export default function Index() {
     LocationID: null,
   });
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
-  const [locationGroupData, setLocationGroupData] = useState<LocationGroup[]>(
-    []
-  );
   const [locationListData, setLocationListData] = useState<Location[]>([]);
 
   const handleOpenEditUser = (user: User) => {
@@ -329,39 +326,6 @@ export default function Index() {
     }
   };
 
-  const fetchLocationGroupData = async () => {
-    try {
-      const cookies = parseCookies();
-      const { userToken } = cookies;
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/locationGroup`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        const data: LocationGroup[] = await response.json();
-        setLocationGroupData(
-          data.filter((locationGroup) => locationGroup.IsActive === 1)
-        );
-      } else {
-        throw new Error("Failed to fetch location group data");
-      }
-    } catch {
-      return toast.custom((t: any) => (
-        <Toast
-          type="error"
-          content="Failed to fetch location group data"
-          t={t}
-        />
-      ));
-    }
-  };
-
   const fetchLocationListData = async () => {
     try {
       const cookies = parseCookies();
@@ -392,7 +356,6 @@ export default function Index() {
   useEffect(() => {
     fetchUserListData();
     fetchRoleListData();
-    fetchLocationGroupData();
     fetchLocationListData();
   }, []);
 
@@ -428,7 +391,7 @@ export default function Index() {
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 pb-4">
-          {filteredUserListData.map((user, index) => (
+          {filteredUserListData?.map((user, index) => (
             <div
               key={index}
               className="w-full rounded-md cursor-pointer"
@@ -551,48 +514,6 @@ export default function Index() {
                   />
                 </div>
               </div>
-              {(
-                (createUserFormData?.Role !== "Guest" &&
-                  createUserFormData?.LocationGroupID) ||
-                []
-              )?.length > 0 && (
-                <div className="w-full">
-                  <div className="flex gap-2">
-                    {createUserFormData.LocationGroupID?.map(
-                      (locationGroupID: any, index: any) => {
-                        const locationGroup = locationGroupData.find(
-                          (locationGroup) =>
-                            locationGroup.LocationGroupId === locationGroupID
-                        );
-                        return (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 bg-background border border-border px-2 rounded-md"
-                          >
-                            <h1 className="font-bold text-sm">
-                              {locationGroup?.LocationGroupName}
-                            </h1>
-                            <div
-                              className="cursor-pointer"
-                              onClick={() =>
-                                setCreateUserFormData({
-                                  ...createUserFormData,
-                                  LocationGroupID:
-                                    createUserFormData.LocationGroupID?.filter(
-                                      (id: any) => id !== locationGroupID
-                                    ),
-                                })
-                              }
-                            >
-                              <X className="w-4" />
-                            </div>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-              )}
               <div className="h-full flex items-center gap-2">
                 <Input
                   required
@@ -741,48 +662,6 @@ export default function Index() {
                   />
                 </div>
               </div>
-              {(
-                (selectedUser?.Role !== "Guest" &&
-                  selectedUser?.LocationGroupID) ||
-                []
-              )?.length > 0 && (
-                <div className="w-full">
-                  <div className="flex gap-2">
-                    {selectedUser.LocationGroupID?.map(
-                      (locationGroupID: any, index: any) => {
-                        const locationGroup = locationGroupData.find(
-                          (locationGroup) =>
-                            locationGroup.LocationGroupId === locationGroupID
-                        );
-                        return (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 bg-background border border-border px-2 rounded-md"
-                          >
-                            <h1 className="font-bold text-sm">
-                              {locationGroup?.LocationGroupName}
-                            </h1>
-                            <div
-                              className="cursor-pointer"
-                              onClick={() =>
-                                setSelectedUser({
-                                  ...selectedUser,
-                                  LocationGroupID:
-                                    selectedUser.LocationGroupID?.filter(
-                                      (id: any) => id !== locationGroupID
-                                    ),
-                                })
-                              }
-                            >
-                              <X className="w-4" />
-                            </div>
-                          </div>
-                        );
-                      }
-                    )}
-                  </div>
-                </div>
-              )}
               <div className="w-full flex items-center gap-2">
                 <Input
                   required

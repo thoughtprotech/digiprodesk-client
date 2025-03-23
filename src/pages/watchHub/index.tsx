@@ -32,7 +32,7 @@ export default function Index() {
       const { userToken } = cookies;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/property`,
         {
           method: "GET",
           headers: {
@@ -43,16 +43,8 @@ export default function Index() {
       );
       if (response.status === 200) {
         const data = await response.json();
-        setUserLocationListData(
-          data.filter((loc: Location) =>
-            loc.LocationParentID?.split(",").map((loc) => Number(loc) !== 0)
-          )
-        );
-        setFilteredUserLocationData(
-          data.filter((loc: Location) =>
-            loc.LocationParentID?.split(",").map((loc) => Number(loc) !== 0)
-          )
-        );
+        setUserLocationListData(data);
+        setFilteredUserLocationData(data);
       }
     } catch (error) {
       console.error(error);

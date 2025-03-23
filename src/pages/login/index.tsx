@@ -48,7 +48,7 @@ export default function Login() {
         if (role === "Guest") {
           router.push('/guest');
         } else {
-          router.push('/checkInHub');
+          router.push('/watchHub');
         }
         // router.push('/checkInHub');
         return toast.custom((t: any) => <Toast content="Logged In Successfully" type="success" t={t} />);
