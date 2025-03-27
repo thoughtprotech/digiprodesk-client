@@ -107,7 +107,6 @@ export default function Index() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("USER LOC DATA", data);
         if (data.length === 0) {
           setUserLocationID(null);
         }

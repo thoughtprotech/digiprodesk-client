@@ -246,11 +246,7 @@ export default function Index({
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching User Details"
-        />
+        <Toast t={t} type="error" content="Error Fetching User Details" />
       ));
     }
   };
@@ -277,20 +273,12 @@ export default function Index({
         logOut(router);
       } else {
         return toast.custom((t: any) => (
-          <Toast
-            t={t}
-            type="error"
-            content="Error Fetching Role Details"
-          />
+          <Toast t={t} type="error" content="Error Fetching Role Details" />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching Role Details"
-        />
+        <Toast t={t} type="error" content="Error Fetching Role Details" />
       ));
     }
   };
@@ -325,21 +313,51 @@ export default function Index({
       } else {
         console.log({ response });
         return toast.custom((t: any) => (
-          <Toast
-            t={t}
-            type="error"
-            content="Error Fetching User Status"
-          />
+          <Toast t={t} type="error" content="Error Fetching User Status" />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching User Status"
-        />
+        <Toast t={t} type="error" content="Error Fetching User Status" />
       ));
+    }
+  };
+
+  const heartBeat = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+      const decoded = jwt.decode(userToken) as {
+        userName: string;
+        exp: number;
+        role: string;
+      };
+      const { role } = decoded;
+      console.log("Heart Beat");
+      if (role == "Host") {
+        console.log("Sending Heart Beat");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hostCheck`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
+            },
+            body: JSON.stringify({
+              status: userOnline ? "Available" : "Away",
+            }),
+          }
+        );
+
+        if (response.status === 200) {
+          console.log("Heart Beat Sent");
+        } else if (response.status === 401) {
+          logOut(router);
+        }
+      }
+    } catch {
+      console.error("Error Sending Heart Beat");
     }
   };
 
@@ -373,6 +391,13 @@ export default function Index({
     fetchUserDetails();
     fetchRoleDetails();
     fetchUserStatus();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      heartBeat();
+    }, 120000);
+    return () => clearInterval(interval);
   }, []);
 
   const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
