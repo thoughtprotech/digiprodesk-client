@@ -385,6 +385,10 @@ export default function Locations({
     fetchUserListData();
   }, []);
 
+  useEffect(() => {
+    console.log({ selectedLocation });
+  }, [selectedLocation]);
+
   return (
     <div className="w-full h-full overflow-y-auto flex flex-col relative">
       <div className="flex items-center justify-between sticky top-0 bg-background pb-2 pr-2 border-b border-b-border">
@@ -523,7 +527,7 @@ export default function Locations({
                     options={userListData?.map((user) => {
                       return { value: user.UserName, label: user.DisplayName };
                     })}
-                    placeholder="Select Location Type"
+                    placeholder="Select Location Manager"
                     onChange={(e) =>
                       setCreateLocationFormData({
                         ...createLocationFormData,
@@ -757,6 +761,8 @@ export default function Locations({
                       setSelectedLocation({
                         ...selectedLocation!,
                         LocationType: e.target.value,
+                        LocationParentID: "",
+                        LocationManager: null,
                       })
                     }
                     defaultValue={selectedLocation!.LocationType}
@@ -768,7 +774,7 @@ export default function Locations({
                     options={userListData?.map((user) => {
                       return { value: user.UserName, label: user.DisplayName };
                     })}
-                    placeholder="Select Location Type"
+                    placeholder="Select Location Manager"
                     onChange={(e) =>
                       setSelectedLocation({
                         ...selectedLocation,
