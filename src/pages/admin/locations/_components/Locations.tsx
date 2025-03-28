@@ -444,7 +444,7 @@ export default function Locations({
                       </div>
                       {location.LocationType === "Property" &&
                         location.LocationParentID !== "" && (
-                          <div className="w-full flex gap-1 items-center">
+                          <div className="w-full flex gap-1 items-start">
                             <h1 className="font-bold text-sm text-textAlt">
                               Control
                             </h1>
