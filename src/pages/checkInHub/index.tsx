@@ -311,11 +311,6 @@ export default function Index() {
       mediaConnectionRef.current = null;
     }
 
-    // Close current video streams
-    if (currentUserVideoRef.current) {
-      currentUserVideoRef.current.srcObject = null;
-    }
-
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current); // Clear the interval
       recordingIntervalRef.current = null;
@@ -323,7 +318,7 @@ export default function Index() {
 
     if (currentUserVideoRef.current && currentUserVideoRef.current.srcObject) {
       const stream = currentUserVideoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
       currentUserVideoRef.current.srcObject = null;
     }
     socket.emit("end-call", JSON.stringify({ roomId }));
