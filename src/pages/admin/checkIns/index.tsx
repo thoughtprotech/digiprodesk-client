@@ -170,7 +170,7 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="w-full h-fit grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
           {filteredLocationList.map((loc) => (
             <div key={loc.LocationID}>
               <div className="w-full h-fit rounded-md bg-foreground border border-border flex flex-col">
@@ -181,8 +181,8 @@ export default function Index() {
                   <div className="w-full flex items-center gap-2">
                     <div className="bg-text w-12 h-12 rounded-full flex items-center justify-center">
                       <h1 className="text-textAlt font-bold text-2xl">
-                        {loc.LocationName.split(" ")[0].slice(0, 1) +
-                          loc.LocationName.split(" ")[1].slice(0, 1)}
+                        {loc?.LocationName?.split(" ")[0]?.slice(0, 1) +
+                          loc?.LocationName?.split(" ")[1]?.slice(0, 1)}
                       </h1>
                     </div>
                     <div>
