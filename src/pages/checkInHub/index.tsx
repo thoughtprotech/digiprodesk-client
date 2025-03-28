@@ -91,6 +91,23 @@ export default function Index() {
   const [transferCallModal, setTransferCallModal] = useState(false);
   const [userLocationID, setUserLocationID] = useState<number | null>(null);
 
+  // Prevent the user from refreshing the tab while in a call
+  useEffect(() => {
+    if (!inCall.status) return;
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent): void => {
+      // Prevent the default action and set returnValue to trigger the confirmation dialog.
+      event.preventDefault();
+      event.returnValue = ""; // This value is ignored by most browsers.
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [inCall.status]);
+
   const fetchUserLocationGroupId = async () => {
     try {
       const cookies = parseCookies();
