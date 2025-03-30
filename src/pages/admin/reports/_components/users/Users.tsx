@@ -42,7 +42,10 @@ export default function Users() {
   const [userList, setUserList] = useState<UserReport[]>([]);
   const [filteredUserList, setFilteredUserList] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedUserName, setSelectedUserName] = useState("");
+  const [selectedUserName, setSelectedUserName] = useState({
+    username: "",
+    displayname: "",
+  });
 
   const filterUserList = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -100,7 +103,10 @@ export default function Users() {
 
   const handleDrawerOpen = (user: any) => {
     console.log({ user });
-    setSelectedUserName(user.username);
+    setSelectedUserName({
+      username: user.username,
+      displayname: user.displayname,
+    });
     setDrawerOpen(true);
   };
 
@@ -188,7 +194,7 @@ export default function Users() {
                     }`}
                     onClick={handleDrawerOpen.bind(null, row)}
                   >
-                    <td className="py-2 px-4 font-medium">{row.username}</td>
+                    <td className="py-2 px-4 font-medium">{row.displayname}</td>
                     <td className="py-2 px-4">
                       <div className="">{formatDuration(row.AwayDuration)}</div>
                     </td>

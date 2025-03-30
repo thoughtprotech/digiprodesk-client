@@ -11,7 +11,10 @@ import toast from "react-hot-toast";
 type DrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  user?: any;
+  user?: {
+    username: string;
+    displayname: string;
+  };
 };
 
 interface CallData {
@@ -40,7 +43,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
       endDate = new Date().toISOString();
     }
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users/${user}?startDate=${startDate}&endDate=${endDate}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users/${user?.username}?startDate=${startDate}&endDate=${endDate}`,
       {
         method: "GET",
         headers: {
@@ -88,7 +91,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
       >
         <div className="w-full flex items-center justify-between px-4 border-b border-b-border">
           <div>
-            <h1 className="text-3xl font-bold">{user}</h1>
+            <h1 className="text-3xl font-bold">{user?.displayname}</h1>
           </div>
           <div className="p-4">
             <button onClick={onClose} className="text-text focus:outline-none">
