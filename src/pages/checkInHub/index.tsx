@@ -609,7 +609,13 @@ export default function Index() {
       mediaRecorderRef.current.stop(); // Stop recording
       mediaRecorderRef.current = null;
     }
-
+    transferCall(inCall.roomId, locationManager);
+    socket.on("manager-not-available", () => {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Manager Not Available" />
+      ));
+    });
+    
     setScreenshotImage([]);
     setTakeScreenshot(false);
     setBookingId("");
@@ -621,7 +627,6 @@ export default function Index() {
     });
     setMicMuted(false);
     setCameraOff(false);
-    transferCall(inCall.roomId, locationManager);
     setTransferCallModal(false);
     return toast.custom((t: any) => (
       <Toast t={t} type="info" content="Call Transferred" />
@@ -705,6 +710,7 @@ export default function Index() {
   };
 
   const handleCallTransfer = () => {
+    fetchManagerList();
     setTransferCallModal(true);
   };
 
