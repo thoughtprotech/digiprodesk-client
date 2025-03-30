@@ -30,50 +30,53 @@ export default function DateRangeSelect({
       | "custom"
   ) => {
     setDateRange(value);
-  
-    let startDate: Date;
-  
-    // For all cases, end date is set to tomorrow at 12 AM.
-    const now = new Date();
-    const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
-  
+
     if (value === "custom") {
-      // For custom, default start is today 12 AM
-      startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-      
-      // Optionally update UI fields for custom date selection
-      const todayString = startDate.toISOString().split("T")[0];
+      // Set defaults for custom fields (e.g., today's date)
+      const todayString = new Date().toISOString().split("T")[0]; // format yyyy-mm-dd
       setCustomStart(todayString);
       setCustomEnd(todayString);
-      
+      // Call the callback with today's date as default
+      const startDate = new Date(todayString);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(todayString);
+      endDate.setHours(23, 59, 59, 999);
       callBack(startDate.toISOString(), endDate.toISOString());
       return;
     }
-  
-    // For preset ranges, compute the start date based on the value
+
+    const now = new Date();
+    let startDate: Date;
+    const endDate: Date = now;
+
     switch (value) {
       case "today":
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        startDate = new Date(now.setHours(0, 0, 0, 0));
         break;
       case "sevenDays":
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7, 0, 0, 0);
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 7);
         break;
       case "fifteenDays":
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 15, 0, 0, 0);
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 15);
         break;
       case "thirtyDays":
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30, 0, 0, 0);
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 30);
         break;
       case "sixtyDays":
-        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 60, 0, 0, 0);
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 60);
         break;
       default:
         throw new Error("Invalid date range selection");
     }
-  
+
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(23, 59, 59, 999);
     callBack(startDate.toISOString(), endDate.toISOString());
   };
-  
 
   const handleCustomStartChange = (
     event: React.ChangeEvent<HTMLInputElement>
