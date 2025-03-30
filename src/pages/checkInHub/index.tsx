@@ -597,7 +597,32 @@ export default function Index() {
     ));
   };
 
-  const handleCallTransferCallback = (locationManager: string) => {
+  const handleCallTransferCallback = async (locationManager: string) => {
+    // Trigger the call transfer
+    transferCall(inCall.roomId, locationManager);
+
+    // Create a promise that rejects if "manager-not-available" is received.
+    // Adjust the timeout as needed.
+    try {
+      await new Promise<void>((resolve, reject) => {
+        // Listen for the manager-not-available event once.
+        socket.once("manager-not-available", () => {
+          toast.custom((t: any) => (
+            <Toast t={t} type="error" content="Manager Not Available" />
+          ));
+          reject(new Error("Manager not available"));
+        });
+
+        // Optionally, resolve after a short delay if no event is fired.
+        // This delay should be as long as it takes to know whether the event will fire.
+        setTimeout(() => resolve(), 2000);
+      });
+    } catch {
+      // Early exit if the event is detected.
+      return;
+    }
+
+    // The code below will only execute if "manager-not-available" did not fire.
     if (mediaConnectionRef.current) {
       mediaConnectionRef.current.close();
       mediaConnectionRef.current = null;
@@ -609,13 +634,7 @@ export default function Index() {
       mediaRecorderRef.current.stop(); // Stop recording
       mediaRecorderRef.current = null;
     }
-    transferCall(inCall.roomId, locationManager);
-    socket.on("manager-not-available", () => {
-      return toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Manager Not Available" />
-      ));
-    });
-    
+
     setScreenshotImage([]);
     setTakeScreenshot(false);
     setBookingId("");
@@ -628,6 +647,7 @@ export default function Index() {
     setMicMuted(false);
     setCameraOff(false);
     setTransferCallModal(false);
+
     return toast.custom((t: any) => (
       <Toast t={t} type="info" content="Call Transferred" />
     ));
