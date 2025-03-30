@@ -19,8 +19,8 @@ export default function Index() {
 
   const fetchCallListData = async (
     locationID: number,
-    startDate?: string,
-    endDate?: string
+    startDate: string = "",
+    endDate: string = ""
   ) => {
     try {
       const cookies = parseCookies();
@@ -231,7 +231,7 @@ export default function Index() {
                     </td>
                     <td className="w-1/6 py-2 px-4 border-b border-b-border">
                       {row?.callstartdatetime
-                        ? new Date(row.callstartdatetime).toLocaleTimeString()
+                        ? new Date(row.callstartdatetime).toLocaleString()
                         : "N/A"}
                     </td>
                     <td className="w-1/6 py-2 px-4 border-b border-b-border">
@@ -249,6 +249,8 @@ export default function Index() {
                       ? "text-green-500 bg-green-600/20"
                       : row.callstatus === "On Hold"
                       ? "text-blue-500 bg-blue-600/20"
+                      : row.callstatus === "Completed"
+                      ? "text-indigo-600 bg-indigo-600/20"
                       : "text-red-600 bg-red-600/20"
                   }`}
                       >
