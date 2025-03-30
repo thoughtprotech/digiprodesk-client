@@ -9,6 +9,7 @@ import { FileDown } from "lucide-react";
 import exportToExcel from "@/utils/exportToExcel";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
 import Drawer from "./_components/Drawer";
+import formatDuration from "@/utils/formatSeconds";
 
 interface UserReport {
   UserName: string;
@@ -39,7 +40,7 @@ interface UserReport {
 
 export default function Users() {
   const [userList, setUserList] = useState<UserReport[]>([]);
-  const [filteredUserList, setFilteredUserList] = useState<UserReport[]>([]);
+  const [filteredUserList, setFilteredUserList] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedUserName, setSelectedUserName] = useState("");
 
@@ -98,7 +99,8 @@ export default function Users() {
   };
 
   const handleDrawerOpen = (user: any) => {
-    setSelectedUserName(user.UserName);
+    console.log({ user });
+    setSelectedUserName(user.User);
     setDrawerOpen(true);
   };
 
@@ -134,40 +136,37 @@ export default function Users() {
                 User
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Away Duration
+                Away Duration (HH:MM)
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Available Duration
+                Available Duration (HH:MM)
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
                 Total Calls
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Total Call Duration
+                Missed Calls
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Average Call Duration
+                Held Calls
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
                 Calls Transferred
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Missed Calls
+                Tot. Call Duration (HH:MM)
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Calls With On Hold
+                Avg. Call Duration (HH:MM)
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Calls Without On Hold
+                Max. Call Duration (HH:MM)
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Longest Call Duration
+                Min. Call Duration (HH:MM)
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Shortest Call Duration
-              </th>
-              <th className="py-2 px-4 text-left border-b border-b-border">
-                Total Hold Duration
+                Held Call Duration (HH:MM)
               </th>
             </tr>
           </thead>
@@ -189,44 +188,37 @@ export default function Users() {
                     }`}
                     onClick={handleDrawerOpen.bind(null, row)}
                   >
-                    <td className="py-2 px-4 font-medium">{row.UserName}</td>
+                    <td className="py-2 px-4 font-medium">{row.User}</td>
                     <td className="py-2 px-4">
-                      <div className="">
-                        {row.TotalAwayDuration}
-                      </div>
+                      <div className="">{formatDuration(row.AwayDuration)}</div>
                     </td>
                     <td className={`py-2 px-4`}>
                       <div className="">
-                        {row.TotalAvailableDuration}
+                        {formatDuration(row.AvailableDuration)}
                       </div>
                     </td>
                     <td className="py-2 px-4 font-medium">{row.TotalCalls}</td>
                     <td className={`py-2 px-4 font-medium`}>
-                      {row.TotalCallDurationSeconds}
+                      {row.MissedCalls}
+                    </td>
+                    <td className={`py-2 px-4 font-medium`}>{row.HeldCalls}</td>
+                    <td className={`py-2 px-4 font-medium`}>
+                      {row.TransferredCalls}
                     </td>
                     <td className={`py-2 px-4 font-medium`}>
-                      {row.AverageCallDurationSeconds}
+                      {formatDuration(row.Totalcallduration)}
                     </td>
                     <td className={`py-2 px-4 font-medium`}>
-                      {row.NumberOfCallsTransferred}
+                      {formatDuration(row.Averagecallduration)}
                     </td>
                     <td className={`py-2 px-4 font-medium`}>
-                      {row.NumberOfMissedCalls}
+                      {formatDuration(row.Maxcallduration)}
                     </td>
                     <td className={`py-2 px-4 font-medium`}>
-                      {row.CallsWithOnHold}
+                      {formatDuration(row.Mincallduration)}
                     </td>
                     <td className={`py-2 px-4 font-medium`}>
-                      {row.CallsWithoutOnHold}
-                    </td>
-                    <td className={`py-2 px-4 font-medium`}>
-                      {row.LongestCallDuration}
-                    </td>
-                    <td className={`py-2 px-4 font-medium`}>
-                      {row.ShortestCallDuration}
-                    </td>
-                    <td className={`py-2 px-4 font-medium`}>
-                      {row.TotalHoldDuration}
+                      {formatDuration(row.Heldcallduration)}
                     </td>
                   </tr>
                 ))}
