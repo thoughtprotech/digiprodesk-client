@@ -5,7 +5,7 @@ import Users from './_components/users/Users';
 
 export default function Index() {
   const tabData = [
-    { label: "Check ins", content: <Calls /> },
+    { label: "Check Ins", content: <Calls /> },
     { label: "Users", content: <Users /> },
   ];
 
