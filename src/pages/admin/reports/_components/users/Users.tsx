@@ -100,7 +100,7 @@ export default function Users() {
 
   const handleDrawerOpen = (user: any) => {
     console.log({ user });
-    setSelectedUserName(user.User);
+    setSelectedUserName(user.username);
     setDrawerOpen(true);
   };
 
@@ -188,7 +188,7 @@ export default function Users() {
                     }`}
                     onClick={handleDrawerOpen.bind(null, row)}
                   >
-                    <td className="py-2 px-4 font-medium">{row.User}</td>
+                    <td className="py-2 px-4 font-medium">{row.username}</td>
                     <td className="py-2 px-4">
                       <div className="">{formatDuration(row.AwayDuration)}</div>
                     </td>
