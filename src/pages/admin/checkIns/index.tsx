@@ -206,7 +206,7 @@ export default function Index() {
                       <h1 className="font-bold text-3xl">
                         {loc.ManagerMissedCheckIns}
                       </h1>
-                      <h1 className="text-sm font-bold text-red-500">
+                      <h1 className="text-sm font-bold text-red-500 text-center text-nowrap">
                         Manager Missed
                       </h1>
                     </div>
