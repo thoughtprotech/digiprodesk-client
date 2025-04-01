@@ -173,7 +173,7 @@ export default function Index() {
                   className="w-full flex flex-col items-center justify-center gap-4 p-4 cursor-pointer hover:bg-highlight duration-300"
                   onClick={handleNotificationClick.bind(null, loc.locationid!)}
                 >
-                  <div className="w-full UIgrid grid-cols-3 gap-4">
+                  <div className="w-full grid grid-cols-3 gap-4">
                     <div className="flex flex-col items-start">
                       <h1 className="font-bold text-3xl">{loc.NewCheckIns}</h1>
                       <h1 className="text-sm font-bold text-purple-500">
