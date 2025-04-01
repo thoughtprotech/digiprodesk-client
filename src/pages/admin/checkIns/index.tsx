@@ -166,49 +166,44 @@ export default function Index() {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <h1 className="font-bold text-4xl">{loc.TotalCheckIns}</h1>
-                    <h1 className="text-sm font-bold text-blue-500 text-nowrap">
-                      Check Ins
-                    </h1>
+                    <h1 className="font-bold text-3xl">{loc.TotalCheckIns}</h1>
                   </div>
                 </div>
                 <div
                   className="w-full flex flex-col items-center justify-center gap-4 p-4 cursor-pointer hover:bg-highlight duration-300"
                   onClick={handleNotificationClick.bind(null, loc.locationid!)}
                 >
-                  <div className="w-full flex items-center justify-between gap-4">
+                  <div className="w-full UIgrid grid-cols-3 gap-4">
                     <div className="flex flex-col items-start">
-                      <h1 className="font-bold text-4xl">{loc.NewCheckIns}</h1>
+                      <h1 className="font-bold text-3xl">{loc.NewCheckIns}</h1>
                       <h1 className="text-sm font-bold text-purple-500">
                         New Check Ins
                       </h1>
                     </div>
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-4xl">
+                      <h1 className="font-bold text-3xl">
                         {loc.InProgressCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-orange-500">
                         In Progress
                       </h1>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-4xl">
+                    <div className="flex flex-col items-end">
+                      <h1 className="font-bold text-3xl">
                         {loc.OnHoldCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-indigo-500">
                         On Hold
                       </h1>
                     </div>
-                  </div>
-                  <div className="w-full flex items-center justify-between gap-4">
                     <div className="flex flex-col items-start">
-                      <h1 className="font-bold text-4xl">
+                      <h1 className="font-bold text-3xl">
                         {loc.MissedCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-red-500">Missed</h1>
                     </div>
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-4xl">
+                      <h1 className="font-bold text-3xl">
                         {loc.ManagerMissedCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-red-500">
@@ -216,7 +211,7 @@ export default function Index() {
                       </h1>
                     </div>
                     <div className="flex flex-col items-end">
-                      <h1 className="font-bold text-4xl">
+                      <h1 className="font-bold text-3xl">
                         {loc.AnalyticsNegativeCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-red-500">
