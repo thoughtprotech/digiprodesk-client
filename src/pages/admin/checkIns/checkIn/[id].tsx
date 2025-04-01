@@ -128,7 +128,7 @@ export default function Index() {
   ) => {
     const filteredData = callList.filter(
       (data) =>
-        data.CallBookingID?.includes(event.target.value) ||
+        data.CallBookingID?.toLocaleLowerCase()?.includes(event.target.value.toLocaleLowerCase()) ||
         data.CallID?.includes(event.target.value)
     );
     setFilteredCallList(filteredData);
@@ -637,7 +637,7 @@ export default function Index() {
               )}
             </div>
             {currentCall ? (
-              <div className="p-2">
+              <div>
                 {/* Grid of black boxes */}
                 {currentCall.CallDocuments &&
                 currentCall.CallDocuments !== "" ? (
@@ -684,7 +684,7 @@ export default function Index() {
                     ))}
                   </div>
                 ) : (
-                  <div className="w-full h-44 border-2 rounded-md border-border border-dashed flex items-center justify-center">
+                  <div className="w-full h-full mt-4 rounded-md flex items-center justify-center">
                     <h1 className="text-xl font-bold text-textAlt">
                       No Documents Uploaded
                     </h1>
@@ -708,44 +708,62 @@ export default function Index() {
                 </div>
               </div>
             </div>
-            {currentCall?.CallAnalytics !== "" ? (
-              <div className="w-full h-fit rounded-md p-2 flex flex-col gap-2">
-                <div>
-                  <h1 className="text-textAlt font-bold">Rank</h1>
-                  <h1 className="text-2xl font-bold">
-                    {currentCall?.CallAnalytics === ("POSITIVE" as string) ? (
-                      <span className="text-green-500">Positive</span>
-                    ) : currentCall?.CallAnalytics ===
-                      ("NEGATIVE" as string) ? (
-                      <span className="text-red-500">Negative</span>
-                    ) : currentCall?.CallAnalytics === ("Neutral" as string) ? (
-                      <span className="text-yellow-500">Neutral</span>
-                    ) : (
-                      <span className="text-textAlt">No Rank Available</span>
-                    )}
-                  </h1>
-                </div>
-                <div className="border-t border-t-border pt-2 w-full h-full">
-                  {currentCall?.CallReport && (
-                    <div className="w-full h-full rounded-md">
-                      <h1 className="text-textAlt font-bold">Call Report</h1>
-                      {currentCall?.CallReport === "" ? (
-                        <div className="w-full h-full flex items-center text-textAlt">
-                          <h1 className="text-textAlt font-bold text-2xl">
-                            No Report Available
+            {currentCall ? (
+              <div>
+                {currentCall?.CallAnalytics !== "" ? (
+                  <div className="w-full h-fit rounded-md p-2 flex flex-col gap-2">
+                    <div>
+                      <h1 className="text-textAlt font-bold">Rank</h1>
+                      <h1 className="text-2xl font-bold">
+                        {currentCall?.CallAnalytics ===
+                        ("POSITIVE" as string) ? (
+                          <span className="text-green-500">Positive</span>
+                        ) : currentCall?.CallAnalytics ===
+                          ("NEGATIVE" as string) ? (
+                          <span className="text-red-500">Negative</span>
+                        ) : currentCall?.CallAnalytics ===
+                          ("Neutral" as string) ? (
+                          <span className="text-yellow-500">Neutral</span>
+                        ) : (
+                          <span className="text-textAlt">
+                            No Rank Available
+                          </span>
+                        )}
+                      </h1>
+                    </div>
+                    <div className="border-t border-t-border pt-2 w-full h-full">
+                      {currentCall?.CallReport && (
+                        <div className="w-full h-full rounded-md">
+                          <h1 className="text-textAlt font-bold">
+                            Call Report
                           </h1>
+                          {currentCall?.CallReport === "" ? (
+                            <div className="w-full h-full flex items-center text-textAlt">
+                              <h1 className="text-textAlt font-bold text-2xl">
+                                No Report Available
+                              </h1>
+                            </div>
+                          ) : (
+                            <h1 className="text-text font-bold">
+                              {currentCall?.CallReport}
+                            </h1>
+                          )}
                         </div>
-                      ) : (
-                        <h1 className="text-text font-bold">{currentCall?.CallReport}</h1>
                       )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="w-full h-full mt-4 rounded-md flex items-center justify-center">
+                    <h1 className="text-xl font-bold text-textAlt">
+                      No Analytics Available
+                    </h1>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="w-full h-full rounded-md flex items-center justify-center">
                 <h1 className="text-xl font-bold text-textAlt">
-                  No Analytics Available
+                  Select A Check In
                 </h1>
               </div>
             )}

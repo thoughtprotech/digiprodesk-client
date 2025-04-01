@@ -3,71 +3,46 @@ import Layout from "@/components/Layout";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SearchInput from "@/components/ui/Search";
-import { Call, Location } from "@/utils/types";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import { parseCookies } from "nookies";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
 
 export default function Index() {
-  const [callList, setCallList] = useState<Call[]>([]);
-  const [locationList, setLocationList] = useState<Location[]>([]);
-  const [filteredLocationList, setFilteredLocationList] = useState<Location[]>(
-    []
-  );
+  const [checkInDetails, setCheckInDetails] = useState<
+    {
+      locationid: number;
+      locationname: string;
+      TotalCheckIns: string;
+      NewCheckIns: string;
+      InProgressCheckIns: string;
+      OnHoldCheckIns: string;
+      MissedCheckIns: string;
+      ManagerMissedCheckIns: string;
+      AnalyticsNegativeCheckIns: string;
+    }[]
+  >([]);
+  const [filteredCheckInDetails, setFilteredCheckInDetails] = useState<
+    {
+      locationid: number;
+      locationname: string;
+      TotalCheckIns: string;
+      NewCheckIns: string;
+      InProgressCheckIns: string;
+      OnHoldCheckIns: string;
+      MissedCheckIns: string;
+      ManagerMissedCheckIns: string;
+      AnalyticsNegativeCheckIns: string;
+    }[]
+  >([]);
 
-  const fetchCallListData = async (startDate?: string, endDate?: string) => {
-    try {
-      console.log("Fetching Call Data");
-      const cookies = parseCookies();
-      const { userToken } = cookies;
-
-      // Construct query parameters if startDate and endDate are provided
-      const queryParams =
-        startDate && endDate
-          ? `?startDate=${startDate}&endDate=${endDate}`
-          : "";
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call${queryParams}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-
-      if (response.status === 200) {
-        console.log("Fetching Call Data Successfull");
-        const data = await response.json();
-        setCallList(data);
-      } else {
-        return toast.custom((t: any) => (
-          <Toast t={t} content="Failed to fetch call list data" type="error" />
-        ));
-      }
-    } catch {
-      return toast.custom((t: any) => (
-        <Toast t={t} content="Failed to fetch call list data" type="error" />
-      ));
-    }
-  };
-
-  const fetchLocationList = async (startDate?: string, endDate?: string) => {
+  const fetchCheckInDetails = async (startDate?: string, endDate?: string) => {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      // Construct query parameters if startDate and endDate are provided
-      const queryParams =
-        startDate && endDate
-          ? `?startDate=${startDate}&endDate=${endDate}`
-          : "";
-
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/property${queryParams}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/checkInTrailDetails?startDate=${startDate}&endDate=${endDate}`,
         {
           method: "GET",
           headers: {
@@ -79,28 +54,20 @@ export default function Index() {
 
       if (response.status === 200) {
         const data = await response.json();
-        setLocationList(
-          data.filter((loc: Location) => loc.LocationType !== "Control")
-        );
-        setFilteredLocationList(
-          data.filter((loc: Location) => loc.LocationType !== "Control")
-        );
+        setCheckInDetails(data);
+        setFilteredCheckInDetails(data);
       } else {
         return toast.custom((t: any) => (
           <Toast
             t={t}
-            content="Failed to fetch location list data"
+            content="Failed to fetch check-in details"
             type="error"
           />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          content="Failed to fetch location list data"
-          type="error"
-        />
+        <Toast t={t} content="Failed to fetch check-in details" type="error" />
       ));
     }
   };
@@ -122,24 +89,19 @@ export default function Index() {
   const handleSearchCall = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const filteredData = locationList.filter((data) =>
-      data.LocationName.toLowerCase().includes(event.target.value.toLowerCase())
+    const filteredData = checkInDetails.filter((data) =>
+      data.locationname.toLowerCase().includes(event.target.value.toLowerCase())
     );
-    setFilteredLocationList(filteredData);
+    setFilteredCheckInDetails(filteredData);
   };
 
   const handleDateRangeChange = (startDate: string, endDate: string) => {
     console.log("Start Date:", startDate, "End Date:", endDate);
-    fetchCallListData(startDate, endDate);
+    fetchCheckInDetails(startDate, endDate);
   };
 
   useEffect(() => {
-    const now = new Date();
-    const startDate = new Date(now);
-    startDate.setDate(now.getDate() - 1);
-
-    fetchCallListData(startDate.toISOString(), now.toISOString());
-    fetchLocationList();
+    fetchCheckInDetails();
   }, []);
 
   return (
@@ -171,105 +133,84 @@ export default function Index() {
           </div>
         </div>
         <div className="w-full h-fit grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
-          {filteredLocationList.map((loc) => (
-            <div key={loc.LocationID}>
+          {filteredCheckInDetails.map((loc) => (
+            <div key={loc.locationid}>
               <div className="w-full h-fit rounded-md bg-foreground border border-border flex flex-col">
                 <div
                   className="w-full flex items-center justify-between gap-2 border-b border-b-border pb-2 hover:bg-highlight cursor-pointer duration-300 p-2"
-                  onClick={handleCallClick.bind(null, loc.LocationID!)}
+                  onClick={handleCallClick.bind(null, loc.locationid!)}
                 >
                   <div className="w-full flex items-center gap-2">
                     <div className="bg-text w-12 h-12 rounded-full flex items-center justify-center">
                       <h1 className="text-textAlt font-bold text-2xl">
-                        {loc?.LocationName?.split(" ")[0]?.slice(0, 1) +
-                          loc?.LocationName?.split(" ")[1]?.slice(0, 1)}
+                        {loc?.locationname?.split(" ")[0]?.slice(0, 1) +
+                          (loc?.locationname?.split(" ")[1]?.slice(0, 1)
+                            ? loc?.locationname?.split(" ")[1]?.slice(0, 1)
+                            : "")}
                       </h1>
                     </div>
                     <div>
-                      <h1 className="font-bold text-xl">{loc.LocationName}</h1>
-                    </div>
-                  </div>
-                  <div className="w-fit flex items-center justify-center">
-                    <div className="flex flex-col items-center">
-                      <h1 className="text-text font-bold text-2xl">
-                        {
-                          callList.filter(
-                            (call) =>
-                              call.CallPlacedByLocationID === loc.LocationID
-                          ).length
-                        }
-                      </h1>
-                      <h1 className="font-semibold text-xs text-blue-500 whitespace-nowrap">
-                        Check Ins
-                      </h1>
+                      <h1 className="font-bold text-xl">{loc.locationname}</h1>
                     </div>
                   </div>
                 </div>
                 <div
-                  className="w-full flex gap-1 justify-between hover:bg-highlight cursor-pointer duration-300 p-2"
-                  onClick={handleNotificationClick.bind(null, loc.LocationID!)}
+                  className="w-full flex flex-col items-center justify-center gap-4 p-4 cursor-pointer hover:bg-highlight duration-300"
+                  onClick={handleNotificationClick.bind(null, loc.locationid!)}
                 >
-                  <div className="w-full flex items-center justify-center">
+                  <div className="w-full flex items-center justify-center gap-4">
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl text-text">
-                        {
-                          callList.filter(
-                            (call) =>
-                              call.CallPlacedByLocationID === loc.LocationID &&
-                              call.CallStatus === "New"
-                          ).length
-                        }
+                      <h1 className="font-bold text-2xl">
+                        {loc.TotalCheckIns}
                       </h1>
-                      <h1 className="font-semibold text-xs text-orange-500">
-                        Pending
+                      <h1 className="text-sm font-bold text-blue-500">
+                        Check Ins
                       </h1>
                     </div>
-                  </div>
-                  <div className="w-full flex items-center justify-center">
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl text-text">
-                        {
-                          callList.filter(
-                            (call) =>
-                              call.CallPlacedByLocationID === loc.LocationID &&
-                              call.CallStatus === "In Progress"
-                          ).length
-                        }
+                      <h1 className="font-bold text-2xl">{loc.NewCheckIns}</h1>
+                      <h1 className="text-sm font-bold text-purple-500">
+                        New Check Ins
                       </h1>
-                      <h1 className="font-semibold text-xs text-green-500">
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.InProgressCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-orange-500">
                         In Progress
                       </h1>
                     </div>
-                  </div>
-                  <div className="w-full flex items-center justify-center">
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl text-text">
-                        {
-                          callList.filter(
-                            (call) =>
-                              call.CallPlacedByLocationID === loc.LocationID &&
-                              call.CallStatus === "On Hold"
-                          ).length
-                        }
+                      <h1 className="font-bold text-2xl">
+                        {loc.OnHoldCheckIns}
                       </h1>
-                      <h1 className="font-semibold text-xs text-indigo-500">
+                      <h1 className="text-sm font-bold text-indigo-500">
                         On Hold
                       </h1>
                     </div>
                   </div>
-                  <div className="w-full flex items-center justify-center">
+                  <div className="w-full flex items-center justify-center gap-4">
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl text-text">
-                        {
-                          callList.filter(
-                            (call) =>
-                              call.CallPlacedByLocationID === loc.LocationID &&
-                              call.CallStatus === "Missed"
-                          ).length
-                        }
+                      <h1 className="font-bold text-2xl">
+                        {loc.MissedCheckIns}
                       </h1>
-                      <h1 className="font-semibold text-xs text-red-500">
-                        Missed
+                      <h1 className="text-sm font-bold text-red-500">Missed</h1>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.ManagerMissedCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-red-500">
+                        Manager Missed
+                      </h1>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.AnalyticsNegativeCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-red-500">
+                        Negative
                       </h1>
                     </div>
                   </div>
