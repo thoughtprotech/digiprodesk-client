@@ -40,7 +40,7 @@ export default function Index() {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
-  
+
       // Build query parameters only if provided
       const params: { [key: string]: string } = {};
       if (startDate) {
@@ -49,8 +49,10 @@ export default function Index() {
       if (endDate) {
         params.endDate = endDate;
       }
-      const queryString = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
-  
+      const queryString = Object.keys(params).length
+        ? `?${new URLSearchParams(params).toString()}`
+        : "";
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/checkInTrailDetails${queryString}`,
         {
@@ -61,7 +63,7 @@ export default function Index() {
           },
         }
       );
-  
+
       if (response.status === 200) {
         const data = await response.json();
         setCheckInDetails(data);
@@ -81,7 +83,6 @@ export default function Index() {
       ));
     }
   };
-  
 
   // const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   //   setSearchParam(event.target.value)
@@ -164,28 +165,26 @@ export default function Index() {
                       <h1 className="font-bold text-xl">{loc.locationname}</h1>
                     </div>
                   </div>
+                  <div className="flex items-center gap-1">
+                    <h1 className="font-bold text-4xl">{loc.TotalCheckIns}</h1>
+                    <h1 className="text-sm font-bold text-blue-500 text-nowrap">
+                      Check Ins
+                    </h1>
+                  </div>
                 </div>
                 <div
                   className="w-full flex flex-col items-center justify-center gap-4 p-4 cursor-pointer hover:bg-highlight duration-300"
                   onClick={handleNotificationClick.bind(null, loc.locationid!)}
                 >
-                  <div className="w-full flex items-center justify-center gap-4">
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">
-                        {loc.TotalCheckIns}
-                      </h1>
-                      <h1 className="text-sm font-bold text-blue-500">
-                        Check Ins
-                      </h1>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">{loc.NewCheckIns}</h1>
+                  <div className="w-full flex items-center justify-between gap-4">
+                    <div className="flex flex-col items-start">
+                      <h1 className="font-bold text-4xl">{loc.NewCheckIns}</h1>
                       <h1 className="text-sm font-bold text-purple-500">
                         New Check Ins
                       </h1>
                     </div>
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">
+                      <h1 className="font-bold text-4xl">
                         {loc.InProgressCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-orange-500">
@@ -193,7 +192,7 @@ export default function Index() {
                       </h1>
                     </div>
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">
+                      <h1 className="font-bold text-4xl">
                         {loc.OnHoldCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-indigo-500">
@@ -201,23 +200,23 @@ export default function Index() {
                       </h1>
                     </div>
                   </div>
-                  <div className="w-full flex items-center justify-center gap-4">
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">
+                  <div className="w-full flex items-center justify-between gap-4">
+                    <div className="flex flex-col items-start">
+                      <h1 className="font-bold text-4xl">
                         {loc.MissedCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-red-500">Missed</h1>
                     </div>
                     <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">
+                      <h1 className="font-bold text-4xl">
                         {loc.ManagerMissedCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-red-500">
                         Manager Missed
                       </h1>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-2xl">
+                    <div className="flex flex-col items-end">
+                      <h1 className="font-bold text-4xl">
                         {loc.AnalyticsNegativeCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-red-500">
