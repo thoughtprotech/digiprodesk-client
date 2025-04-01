@@ -40,9 +40,19 @@ export default function Index() {
     try {
       const cookies = parseCookies();
       const { userToken } = cookies;
-
+  
+      // Build query parameters only if provided
+      const params: { [key: string]: string } = {};
+      if (startDate) {
+        params.startDate = startDate;
+      }
+      if (endDate) {
+        params.endDate = endDate;
+      }
+      const queryString = Object.keys(params).length ? `?${new URLSearchParams(params).toString()}` : '';
+  
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/checkInTrailDetails?startDate=${startDate}&endDate=${endDate}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/checkInTrailDetails${queryString}`,
         {
           method: "GET",
           headers: {
@@ -51,7 +61,7 @@ export default function Index() {
           },
         }
       );
-
+  
       if (response.status === 200) {
         const data = await response.json();
         setCheckInDetails(data);
@@ -71,6 +81,7 @@ export default function Index() {
       ));
     }
   };
+  
 
   // const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
   //   setSearchParam(event.target.value)
