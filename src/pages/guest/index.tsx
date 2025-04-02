@@ -387,6 +387,7 @@ export default function Index() {
 
       socket.on("call-joined", (data) => {
         if (data.CallID === currentRoomId.current) {
+          console.log({ data });
           call(data.CallAssignedTo);
           setCallStatus("inProgress");
           ringTone?.current?.pause();
