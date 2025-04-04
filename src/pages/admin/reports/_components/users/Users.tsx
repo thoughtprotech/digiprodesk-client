@@ -184,7 +184,7 @@ export default function Users() {
                 .map((row, index) => (
                   <tr
                     key={row.UserName}
-                    className={`text-sm cursor-pointer ${
+                    className={`text-sm cursor-pointer hover:bg-highlight duration-300${
                       index !==
                       filteredUserList.filter((call) => call.Role !== "Guest")
                         .length -
