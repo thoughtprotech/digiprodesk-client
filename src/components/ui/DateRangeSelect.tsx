@@ -199,13 +199,13 @@ export default function DateRangeSelect({
             type="date"
             value={customStart}
             onChange={handleCustomStartChange}
-            className="bg-background border-2 border-border rounded p-2 focus:outline-none focus:ring-0 font-bold text-sm"
+            className="custom-date-input bg-background border-2 border-border rounded p-2 focus:outline-none focus:ring-0 font-bold text-sm"
           />
           <input
             type="date"
             value={customEnd}
             onChange={handleCustomEndChange}
-            className="bg-background border-2 border-border rounded p-2 focus:outline-none focus:ring-0 font-bold text-sm"
+            className="custom-date-input bg-background border-2 border-border rounded p-2 focus:outline-none focus:ring-0 font-bold text-sm"
           />
         </div>
       )}
