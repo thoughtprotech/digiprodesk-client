@@ -9,11 +9,13 @@ import Toast from "@/components/ui/Toast";
 import { Call, Location } from "@/utils/types";
 import { ArrowLeft } from "lucide-react";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
+import { useDateContext } from "../../../context/DateContext";
 
 export default function Index() {
   const [, setCallList] = useState<Call[]>([]);
   const [filteredCallList, setFilteredCallList] = useState<any[]>([]);
   const [location, setLocation] = useState<Location>();
+  const { startDate, setStartDate, endDate, setEndDate } = useDateContext();
 
   const router = useRouter();
 
@@ -152,7 +154,11 @@ export default function Index() {
 
   useEffect(() => {
     if (router.isReady && router.query.id) {
-      fetchCallListData(Number(router.query.id));
+      if (startDate && endDate) {
+        fetchCallListData(Number(router.query.id), startDate, endDate);
+      } else {
+        fetchCallListData(Number(router.query.id));
+      }
       fetchLocation(Number(router.query.id));
     }
   }, [router.isReady, router.query.id]);
@@ -188,8 +194,12 @@ export default function Index() {
           <div>
             <DateRangeSelect
               callBack={(startDate, endDate) => {
+                setStartDate(startDate);
+                setEndDate(endDate);
                 fetchCallListData(Number(router.query.id), startDate, endDate);
               }}
+              defaultStart={startDate}
+              defaultEnd={endDate}
             />
           </div>
         </div>

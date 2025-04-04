@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import { parseCookies } from "nookies";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
+import { DateContextProvider, useDateContext } from "../../../context/DateContext";
 
 export default function Index() {
   const [checkInDetails, setCheckInDetails] = useState<
@@ -35,6 +36,8 @@ export default function Index() {
       AnalyticsNegativeCheckIns: string;
     }[]
   >([]);
+
+  const { startDate, setStartDate, endDate, setEndDate } = useDateContext();
 
   const fetchCheckInDetails = async (startDate?: string, endDate?: string) => {
     try {
@@ -109,11 +112,17 @@ export default function Index() {
 
   const handleDateRangeChange = (startDate: string, endDate: string) => {
     console.log("Start Date:", startDate, "End Date:", endDate);
+    setStartDate(startDate);
+    setEndDate(endDate);
     fetchCheckInDetails(startDate, endDate);
   };
 
   useEffect(() => {
-    fetchCheckInDetails();
+    if (startDate && endDate) {
+      fetchCheckInDetails(startDate, endDate);
+    } else {
+      fetchCheckInDetails();
+    }
   }, []);
 
   return (
@@ -129,97 +138,117 @@ export default function Index() {
         </div>
       }
     >
-      <div className="w-full h-full min-h-screen flex flex-col gap-2 bg-background px-2">
-        <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
-          <div className="w52">
-            <SearchInput placeholder="Locations" onChange={handleSearchCall} />
-          </div>
-          <div className="flex gap-2">
-            <div>
-              <DateRangeSelect
-                callBack={(startDate, endDate) =>
-                  handleDateRangeChange(startDate, endDate)
-                }
+      <DateContextProvider>
+        <div className="w-full h-full min-h-screen flex flex-col gap-2 bg-background px-2">
+          <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
+            <div className="w52">
+              <SearchInput
+                placeholder="Locations"
+                onChange={handleSearchCall}
               />
             </div>
+            <div className="flex gap-2">
+              <div>
+                <DateRangeSelect
+                  callBack={(startDate, endDate) =>
+                    handleDateRangeChange(startDate, endDate)
+                  }
+                  defaultStart={startDate}
+                  defaultEnd={endDate}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="w-full h-fit grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-          {filteredCheckInDetails.map((loc) => (
-            <div key={loc.locationid}>
-              <div className="w-full h-fit rounded-md bg-foreground border border-border flex flex-col">
-                <div
-                  className="w-full flex items-center justify-between gap-2 border-b border-b-border pb-2 hover:bg-highlight cursor-pointer duration-300 p-4"
-                  onClick={handleCallClick.bind(null, loc.locationid!)}
-                >
-                  <div className="w-full flex items-center gap-2">
-                    <div className="bg-text w-12 h-12 rounded-full flex items-center justify-center">
-                      <h1 className="text-textAlt font-bold text-2xl">
-                        {loc?.locationname?.split(" ")[0]?.slice(0, 1) +
-                          (loc?.locationname?.split(" ")[1]?.slice(0, 1)
-                            ? loc?.locationname?.split(" ")[1]?.slice(0, 1)
-                            : "")}
+          <div className="w-full h-fit grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {filteredCheckInDetails.map((loc) => (
+              <div key={loc.locationid}>
+                <div className="w-full h-fit rounded-md bg-foreground border border-border flex flex-col">
+                  <div
+                    className="w-full flex items-center justify-between gap-2 border-b border-b-border pb-2 hover:bg-highlight cursor-pointer duration-300 p-4"
+                    onClick={handleCallClick.bind(null, loc.locationid!)}
+                  >
+                    <div className="w-full flex items-center gap-2">
+                      <div className="bg-text w-12 h-12 rounded-full flex items-center justify-center">
+                        <h1 className="text-textAlt font-bold text-2xl">
+                          {loc?.locationname?.split(" ")[0]?.slice(0, 1) +
+                            (loc?.locationname?.split(" ")[1]?.slice(0, 1)
+                              ? loc?.locationname?.split(" ")[1]?.slice(0, 1)
+                              : "")}
+                        </h1>
+                      </div>
+                      <div>
+                        <h1 className="font-bold text-xl">
+                          {loc.locationname}
+                        </h1>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <h1 className="font-bold text-2xl">
+                        {loc.TotalCheckIns}
+                      </h1>
+                      <h1 className="text-blue-500 font-bold text-sm text-nowrap">
+                        Check Ins
                       </h1>
                     </div>
-                    <div>
-                      <h1 className="font-bold text-xl">{loc.locationname}</h1>
+                  </div>
+                  <div
+                    className="w-full flex items-center justify-around gap-4 p-3 cursor-pointer hover:bg-highlight duration-300 text-nowrap overflow-hidden"
+                    onClick={handleNotificationClick.bind(
+                      null,
+                      loc.locationid!
+                    )}
+                  >
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">{loc.NewCheckIns}</h1>
+                      <h1 className="text-sm font-bold text-purple-500">New</h1>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-center gap-1">
-                    <h1 className="font-bold text-2xl">{loc.TotalCheckIns}</h1>
-                    <h1 className="text-blue-500 font-bold text-sm text-nowrap">
-                      Check Ins
-                    </h1>
-                  </div>
-                </div>
-                <div
-                  className="w-full flex items-center justify-around gap-4 p-3 cursor-pointer hover:bg-highlight duration-300 text-nowrap overflow-hidden"
-                  onClick={handleNotificationClick.bind(null, loc.locationid!)}
-                >
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-2xl">{loc.NewCheckIns}</h1>
-                    <h1 className="text-sm font-bold text-purple-500">
-                      New
-                    </h1>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-2xl">
-                      {loc.InProgressCheckIns}
-                    </h1>
-                    <h1 className="text-sm font-bold text-orange-500">
-                      In Progress
-                    </h1>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-2xl">{loc.OnHoldCheckIns}</h1>
-                    <h1 className="text-sm font-bold text-indigo-500">
-                      On Hold
-                    </h1>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-2xl">{loc.MissedCheckIns}</h1>
-                    <h1 className="text-sm font-bold text-yellow-500">Missed</h1>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-2xl">
-                      {loc.ManagerMissedCheckIns}
-                    </h1>
-                    <h1 className="text-sm font-bold text-amber-500 text-center text-nowrap">
-                      Manager Missed
-                    </h1>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <h1 className="font-bold text-2xl">
-                      {loc.AnalyticsNegativeCheckIns}
-                    </h1>
-                    <h1 className="text-sm font-bold text-red-500">Negative</h1>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.InProgressCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-orange-500">
+                        In Progress
+                      </h1>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.OnHoldCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-indigo-500">
+                        On Hold
+                      </h1>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.MissedCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-yellow-500">
+                        Missed
+                      </h1>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.ManagerMissedCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-amber-500 text-center text-nowrap">
+                        Manager Missed
+                      </h1>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <h1 className="font-bold text-2xl">
+                        {loc.AnalyticsNegativeCheckIns}
+                      </h1>
+                      <h1 className="text-sm font-bold text-red-500">
+                        Negative
+                      </h1>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      </DateContextProvider>
     </Layout>
   );
 }

@@ -23,6 +23,7 @@ import Toast from "@/components/ui/Toast";
 import { Call, CallLog, Location } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
 import Modal from "@/components/ui/Modal";
+import { useDateContext } from "../../../../context/DateContext";
 
 const callMapping: {
   [key: string]: {
@@ -112,6 +113,7 @@ export default function Index() {
   });
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [videoError, setVideoError] = useState<boolean>(false);
+  const { startDate, endDate } = useDateContext();
 
   useEffect(() => {
     if (currentCall?.CallID) {
@@ -128,8 +130,9 @@ export default function Index() {
   ) => {
     const filteredData = callList.filter(
       (data) =>
-        data.CallBookingID?.toLocaleLowerCase()?.includes(event.target.value.toLocaleLowerCase()) ||
-        data.CallID?.includes(event.target.value)
+        data.CallBookingID?.toLocaleLowerCase()?.includes(
+          event.target.value.toLocaleLowerCase()
+        ) || data.CallID?.includes(event.target.value)
     );
     setFilteredCallList(filteredData);
   };
@@ -168,7 +171,7 @@ export default function Index() {
       const { userToken } = cookies;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call?CallPlacedByLocationID=${locationID}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call?CallPlacedByLocationID=${locationID}&startDate=${startDate}&endDate=${endDate}`,
         {
           method: "GET",
           headers: {

@@ -4,17 +4,17 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Toaster } from "react-hot-toast";
+import { DateContextProvider } from "../context/DateContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <CallProvider>
       <CallListProvider>
         <ThemeProvider>
-          <Component {...pageProps} />
-          <Toaster
-            position="bottom-left"
-            reverseOrder={false}
-          />
+          <DateContextProvider>
+            <Component {...pageProps} />
+          </DateContextProvider>
+          <Toaster position="bottom-left" reverseOrder={false} />
         </ThemeProvider>
       </CallListProvider>
     </CallProvider>
