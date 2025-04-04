@@ -144,12 +144,12 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div className="w-full h-fit grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div className="w-full h-fit grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
           {filteredCheckInDetails.map((loc) => (
             <div key={loc.locationid}>
               <div className="w-full h-fit rounded-md bg-foreground border border-border flex flex-col">
                 <div
-                  className="w-full flex items-center justify-between gap-2 border-b border-b-border pb-2 hover:bg-highlight cursor-pointer duration-300 p-2"
+                  className="w-full flex items-center justify-between gap-2 border-b border-b-border pb-2 hover:bg-highlight cursor-pointer duration-300 p-4"
                   onClick={handleCallClick.bind(null, loc.locationid!)}
                 >
                   <div className="w-full flex items-center gap-2">
@@ -165,59 +165,54 @@ export default function Index() {
                       <h1 className="font-bold text-xl">{loc.locationname}</h1>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <h1 className="font-bold text-3xl">{loc.TotalCheckIns}</h1>
+                  <div className="flex flex-col items-center gap-1">
+                    <h1 className="font-bold text-2xl">{loc.TotalCheckIns}</h1>
+                    <h1 className="text-blue-500 font-bold text-sm text-nowrap">
+                      Check Ins
+                    </h1>
                   </div>
                 </div>
                 <div
-                  className="w-full flex flex-col items-center justify-center gap-4 p-4 cursor-pointer hover:bg-highlight duration-300"
+                  className="w-full flex items-center justify-around gap-4 p-3 cursor-pointer hover:bg-highlight duration-300 text-nowrap overflow-hidden"
                   onClick={handleNotificationClick.bind(null, loc.locationid!)}
                 >
-                  <div className="w-full grid grid-cols-3 gap-4">
-                    <div className="flex flex-col items-start">
-                      <h1 className="font-bold text-3xl">{loc.NewCheckIns}</h1>
-                      <h1 className="text-sm font-bold text-purple-500">
-                        New Check Ins
-                      </h1>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-3xl">
-                        {loc.InProgressCheckIns}
-                      </h1>
-                      <h1 className="text-sm font-bold text-orange-500">
-                        In Progress
-                      </h1>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <h1 className="font-bold text-3xl">
-                        {loc.OnHoldCheckIns}
-                      </h1>
-                      <h1 className="text-sm font-bold text-indigo-500">
-                        On Hold
-                      </h1>
-                    </div>
-                    <div className="flex flex-col items-start">
-                      <h1 className="font-bold text-3xl">
-                        {loc.MissedCheckIns}
-                      </h1>
-                      <h1 className="text-sm font-bold text-red-500">Missed</h1>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <h1 className="font-bold text-3xl">
-                        {loc.ManagerMissedCheckIns}
-                      </h1>
-                      <h1 className="text-sm font-bold text-red-500 text-center text-nowrap">
-                        Manager Missed
-                      </h1>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <h1 className="font-bold text-3xl">
-                        {loc.AnalyticsNegativeCheckIns}
-                      </h1>
-                      <h1 className="text-sm font-bold text-red-500">
-                        Negative
-                      </h1>
-                    </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-2xl">{loc.NewCheckIns}</h1>
+                    <h1 className="text-sm font-bold text-purple-500">
+                      New
+                    </h1>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-2xl">
+                      {loc.InProgressCheckIns}
+                    </h1>
+                    <h1 className="text-sm font-bold text-orange-500">
+                      In Progress
+                    </h1>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-2xl">{loc.OnHoldCheckIns}</h1>
+                    <h1 className="text-sm font-bold text-indigo-500">
+                      On Hold
+                    </h1>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-2xl">{loc.MissedCheckIns}</h1>
+                    <h1 className="text-sm font-bold text-yellow-500">Missed</h1>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-2xl">
+                      {loc.ManagerMissedCheckIns}
+                    </h1>
+                    <h1 className="text-sm font-bold text-amber-500 text-center text-nowrap">
+                      Manager Missed
+                    </h1>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <h1 className="font-bold text-2xl">
+                      {loc.AnalyticsNegativeCheckIns}
+                    </h1>
+                    <h1 className="text-sm font-bold text-red-500">Negative</h1>
                   </div>
                 </div>
               </div>
