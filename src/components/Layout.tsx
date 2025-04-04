@@ -4,6 +4,7 @@ import {
   Backpack,
   Cctv,
   FileText,
+  LockKeyhole,
   LogOut,
   MapPinPlus,
   SmartphoneNfc,
@@ -48,6 +49,16 @@ export default function Index({
   const [logOutPassword, setLogOutPassword] = useState("");
   const passwordRef = useRef<HTMLInputElement>(null);
   const logOutPasswordRef = useRef<HTMLInputElement>(null);
+  const changePasswordRef = useRef<HTMLInputElement>(null);
+  const [changePasswordModal, setChangePasswordModal] =
+    useState<boolean>(false);
+  const [changePasswordPayload, setChangePasswordPayload] = useState<{
+    oldPassword: string;
+    newPassword: string;
+  }>({
+    oldPassword: "",
+    newPassword: "",
+  });
 
   const [userId, setUserId] = useState<string>();
   const { CallRingComponent, showCallRing } = useCallRing();
@@ -61,10 +72,80 @@ export default function Index({
     if (confirmLogoutModal) {
       logOutPasswordRef.current?.focus();
     }
-  }, [confirmToggleModal, confirmLogoutModal]);
+    if (changePasswordModal) {
+      changePasswordRef.current?.focus();
+    }
+  }, [confirmToggleModal, confirmLogoutModal, changePasswordModal]);
 
   const handleLogOutToggle = () => {
     setConfirmLogoutModal(true);
+  };
+
+  const handleChangePasswordToggle = () => {
+    setChangePasswordModal(true);
+  };
+
+  const handleCloseChangePasswordModal = () => {
+    setChangePasswordModal(false);
+    setChangePasswordPayload({
+      oldPassword: "",
+      newPassword: "",
+    });
+  };
+
+  const handlePasswordChange = async (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log("Password Change");
+
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    if (changePasswordPayload.oldPassword === "") {
+      return toast.custom((t: any) => {
+        <Toast t={t} content="Old Password Is Required" type="error" />;
+      });
+    }
+    if (changePasswordPayload.newPassword === "") {
+      return toast.custom((t: any) => {
+        <Toast t={t} content="New Password Is Required" type="error" />;
+      });
+    }
+
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/authentication/changePassword`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            oldPassword: changePasswordPayload.oldPassword,
+            newPassword: changePasswordPayload.newPassword,
+          }),
+        }
+      );
+
+      if (response.status === 200) {
+        setChangePasswordModal(false);
+        setChangePasswordPayload({
+          oldPassword: "",
+          newPassword: "",
+        });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="success" content="Password changed successfully" />
+        ));
+      } else if (response.status === 401) {
+        return toast.custom((t: any) => (
+          <Toast content="Old Password Is Invalid" type="error" t={t} />
+        ));
+      }
+    } catch (error: any) {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content={error.error} />
+      ));
+    }
   };
 
   const toggleUserAway = () => {
@@ -648,6 +729,15 @@ export default function Index({
                       </div>
                     </Tooltip>
                   </div>
+                  <div className="px-2" onClick={handleChangePasswordToggle}>
+                    <Tooltip
+                      className="transform -translate-x-20"
+                      tooltip="Change Password"
+                      position="bottom"
+                    >
+                      <LockKeyhole className="w-5 h-5" />
+                    </Tooltip>
+                  </div>
                   <div onClick={handleLogOutToggle}>
                     <Tooltip
                       className="transform -translate-x-12"
@@ -742,6 +832,58 @@ export default function Index({
                     </div>
                   </form>
                 </div>
+              </Modal>
+            )}
+            {changePasswordModal && (
+              <Modal
+                onClose={handleCloseChangePasswordModal}
+                title="Change Password"
+              >
+                <form
+                  className="flex flex-col space-y-4 pt-4"
+                  onSubmit={handlePasswordChange}
+                >
+                  <div>
+                    <Input
+                      ref={changePasswordRef}
+                      type="password"
+                      name="oldPassword"
+                      placeholder="Old Password"
+                      value={changePasswordPayload.oldPassword}
+                      onChange={(e) =>
+                        setChangePasswordPayload({
+                          ...changePasswordPayload,
+                          oldPassword: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      name="newPassword"
+                      placeholder="New Password"
+                      value={changePasswordPayload.newPassword}
+                      onChange={(e) =>
+                        setChangePasswordPayload({
+                          ...changePasswordPayload,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2 items-center justify-center">
+                    <Button text="Submit" color="foreground" type="submit" />
+                    <Button
+                      text="Cancel"
+                      color="foreground"
+                      type="button"
+                      onClick={handleCloseChangePasswordModal}
+                    />
+                  </div>
+                </form>
               </Modal>
             )}
           </div>

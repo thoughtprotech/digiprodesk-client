@@ -572,9 +572,9 @@ export default function Index() {
                   <h1 className="font-bold text-sm">Password</h1>
                   <Input
                     required
-                    placeholder="Enter Password"
+                    placeholder="Enter New Password"
                     type="password"
-                    value={selectedUser!.Password}
+                    // value={selectedUser!.Password}
                     onChange={(e) =>
                       setSelectedUser({
                         ...selectedUser!,
