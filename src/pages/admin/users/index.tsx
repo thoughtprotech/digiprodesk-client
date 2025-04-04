@@ -20,6 +20,7 @@ export default function Index() {
   const [createUserModal, setCreateUserModal] = useState<boolean>(false);
   const [createUserFormData, setCreateUserFormData] = useState<User>({
     UserName: "",
+    email: "",
     Password: "",
     DisplayName: "",
     UserPhoto: null,
@@ -36,6 +37,7 @@ export default function Index() {
   });
   const [selectedUser, setSelectedUser] = useState<User>({
     UserName: "",
+    email: "",
     Password: "",
     DisplayName: "",
     UserPhoto: null,
@@ -58,6 +60,7 @@ export default function Index() {
     setEditUserModal(true);
     const userData = {
       UserName: user.UserName || "",
+      email: user.email || "",
       Password: user.Password || "",
       DisplayName: user.DisplayName || "",
       UserPhoto: user.UserPhoto,
@@ -154,6 +157,7 @@ export default function Index() {
       if (response.status === 201) {
         setCreateUserFormData({
           UserName: "",
+          email: "",
           Password: "",
           DisplayName: "",
           UserPhoto: null,
@@ -254,6 +258,7 @@ export default function Index() {
       if (response.status === 200) {
         setSelectedUser({
           UserName: "",
+          email: "",
           Password: "",
           DisplayName: "",
           UserPhoto: null,
@@ -426,6 +431,22 @@ export default function Index() {
                   />
                 </div>
                 <div className="w-full">
+                  <h1 className="font-bold text-sm">Email</h1>
+                  <Input
+                    required
+                    type="text"
+                    value={createUserFormData.email}
+                    onChange={(e) =>
+                      setCreateUserFormData({
+                        ...createUserFormData,
+                        email: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="w-full flex gap-2 justify-between">
+                <div className="w-full">
                   <h1 className="font-bold text-sm">Password</h1>
                   <Input
                     required
@@ -439,8 +460,6 @@ export default function Index() {
                     }
                   />
                 </div>
-              </div>
-              <div className="w-full flex gap-2 justify-between">
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Display Name</h1>
                   <Input
@@ -455,7 +474,9 @@ export default function Index() {
                     }
                   />
                 </div>
-                <div className="w-full">
+              </div>
+              <div className="w-full flex items-center gap-2">
+                <div className="w-1/2">
                   <h1 className="font-bold text-sm">Role</h1>
                   <Select
                     options={rolesListData.map((role) => ({
@@ -471,8 +492,6 @@ export default function Index() {
                     placeholder="Select Role"
                   />
                 </div>
-              </div>
-              <div className="w-full flex items-center gap-2">
                 <div className="w-1/2">
                   <h1 className="font-bold text-sm">Location</h1>
                   <Select
@@ -501,18 +520,18 @@ export default function Index() {
                     placeholder="No Location Selected"
                   />
                 </div>
-                <div className="w-1/2">
-                  <h1 className="font-bold text-sm">User Photo</h1>
-                  <Input
-                    type="file"
-                    onChange={(e) =>
-                      setCreateUserFormData({
-                        ...createUserFormData,
-                        UserPhoto: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+              </div>
+              <div className="w-1/2">
+                <h1 className="font-bold text-sm">User Photo</h1>
+                <Input
+                  type="file"
+                  onChange={(e) =>
+                    setCreateUserFormData({
+                      ...createUserFormData,
+                      UserPhoto: e.target.value,
+                    })
+                  }
+                />
               </div>
               <div className="h-full flex items-center gap-2">
                 <Input
@@ -555,23 +574,31 @@ export default function Index() {
               <div className="w-full flex gap-2 justify-between">
                 <div className="w-full">
                   <h1 className="font-bold text-sm">User Name</h1>
+                  <div className="w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none cursor-not-allowed">
+                    <h1 className="text-textAlt">{selectedUser?.UserName}</h1>
+                  </div>
+                </div>
+                <div className="w-full">
+                  <h1 className="font-bold text-sm">Email</h1>
                   <Input
                     required
-                    placeholder="Enter Username"
+                    placeholder="Enter Email"
                     type="text"
-                    value={selectedUser!.UserName}
+                    value={selectedUser!.email}
                     onChange={(e) =>
                       setSelectedUser({
                         ...selectedUser!,
-                        UserName: e.target.value,
+                        email: e.target.value,
                       })
                     }
                   />
                 </div>
+              </div>
+              <div className="w-full flex gap-2 justify-between">
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Password</h1>
                   <Input
-                    required
+                    // required
                     placeholder="Enter New Password"
                     type="password"
                     // value={selectedUser!.Password}
@@ -583,8 +610,6 @@ export default function Index() {
                     }
                   />
                 </div>
-              </div>
-              <div className="w-full flex gap-2 justify-between">
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Display Name</h1>
                   <Input
@@ -600,7 +625,9 @@ export default function Index() {
                     }
                   />
                 </div>
-                <div className="w-full">
+              </div>
+              <div className="w-full flex items-center gap-2">
+                <div className="w-1/2">
                   <h1 className="font-bold text-sm">Role</h1>
                   <Select
                     options={rolesListData.map((role) => ({
@@ -617,8 +644,6 @@ export default function Index() {
                     defaultValue={selectedUser!.Role}
                   />
                 </div>
-              </div>
-              <div className="w-full flex items-center gap-2">
                 <div className="w-1/2">
                   <h1 className="font-bold text-sm">Location</h1>
                   <Select
@@ -648,6 +673,8 @@ export default function Index() {
                     defaultValue={selectedUser.LocationID?.toString()}
                   />
                 </div>
+              </div>
+              <div className="w-full flex items-center gap-2">
                 <div className="w-1/2">
                   <h1 className="font-bold text-sm">User Photo</h1>
                   <Input
@@ -661,8 +688,6 @@ export default function Index() {
                     value={`${selectedUser?.UserPhoto}`}
                   />
                 </div>
-              </div>
-              <div className="w-full flex items-center gap-2">
                 <Input
                   required
                   placeholder="Is Active"
