@@ -433,7 +433,6 @@ export default function Index() {
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Email</h1>
                   <Input
-                    required
                     type="text"
                     value={createUserFormData.email}
                     onChange={(e) =>
@@ -581,7 +580,6 @@ export default function Index() {
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Email</h1>
                   <Input
-                    required
                     placeholder="Enter Email"
                     type="text"
                     value={selectedUser!.email}
