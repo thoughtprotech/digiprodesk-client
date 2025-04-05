@@ -684,13 +684,14 @@ export default function Index() {
           <div className="w-full h-full flex items-center justify-center">
             <div className="flex flex-col items-center  justify-center space-y-5">
               <h1 className="font-bold text-xl">
-                No One Is Availalble At The Momenet. Sorry For The Inconvinience
+                Looks like our virtual assistant is taking a short break. Please
+                check back in a little while!
               </h1>
               <Button
                 onClick={() => {
                   setCallStatus("notInCall");
                 }}
-                text="Go Back"
+                text="Call Again"
                 color="gray"
               />
             </div>
