@@ -36,7 +36,13 @@ export default function Index() {
   const currentRoomId = useRef<string>("");
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<
-    "notInCall" | "calling" | "inProgress" | "onHold" | "transferred"
+    | "notInCall"
+    | "calling"
+    | "inProgress"
+    | "onHold"
+    | "transferred"
+    | "missed"
+    | "hostUnavailabe"
   >("notInCall");
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -465,6 +471,13 @@ export default function Index() {
         }
       });
 
+      socket.on("host-unavailable", async (data) => {
+        if (data.CallID === currentRoomId.current) {
+          setInCall(false);
+          setCallStatus("hostUnavailabe");
+        }
+      });
+
       peer.on("call", (call: MediaConnection) => {
         navigator.mediaDevices
           .getUserMedia({ video: true, audio: true })
@@ -665,6 +678,22 @@ export default function Index() {
               Your Call Is Being Transferred, Thank you for your patience.
               We&apos;ll be with you shortly.
             </h1>
+          </div>
+        )}
+        {callStatus === "hostUnavailabe" && (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="flex flex-col items-center  justify-center space-y-5">
+              <h1 className="font-bold text-xl">
+                No One Is Availalble At The Momenet. Sorry For The Inconvinience
+              </h1>
+              <Button
+                onClick={() => {
+                  setCallStatus("notInCall");
+                }}
+                text="Call Again"
+                color="gray"
+              />
+            </div>
           </div>
         )}
         <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
