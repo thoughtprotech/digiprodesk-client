@@ -690,7 +690,7 @@ export default function Index() {
                 onClick={() => {
                   setCallStatus("notInCall");
                 }}
-                text="Call Again"
+                text="Go Back"
                 color="gray"
               />
             </div>
