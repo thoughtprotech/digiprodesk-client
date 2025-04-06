@@ -154,9 +154,13 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
                         <td className="py-2 px-4 border-b border-b-border">
                           {new Date(
                             call.callstartdatetime
+                          ).toDateString()}{" "}
+                          {new Date(
+                            call.callstartdatetime
                           ).toLocaleTimeString()}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
+                          {new Date(call.callenddatetime).toDateString()}{" "}
                           {new Date(call.callenddatetime).toLocaleTimeString()}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">

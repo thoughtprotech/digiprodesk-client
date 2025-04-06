@@ -869,7 +869,7 @@ export default function Index({
                     />
                   </div>
                   <div className="flex gap-2 items-center justify-center">
-                    <Button text="Submit" color="foreground" type="submit" />
+                    <Button text="Save" color="foreground" type="submit" />
                     <Button
                       text="Cancel"
                       color="foreground"
