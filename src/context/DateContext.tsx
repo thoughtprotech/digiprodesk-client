@@ -14,11 +14,39 @@ type DateContextType = {
   setEndDate: Dispatch<SetStateAction<string>>;
 };
 
-export const DateContext = createContext<DateContextType | undefined>(undefined);
+export const DateContext = createContext<DateContextType | undefined>(
+  undefined
+);
 
 export const DateContextProvider = ({ children }: { children: ReactNode }) => {
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  // Create a new Date instance for today
+  const now = new Date();
+
+  // Initialize startDate as today 12:00 AM
+  const initialStartDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0
+  ).toISOString();
+
+  // Initialize endDate as today 11:59 PM
+  const initialEndDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999
+  ).toISOString();
+
+  const [startDate, setStartDate] = useState<string>(initialStartDate);
+  const [endDate, setEndDate] = useState<string>(initialEndDate);
+
   return (
     <DateContext.Provider
       value={{ startDate, setStartDate, endDate, setEndDate }}
@@ -29,9 +57,9 @@ export const DateContextProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useDateContext = (): DateContextType => {
-    const context = useContext(DateContext);
-    if (!context) {
-      throw new Error('useDateContext must be used within a DateProvider');
-    }
-    return context;
-  };
+  const context = useContext(DateContext);
+  if (!context) {
+    throw new Error("useDateContext must be used within a DateContextProvider");
+  }
+  return context;
+};
