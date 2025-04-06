@@ -28,7 +28,6 @@ import Chip from "@/components/ui/Chip";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Peer, { MediaConnection } from "peerjs";
-import { io } from "socket.io-client";
 import { parseCookies } from "nookies";
 import jwt from "jsonwebtoken";
 import { CallContext } from "@/context/CallContext";
@@ -37,6 +36,8 @@ import { CallListContext } from "@/context/CallListContext";
 import { toTitleCase } from "@/utils/stringFunctions";
 import Select from "@/components/ui/Select";
 import ElapsedTime from "@/components/ui/ElapsedTime";
+import { useSocket } from "@/context/SocketContext";
+import { io } from "socket.io-client";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -90,6 +91,8 @@ export default function Index() {
   const [selectedManager, setSelectedManager] = useState<string>("");
   const [transferCallModal, setTransferCallModal] = useState(false);
   const [userLocationID, setUserLocationID] = useState<number | null>(null);
+  const { socket } = useSocket();
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   // Prevent the user from refreshing the tab while in a call
   useEffect(() => {
@@ -245,13 +248,6 @@ export default function Index() {
     }
   };
 
-  const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
-    query: {
-      userId,
-    },
-    withCredentials: true,
-  });
-
   useEffect(() => {
     if (guestCallId && userId && userLocationID) {
       initiateCall(guestCallId);
@@ -266,7 +262,7 @@ export default function Index() {
       callId: guestId!,
       roomId: roomId,
     });
-    if (socket) {
+    if (socketRef.current) {
       hostCallingRingTone.current = new Audio("/sounds/guestRingTone.mp3");
       hostCallingRingTone.current?.play();
       setTimeout(() => {
@@ -274,7 +270,7 @@ export default function Index() {
         hostCallingRingTone!.current!.currentTime = 0;
       }, 3000);
       console.log({ roomId, LocationID: userLocationID, to: guestId });
-      socket.emit(
+      socketRef.current.emit(
         "call-guest",
         JSON.stringify({ roomId, LocationID: userLocationID, to: guestId })
       );
@@ -282,73 +278,105 @@ export default function Index() {
   };
 
   const joinCall = (roomId: string) => {
-    currentRoomId.current = roomId;
-    socket.emit("join-call", JSON.stringify({ roomId }));
+    try {
+      currentRoomId.current = roomId;
+      if (socketRef.current) {
+        console.log(socketRef.current);
+        console.log({ roomId });
+        socketRef.current?.emit("join-call", JSON.stringify({ roomId }));
+      } else {
+        console.log("No Socket Connection");
+      }
+    } catch (error) {
+      console.log("JOINING ERROR", error);
+    }
   };
 
   const endCall = (roomId: string) => {
-    if (bookingId.length > 50) {
-      return toast.custom((t: any) => (
-        <Toast t={t} type="warning" content="Booking ID Is Too Long" />
-      ));
-    }
+    if (socketRef.current) {
+      if (bookingId.length > 50) {
+        return toast.custom((t: any) => (
+          <Toast t={t} type="warning" content="Booking ID Is Too Long" />
+        ));
+      }
 
-    if (callNotes.length > 2000) {
-      return toast.custom((t: any) => (
-        <Toast t={t} type="warning" content="Call Notes Is Too Long" />
-      ));
-    }
+      if (callNotes.length > 2000) {
+        return toast.custom((t: any) => (
+          <Toast t={t} type="warning" content="Call Notes Is Too Long" />
+        ));
+      }
 
-    if (screenshotImage && screenshotImage.length > 0) {
-      updateCallInfo(roomId, bookingId, callNotes, screenshotImage);
+      if (screenshotImage && screenshotImage.length > 0) {
+        updateCallInfo(roomId, bookingId, callNotes, screenshotImage);
+      } else {
+        updateCallInfo(roomId, bookingId, callNotes);
+      }
+
+      // Close the PeerJS call if it's active
+      if (mediaConnectionRef.current) {
+        mediaConnectionRef.current.close();
+        mediaConnectionRef.current = null;
+      }
+
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current); // Clear the interval
+        recordingIntervalRef.current = null;
+      }
+
+      if (
+        currentUserVideoRef.current &&
+        currentUserVideoRef.current.srcObject
+      ) {
+        const stream = currentUserVideoRef.current.srcObject as MediaStream;
+        stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
+        currentUserVideoRef.current.srcObject = null;
+      }
+      socketRef.current.emit("end-call", JSON.stringify({ roomId }));
     } else {
-      updateCallInfo(roomId, bookingId, callNotes);
+      console.log("No Socket Connection");
     }
-
-    // Close the PeerJS call if it's active
-    if (mediaConnectionRef.current) {
-      mediaConnectionRef.current.close();
-      mediaConnectionRef.current = null;
-    }
-
-    if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current); // Clear the interval
-      recordingIntervalRef.current = null;
-    }
-
-    if (currentUserVideoRef.current && currentUserVideoRef.current.srcObject) {
-      const stream = currentUserVideoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach((track: MediaStreamTrack) => track.stop());
-      currentUserVideoRef.current.srcObject = null;
-    }
-    socket.emit("end-call", JSON.stringify({ roomId }));
   };
 
   const transferCall = (roomId: string, locationManager: string) => {
-    socket.emit("transfer-call", JSON.stringify({ roomId, locationManager }));
+    if (socketRef.current) {
+      socketRef.current.emit(
+        "transfer-call",
+        JSON.stringify({ roomId, locationManager })
+      );
+    } else {
+      console.log("No Socket Connection");
+    }
   };
 
   const holdCall = (roomId: string) => {
-    socket.emit("hold-call", JSON.stringify({ roomId }));
+    if (socketRef.current) {
+      socketRef.current.emit("hold-call", JSON.stringify({ roomId }));
 
-    // Close the PeerJS call if it's active
-    if (mediaConnectionRef.current) {
-      mediaConnectionRef.current.close();
-      mediaConnectionRef.current = null;
-    }
+      // Close the PeerJS call if it's active
+      if (mediaConnectionRef.current) {
+        mediaConnectionRef.current.close();
+        mediaConnectionRef.current = null;
+      }
 
-    // Close current video streams
-    if (currentUserVideoRef.current) {
-      currentUserVideoRef.current.srcObject = null;
-    }
-    if (recordingIntervalRef.current) {
-      clearInterval(recordingIntervalRef.current); // Clear the interval
-      recordingIntervalRef.current = null;
+      // Close current video streams
+      if (currentUserVideoRef.current) {
+        currentUserVideoRef.current.srcObject = null;
+      }
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current); // Clear the interval
+        recordingIntervalRef.current = null;
+      }
+    } else {
+      console.log("No Socket Connection");
     }
   };
 
   const resumeCall = (roomId: string) => {
-    socket.emit("resume-call", JSON.stringify({ roomId }));
+    if (socketRef.current) {
+      socketRef.current.emit("resume-call", JSON.stringify({ roomId }));
+    } else {
+      console.log("No Socket Connection");
+    }
   };
 
   useEffect(() => {
@@ -363,6 +391,10 @@ export default function Index() {
     fetchUserLocationGroupId();
     fetchManagerList();
   }, [userId]);
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
 
   useEffect(() => {
     try {
@@ -606,7 +638,7 @@ export default function Index() {
     try {
       await new Promise<void>((resolve, reject) => {
         // Listen for the manager-not-available event once.
-        socket.once("manager-not-available", () => {
+        socket?.once("manager-not-available", () => {
           toast.custom((t: any) => (
             <Toast t={t} type="error" content="Manager Not Available" />
           ));

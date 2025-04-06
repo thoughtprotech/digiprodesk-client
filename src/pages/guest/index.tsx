@@ -13,7 +13,6 @@ import { useRouter } from "next/router";
 import { parseCookies } from "nookies";
 import Peer, { MediaConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
 import jwt from "jsonwebtoken";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
@@ -26,6 +25,8 @@ import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
 import ElapsedTime from "@/components/ui/ElapsedTime";
 import logOut from "@/utils/logOut";
+import { useSocket } from "@/context/SocketContext";
+import { io } from "socket.io-client";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -55,6 +56,7 @@ export default function Index() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const callRingTone = useRef<HTMLAudioElement | null>(null);
   const ringTone = useRef<HTMLAudioElement | null>(null);
+  const { socket } = useSocket();
 
   useEffect(() => {
     ringTone.current = new Audio("/sounds/guestRingTone.mp3");
@@ -382,16 +384,9 @@ export default function Index() {
       });
       peerInstance.current = peer;
 
-      const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
-        query: {
-          userId,
-        },
-        withCredentials: true,
-      });
+      // socketRef.current = socket; // Store socket in ref
 
-      socketRef.current = socket; // Store socket in ref
-
-      socket.on("call-joined", (data) => {
+      socket?.on("call-joined", (data) => {
         if (data.CallID === currentRoomId.current) {
           console.log({ data });
           call(data.CallAssignedTo);
@@ -403,26 +398,26 @@ export default function Index() {
         }
       });
 
-      socket.on("call-on-hold", (data) => {
+      socket?.on("call-on-hold", (data) => {
         if (data.CallID === currentRoomId.current) {
           setCallStatus("onHold");
         }
       });
 
-      socket.on("call-transferred", (data) => {
+      socket?.on("call-transferred", (data) => {
         if (data.CallID === currentRoomId.current) {
           setCallStatus("transferred");
         }
       });
 
-      socket.on("call-resumed", (data) => {
+      socket?.on("call-resumed", (data) => {
         if (data.CallID === currentRoomId.current) {
           call(data.CallAssignedTo);
           setCallStatus("inProgress");
         }
       });
 
-      socket.on("call-ended", async (data) => {
+      socket?.on("call-ended", async (data) => {
         if (data.CallID === currentRoomId.current) {
           if (mediaConnectionRef.current) {
             mediaConnectionRef.current.close();
@@ -453,7 +448,7 @@ export default function Index() {
         }
       });
 
-      socket.on("incoming-host-call", (data) => {
+      socket?.on("incoming-host-call", (data) => {
         const { roomId, from, to } = data;
         console.log({ hostCall: data });
         if (to === userId) {
@@ -471,7 +466,7 @@ export default function Index() {
         }
       });
 
-      socket.on("host-unavailable", async (data) => {
+      socket?.on("host-unavailable", async (data) => {
         if (data.CallID === currentRoomId.current) {
           setInCall(false);
           setCallStatus("hostUnavailabe");
@@ -503,11 +498,15 @@ export default function Index() {
       });
 
       return () => {
-        socket.disconnect();
+        socket?.disconnect();
         peerInstance.current?.destroy();
       };
     }
   }, [userId]);
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
 
   return (
     <WithRole>

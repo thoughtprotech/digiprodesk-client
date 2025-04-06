@@ -22,11 +22,11 @@ import jwt from "jsonwebtoken";
 import { CallQueue, RoleDetail, User } from "@/utils/types";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
-import { io } from "socket.io-client";
 import { useCallRing } from "./ui/CallRing";
 import { CallListContext } from "@/context/CallListContext";
 import WithRole from "./WithRole";
 import logOut from "@/utils/logOut";
+import { useSocket } from "@/context/SocketContext";
 
 export default function Index({
   header,
@@ -64,6 +64,7 @@ export default function Index({
   const { CallRingComponent, showCallRing } = useCallRing();
   const { callList, setCallList, setCallToPickUp } =
     useContext(CallListContext);
+  const { socket } = useSocket();
 
   useEffect(() => {
     if (confirmToggleModal) {
@@ -481,16 +482,9 @@ export default function Index({
     return () => clearInterval(interval);
   }, []);
 
-  const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
-    query: {
-      userId,
-    },
-    withCredentials: true,
-  });
-
   useEffect(() => {
     try {
-      if (userId && userId !== "") {
+      if (userId && userId !== "" && socket) {
         socket.emit("get-call-list");
         socket.on("call-list-update", (data: CallQueue[]) => {
           // Identify new "pending" calls

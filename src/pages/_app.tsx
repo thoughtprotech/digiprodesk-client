@@ -5,18 +5,21 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { Toaster } from "react-hot-toast";
 import { DateContextProvider } from "../context/DateContext";
+import { SocketProvider } from "@/context/SocketContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <CallProvider>
-      <CallListProvider>
-        <ThemeProvider>
-          <DateContextProvider>
-            <Component {...pageProps} />
-          </DateContextProvider>
-          <Toaster position="bottom-left" reverseOrder={false} />
-        </ThemeProvider>
-      </CallListProvider>
-    </CallProvider>
+    <SocketProvider>
+      <CallProvider>
+        <CallListProvider>
+          <ThemeProvider>
+            <DateContextProvider>
+              <Component {...pageProps} />
+            </DateContextProvider>
+            <Toaster position="bottom-left" reverseOrder={false} />
+          </ThemeProvider>
+        </CallListProvider>
+      </CallProvider>
+    </SocketProvider>
   );
 }
