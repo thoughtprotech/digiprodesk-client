@@ -488,7 +488,7 @@ export default function Index({
         socket.emit("get-call-list");
         socket.on("call-list-update", (data: CallQueue[]) => {
           // Identify new "pending" calls
-          const newPendingCalls = data.filter(
+          let newPendingCalls = data.filter(
             (call) =>
               call.CallStatus === "New" &&
               call.CallPlacedByUserName !== userId &&
@@ -502,6 +502,7 @@ export default function Index({
             newPendingCalls.map((call) => {
               showCallRing(call, () => {
                 setCallToPickUp(call);
+                newPendingCalls = newPendingCalls.filter((c) => c.CallID !== call.CallID);
                 router.push("/checkInHub");
               });
             });
