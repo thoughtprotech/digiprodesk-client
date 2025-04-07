@@ -470,6 +470,9 @@ export default function Index() {
         if (data.CallID === currentRoomId.current) {
           setInCall(false);
           setCallStatus("hostUnavailabe");
+          setTimeout(() => {
+            setCallStatus("notInCall");
+          }, 10000);
         }
       });
 
@@ -506,7 +509,7 @@ export default function Index() {
 
   useEffect(() => {
     socketRef.current = socket;
-  }, [socket,]);
+  }, [socket]);
 
   return (
     <WithRole>
@@ -686,13 +689,6 @@ export default function Index() {
                 Looks like our virtual assistant is taking a short break. Please
                 check back in a little while!
               </h1>
-              <Button
-                onClick={() => {
-                  setCallStatus("notInCall");
-                }}
-                text="Call Again"
-                color="gray"
-              />
             </div>
           </div>
         )}
