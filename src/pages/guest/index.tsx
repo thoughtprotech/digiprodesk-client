@@ -502,11 +502,11 @@ export default function Index() {
         peerInstance.current?.destroy();
       };
     }
-  }, [userId]);
+  }, [userId, socket]);
 
   useEffect(() => {
     socketRef.current = socket;
-  }, [socket]);
+  }, [socket,]);
 
   return (
     <WithRole>

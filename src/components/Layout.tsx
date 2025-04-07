@@ -521,7 +521,7 @@ export default function Index({
         <Toast t={t} type="error" content="Error Connecting to Socket" />
       ));
     }
-  }, [userId]);
+  }, [userId, socket]);
 
   if (user) {
     return (

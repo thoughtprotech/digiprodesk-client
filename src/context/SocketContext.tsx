@@ -44,6 +44,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
+    console.log({ userToken });
     if (!userToken) {
       // If there's no token (user is logged out), disconnect any active socket.
       if (socket) {
