@@ -93,6 +93,35 @@ export default function Index() {
   const [userLocationID, setUserLocationID] = useState<number | null>(null);
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
+  const [isManager, setIsManager] = useState<boolean>(false);
+
+  const checkManager = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hostUserStatus/${userId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data[0]) {
+          setIsManager(data[0]?.ismanager === 1);
+        }
+      }
+    } catch (error) {
+      console.log({ error });
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Performing Manager Check" />
+      ));
+    }
+  };
 
   // Prevent the user from refreshing the tab while in a call
   useEffect(() => {
@@ -390,6 +419,7 @@ export default function Index() {
   useEffect(() => {
     fetchUserLocationGroupId();
     fetchManagerList();
+    checkManager();
   }, [userId]);
 
   useEffect(() => {
@@ -1168,15 +1198,17 @@ export default function Index() {
                         }
                         onClick={handleToggleCamera}
                       />
-                      <Button
-                        color="cyan"
-                        icon={
-                          <Tooltip tooltip="Transfer  Call">
-                            <PhoneOutgoing className="w-6 h-6" />
-                          </Tooltip>
-                        }
-                        onClick={handleCallTransfer}
-                      />
+                      {!isManager && (
+                        <Button
+                          color="cyan"
+                          icon={
+                            <Tooltip tooltip="Transfer  Call">
+                              <PhoneOutgoing className="w-6 h-6" />
+                            </Tooltip>
+                          }
+                          onClick={handleCallTransfer}
+                        />
+                      )}
                       <Button
                         color="indigo"
                         icon={
