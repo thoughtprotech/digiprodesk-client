@@ -389,7 +389,11 @@ export default function Index() {
       socket?.on("call-joined", (data) => {
         if (data.CallID === currentRoomId.current) {
           console.log({ data });
-          call(data.CallAssignedTo);
+          if (data.CallTransferredTo && data.CallTransferredTo !== "") {
+            call(data.CallTransferredTo);
+          } else {
+            call(data.CallAssignedTo);
+          }
           setCallStatus("inProgress");
           ringTone?.current?.pause();
           if (ringTone.current) {
