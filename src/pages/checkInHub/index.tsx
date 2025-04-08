@@ -771,7 +771,6 @@ export default function Index() {
       callId: "",
       roomId: "",
     });
-    holdCall(inCall.roomId);
     setInCall({
       status: true,
       callId,
@@ -783,6 +782,7 @@ export default function Index() {
     } else {
       resumeCall(roomId);
     }
+    holdCall(inCall.roomId);
     toast.custom((t: any) => (
       <Toast t={t} type="info" content="Call Put On Hold" />
     ));
