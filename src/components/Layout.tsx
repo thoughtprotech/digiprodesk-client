@@ -65,6 +65,7 @@ export default function Index({
   const { callList, setCallList, setCallToPickUp } =
     useContext(CallListContext);
   const { socket } = useSocket();
+  const [joinedCallIds, setJoinedCallIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (confirmToggleModal) {
@@ -482,12 +483,29 @@ export default function Index({
     return () => clearInterval(interval);
   }, []);
 
+  const arraysEqual = (a: any[], b: string | any[]) =>
+    Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((val, index) => val === b[index]);
+
   useEffect(() => {
     try {
       if (userId && userId !== "" && socket) {
         socket.emit("get-call-list");
         socket.on("call-list-update", (data: CallQueue[]) => {
           // Identify new "pending" calls
+          if (
+            arraysEqual(
+              callList,
+              data.filter(
+                (call) =>
+                  call.AssignedToUserName === userId &&
+                  call.CallPlacedByUserName !== userId
+              )
+            )
+          )
+            return;
           let newPendingCalls = data.filter(
             (call) =>
               call.CallStatus === "New" &&
@@ -495,14 +513,18 @@ export default function Index({
               call.AssignedToUserName === userId &&
               !callList.some(
                 (existingCall) => existingCall.CallID === call.CallID
-              )
+              ) &&
+              !joinedCallIds.has(call.CallID)
           );
 
           if (newPendingCalls.length > 0 && router.query.from !== "push") {
             newPendingCalls.map((call) => {
               showCallRing(call, () => {
                 setCallToPickUp(call);
-                newPendingCalls = newPendingCalls.filter((c) => c.CallID !== call.CallID);
+                newPendingCalls = newPendingCalls.filter(
+                  (c) => c.CallID !== call.CallID
+                );
+                setJoinedCallIds((prev) => new Set(prev).add(call.CallID));
                 router.push("/checkInHub");
               });
             });
