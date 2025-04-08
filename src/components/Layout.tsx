@@ -487,10 +487,7 @@ export default function Index({
     try {
       if (userId && userId !== "" && socket) {
         socket.emit("get-call-list");
-        console.log("GETTING CALLS");
         socket.on("call-list-update", (data: CallQueue[]) => {
-          console.log("CALL LIST", { callList });
-          console.log("CALL LIST DATA", { data });
           // Identify new "pending" calls
           let newPendingCalls = data.filter(
             (call) =>
