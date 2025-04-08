@@ -483,29 +483,13 @@ export default function Index({
     return () => clearInterval(interval);
   }, []);
 
-  const arraysEqual = (a: any[], b: string | any[]) =>
-    Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every((val, index) => val === b[index]);
-
   useEffect(() => {
     try {
       if (userId && userId !== "" && socket) {
         socket.emit("get-call-list");
+        console.log("GETTING CALLS");
         socket.on("call-list-update", (data: CallQueue[]) => {
           // Identify new "pending" calls
-          if (
-            arraysEqual(
-              callList,
-              data.filter(
-                (call) =>
-                  call.AssignedToUserName === userId &&
-                  call.CallPlacedByUserName !== userId
-              )
-            )
-          )
-            return;
           let newPendingCalls = data.filter(
             (call) =>
               call.CallStatus === "New" &&
