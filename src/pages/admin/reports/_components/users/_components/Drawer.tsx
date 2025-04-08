@@ -29,7 +29,6 @@ interface CallData {
 }
 
 const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
-  console.log({ user });
   const [callData, setCallData] = useState<CallData[]>();
 
   const fetchCallData = async (startDate?: string, endDate?: string) => {
@@ -55,7 +54,6 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log({ data });
       setCallData(data);
     } else {
       toast.error("Failed to fetch call data");
@@ -68,7 +66,6 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
 
   useEffect(() => {
     fetchCallData();
-    console.log(user);
   }, [user]);
 
   return (

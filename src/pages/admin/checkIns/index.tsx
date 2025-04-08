@@ -111,7 +111,6 @@ export default function Index() {
   };
 
   const handleDateRangeChange = (startDate: string, endDate: string) => {
-    console.log("Start Date:", startDate, "End Date:", endDate);
     setStartDate(startDate);
     setEndDate(endDate);
     fetchCheckInDetails(startDate, endDate);

@@ -52,7 +52,6 @@ export default function Calls() {
         }
       );
       const data = await response.json();
-      console.log({ data });
       setCallData(data);
       setFilteredCallData(data);
     } catch {
@@ -76,7 +75,6 @@ export default function Calls() {
     setFilteredCallData(filteredUserList);
   };
   const handleDateRangeChange = (startDate: string, endDate: string) => {
-    console.log("Start Date:", startDate, "End Date:", endDate);
     fetchCallData(startDate, endDate);
   };
 

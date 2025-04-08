@@ -108,8 +108,6 @@ export default function Locations({
       const cookies = parseCookies();
       const { userToken } = cookies;
 
-      console.log({ createLocationFormData });
-
       const formData = new FormData();
       // Append all the other form fields
 
@@ -173,10 +171,6 @@ export default function Locations({
           createLocationFormData.LocationReceptionistPhoto
         );
       }
-
-      console.log({ createLocationFormData });
-
-      console.log("FormData content:", Array.from(formData.entries()));
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`,
@@ -293,10 +287,6 @@ export default function Locations({
         );
       }
 
-      console.log({ selectedLocation });
-
-      console.log("FormData content:", Array.from(formData.entries()));
-
       // Send API request
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/location`,
@@ -384,10 +374,6 @@ export default function Locations({
   useEffect(() => {
     fetchUserListData();
   }, []);
-
-  useEffect(() => {
-    console.log({ selectedLocation });
-  }, [selectedLocation]);
 
   return (
     <div className="w-full h-full overflow-y-auto flex flex-col relative">
@@ -918,7 +904,6 @@ export default function Locations({
                                                   val !== trimmedControlID
                                               )
                                           : [];
-                                      console.log({ currentValues });
                                       // Return the updated object with the joined string
                                       return {
                                         ...prev,

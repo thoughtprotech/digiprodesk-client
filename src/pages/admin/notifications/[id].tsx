@@ -43,7 +43,6 @@ export default function Index() {
 
         if (response.status === 200) {
           const data = await response.json();
-          console.log({ data });
           setCallList(
             data.sort(
               (a: any, b: any) =>
@@ -81,7 +80,6 @@ export default function Index() {
 
         if (response.status === 200) {
           const data = await response.json();
-          console.log({ data });
           setCallList(
             data.sort(
               (a: any, b: any) =>

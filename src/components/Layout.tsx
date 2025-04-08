@@ -489,6 +489,7 @@ export default function Index({
         socket.emit("get-call-list");
         console.log("GETTING CALLS");
         socket.on("call-list-update", (data: CallQueue[]) => {
+          console.log("CALL LIST", {data});
           // Identify new "pending" calls
           let newPendingCalls = data.filter(
             (call) =>

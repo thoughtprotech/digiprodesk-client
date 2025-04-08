@@ -56,7 +56,6 @@ export default function Index() {
   const [locationListData, setLocationListData] = useState<Location[]>([]);
 
   const handleOpenEditUser = (user: User) => {
-    console.log({ user });
     setEditUserModal(true);
     const userData = {
       UserName: user.UserName || "",
@@ -96,8 +95,6 @@ export default function Index() {
 
     const { UserName, Password, DisplayName, Role, LocationID } =
       createUserFormData;
-
-    // return console.log({ createUserFormData });
 
     if (!UserName || !Password || !DisplayName || !Role) {
       return toast.custom((t: any) => (
@@ -217,8 +214,6 @@ export default function Index() {
         <Toast t={t} content="Please select a location" type="warning" />
       ));
     }
-
-    console.log({ selectedUser });
 
     if (selectedUser!.Role === "") {
       return toast.custom((t: any) => (
@@ -363,10 +358,6 @@ export default function Index() {
     fetchRoleListData();
     fetchLocationListData();
   }, []);
-
-  useEffect(() => {
-    console.log({ selectedUser });
-  }, [selectedUser]);
 
   return (
     <Layout

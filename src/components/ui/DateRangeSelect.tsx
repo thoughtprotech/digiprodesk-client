@@ -54,7 +54,6 @@ function getInitialDateRange(
   ) {
     return "today";
   }
-  console.log({ diffDays });
   if (diffDays - 1 === 7) return "sevenDays";
   if (diffDays - 1 === 15) return "fifteenDays";
   if (diffDays - 1 === 30) return "thirtyDays";
@@ -84,8 +83,6 @@ export default function DateRangeSelect({
       setCustomEnd(defaultEnd);
     }
   }, [defaultStart, defaultEnd]);
-
-  console.log({ initialDateRange });
 
   const handleChangeDateRange = (value: DateRangeOption) => {
     setDateRange(value);

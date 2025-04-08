@@ -183,7 +183,6 @@ export default function Index() {
 
       if (response.status === 200) {
         const data = await response.json();
-        console.log({ data });
         setCallList(
           data.sort(
             (a: any, b: any) =>
@@ -302,7 +301,6 @@ export default function Index() {
 
       reader.onload = () => {
         const base64String = reader.result as string; // This is the base64 string with the MIME type
-        console.log({ base64String }); // This will log the base64-encoded string
         setDocumentList([...documentList, base64String]);
       };
 
@@ -313,10 +311,6 @@ export default function Index() {
       console.error("No file found");
     }
   };
-
-  useEffect(() => {
-    console.log({ documentList });
-  }, [documentList]);
 
   const updateCallInfo = async () => {
     try {

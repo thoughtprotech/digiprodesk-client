@@ -44,7 +44,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    console.log({ userToken });
     if (!userToken) {
       // If there's no token (user is logged out), disconnect any active socket.
       if (socket) {
@@ -63,7 +62,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       const newSocket = io(process.env.NEXT_PUBLIC_BACKEND_URL!, {
         auth: { userId },
       });
-      console.log("Creating new socket connection:", newSocket);
       setSocket(newSocket);
     }
   }, [userToken, socket]);

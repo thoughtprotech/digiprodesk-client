@@ -97,12 +97,10 @@ export default function Users() {
   };
 
   const handleDateRangeChange = (startDate: string, endDate: string) => {
-    console.log("Start Date:", startDate, "End Date:", endDate);
     fetchUserListData(startDate, endDate);
   };
 
   const handleDrawerOpen = (user: any) => {
-    console.log({ user });
     setSelectedUserName({
       username: user.username,
       displayname: user.displayname,
