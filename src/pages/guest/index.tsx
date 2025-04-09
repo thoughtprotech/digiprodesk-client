@@ -57,6 +57,9 @@ export default function Index() {
   const callRingTone = useRef<HTMLAudioElement | null>(null);
   const ringTone = useRef<HTMLAudioElement | null>(null);
   const { socket } = useSocket();
+  const [advertisementStatus, setAdvertisementStatus] = useState<
+    "image" | "video"
+  >("image");
 
   useEffect(() => {
     ringTone.current = new Audio("/sounds/guestRingTone.mp3");
@@ -519,6 +522,12 @@ export default function Index() {
     socketRef.current = socket;
   }, [socket]);
 
+  useEffect(() => {
+    setTimeout(() => {
+      setAdvertisementStatus("video");
+    }, 10000);
+  }, []);
+
   return (
     <WithRole>
       <div className="w-full h-screen bg-background flex flex-col text-white">
@@ -548,8 +557,7 @@ export default function Index() {
           <div className="w-full h-full flex relative">
             {/* Video Section (75% of the width) */}
             <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-              {location?.LocationAdvertisementVideo &&
-              location?.LocationAdvertisementVideo?.length > 0 ? (
+              {advertisementStatus === "video" ? (
                 <video
                   src={`${location?.LocationAdvertisementVideo}`}
                   autoPlay
@@ -565,7 +573,7 @@ export default function Index() {
                         ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
                         : "/images/background.png"
                     }
-                    alt="Background"
+                    alt=""
                     className="w-full h-full object-cover"
                   />
                 )
