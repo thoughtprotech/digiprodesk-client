@@ -27,6 +27,7 @@ import { CallListContext } from "@/context/CallListContext";
 import WithRole from "./WithRole";
 import logOut from "@/utils/logOut";
 import { useSocket } from "@/context/SocketContext";
+import { CallDetailsContext } from "@/context/CallDetailsContext";
 
 export default function Index({
   header,
@@ -67,6 +68,39 @@ export default function Index({
   const { socket } = useSocket();
   const [joinedCallIds, setJoinedCallIds] = useState<Set<string>>(new Set());
   const [userControl, setUserControl] = useState<Location>();
+  const { setGuestLocation } = useContext(CallDetailsContext);
+
+  const fetchGuestLocationDetails = async (userName: string) => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/user/${userName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setGuestLocation(data[0]);
+        });
+      } else {
+        console.log({ response });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Status" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Status" />
+      ));
+    }
+  };
 
   useEffect(() => {
     if (confirmToggleModal) {
@@ -545,6 +579,7 @@ export default function Index({
                 newPendingCalls = newPendingCalls.filter(
                   (c) => c.CallID !== call.CallID
                 );
+                fetchGuestLocationDetails(call.CallPlacedByUserName!);
                 setJoinedCallIds((prev) => new Set(prev).add(call.CallID));
                 router.push("/checkInHub");
               });

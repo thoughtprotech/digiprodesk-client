@@ -17,7 +17,7 @@ export default function CallingCard({
   resumeCall,
   roomId,
   startTime,
-  fetchUserControl,
+  fetchGuestLocationDetails,
 }: {
   title: string;
   status: string;
@@ -31,7 +31,7 @@ export default function CallingCard({
   resumeCall: (roomId: string) => void;
   roomId: string;
   startTime: string | undefined;
-  fetchUserControl: any;
+  fetchGuestLocationDetails: any;
 }) {
   const handleJoinCall = () => {
     if (inCall.status) {
@@ -48,7 +48,7 @@ export default function CallingCard({
         callId: title,
         roomId: roomId,
       });
-      fetchUserControl(title);
+      fetchGuestLocationDetails(title);
       joinCall(roomId);
     } else {
       setInCall({
@@ -56,7 +56,7 @@ export default function CallingCard({
         callId: title,
         roomId: roomId,
       });
-      fetchUserControl(title);
+      fetchGuestLocationDetails(title);
       resumeCall(roomId);
     }
     return toast.custom((t: any) => (

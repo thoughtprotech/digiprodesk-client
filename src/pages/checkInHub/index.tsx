@@ -37,7 +37,7 @@ import Select from "@/components/ui/Select";
 import ElapsedTime from "@/components/ui/ElapsedTime";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
-import { Location } from "@/utils/types";
+import { CallDetailsContext } from "@/context/CallDetailsContext";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -94,9 +94,10 @@ export default function Index() {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [isManager, setIsManager] = useState<boolean>(false);
-  const [guestLocation, setGuestLocation] = useState<Location>();
+  // const [guestLocation, setGuestLocation] = useState<Location>();
+  const {guestLocation, setGuestLocation} = useContext(CallDetailsContext);
 
-  const fetchUserControl = async (userName: string) => {
+  const fetchGuestLocationDetails = async (userName: string) => {
     const cookies = parseCookies();
     const { userToken } = cookies;
 
@@ -1051,7 +1052,7 @@ export default function Index() {
                               resumeCall={resumeCall}
                               roomId={card.CallID}
                               startTime={card.CallStartDateTime}
-                              fetchUserControl={fetchUserControl}
+                              fetchGuestLocationDetails={fetchGuestLocationDetails}
                             />
                           ))
                         ) : (
@@ -1080,7 +1081,7 @@ export default function Index() {
                           resumeCall={resumeCall}
                           roomId={card.CallID}
                           startTime={card.CallStartDateTime}
-                          fetchUserControl={fetchUserControl}
+                          fetchGuestLocationDetails={fetchGuestLocationDetails}
                         />
                       ))
                     ) : (
