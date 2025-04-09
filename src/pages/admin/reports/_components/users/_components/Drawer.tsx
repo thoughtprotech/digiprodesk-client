@@ -128,7 +128,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
                       End Time
                     </th>
                     <th className="py-2 px-4 border-b border-b-border text-left">
-                      Duration
+                      Duration (HH:MM:SS)
                     </th>
                     <th className="py-2 px-4 border-b border-b-border text-left">
                       Transferred To
@@ -164,13 +164,13 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
                           {formatDuration(call?.CallDuration)}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {call?.CallTransferredTo || "--"}
+                          {call?.CallTransferredTo || ""}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
                           {call?.callstatus}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {call?.callanalytics ? call?.callanalytics : "--"}
+                          {call?.callanalytics ? call?.callanalytics : ""}
                         </td>
                       </tr>
                     );

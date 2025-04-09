@@ -54,6 +54,7 @@ export default function Index() {
   });
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
   const [locationListData, setLocationListData] = useState<Location[]>([]);
+  const [editPassword, setEditPassword] = useState<string>("");
 
   const handleOpenEditUser = (user: User) => {
     setEditUserModal(true);
@@ -185,9 +186,9 @@ export default function Index() {
   const handleEditUser = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    const { UserName, Password, DisplayName, Role, LocationID } = selectedUser;
+    const { UserName, DisplayName, Role, LocationID } = selectedUser;
 
-    if (!UserName || !Password || !DisplayName || !Role) {
+    if (!UserName || !DisplayName || !Role) {
       return toast.custom((t: any) => (
         <Toast
           t={t}
@@ -229,15 +230,21 @@ export default function Index() {
 
       // Append all the fields (same as in handleCreateUserSubmit)
       Object.keys(selectedUser!).forEach((key) => {
-        if (key !== "UserPhoto") {
+        if (key !== "UserPhoto" && key !== "Password") {
           formData.append(key, selectedUser![key as keyof User] as any);
         }
       });
+
+      if (editPassword.length !== 0) {
+        formData.append("Password", editPassword);
+      }
 
       // Append the UserPhoto as a file if available
       if (selectedUser!.UserPhoto && selectedUser!.UserPhoto instanceof File) {
         formData.append("UserPhoto", selectedUser!.UserPhoto);
       }
+
+      console.log({ formData });
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
@@ -363,9 +370,6 @@ export default function Index() {
     <Layout
       headerTitle={
         <div className="flex items-center gap-2">
-          <div className="border-r border-r-border pr-2">
-            <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
-          </div>
           <div>
             <h1 className="font-bold text-lg">USERS</h1>
           </div>
@@ -591,12 +595,7 @@ export default function Index() {
                     placeholder="Enter New Password"
                     type="password"
                     // value={selectedUser!.Password}
-                    onChange={(e) =>
-                      setSelectedUser({
-                        ...selectedUser!,
-                        Password: e.target.value,
-                      })
-                    }
+                    onChange={(e) => setEditPassword(e.target.value)}
                   />
                 </div>
                 <div className="w-full">

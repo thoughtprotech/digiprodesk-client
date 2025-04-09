@@ -16,13 +16,14 @@ export default function CallingCard({
   joinCall,
   resumeCall,
   roomId,
-  startTime
+  startTime,
+  fetchUserControl,
 }: {
   title: string;
   status: string;
   inCall: {
     status: boolean;
-    callId: string
+    callId: string;
   };
   setInCall: any;
   setConfirmEndCall: any;
@@ -30,13 +31,14 @@ export default function CallingCard({
   resumeCall: (roomId: string) => void;
   roomId: string;
   startTime: string | undefined;
+  fetchUserControl: any;
 }) {
   const handleJoinCall = () => {
     if (inCall.status) {
       return setConfirmEndCall({
         status: true,
         callId: title,
-        roomId: roomId
+        roomId: roomId,
       });
     }
 
@@ -44,19 +46,23 @@ export default function CallingCard({
       setInCall({
         status: true,
         callId: title,
-        roomId: roomId
+        roomId: roomId,
       });
+      fetchUserControl(title);
       joinCall(roomId);
     } else {
       setInCall({
         status: true,
         callId: title,
-        roomId: roomId
+        roomId: roomId,
       });
+      fetchUserControl(title);
       resumeCall(roomId);
     }
-    return toast.custom((t: any) => (<Toast t={t} type="info" content="Call Commenced" />));
-  }
+    return toast.custom((t: any) => (
+      <Toast t={t} type="info" content="Call Commenced" />
+    ));
+  };
 
   return (
     <div className="w-full h-full bg-background rounded-lg p-2 flex flex-col space-y-2 justify-between border-2 border-border">
@@ -94,16 +100,20 @@ export default function CallingCard({
               position="bottom"
             >
               <Button
-                className={`w-fit h-fit whitespace-nowrap rounded-md ${status === "New"
-                  ? "bg-green-500/50 dark:bg-green-500/30 hover:bg-green-500 dark:hover:bg-green-500 border border-green-500"
-                  : "bg-indigo-500/50 dark:bg-indigo-500/30 hover:bg-indigo-500 dark:hover:bg-indigo-500 border border-indigo-500"
-                  } duration-300 font-bold text-sm justify-center items-center flex px-4 py-1`}
+                className={`w-fit h-fit whitespace-nowrap rounded-md ${
+                  status === "New"
+                    ? "bg-green-500/50 dark:bg-green-500/30 hover:bg-green-500 dark:hover:bg-green-500 border border-green-500"
+                    : "bg-indigo-500/50 dark:bg-indigo-500/30 hover:bg-indigo-500 dark:hover:bg-indigo-500 border border-indigo-500"
+                } duration-300 font-bold text-sm justify-center items-center flex px-4 py-1`}
                 onClick={handleJoinCall}
-                icon={status === "New" ? (
-                  <Phone className="w-4 h-4" />
-                ) : (
-                  <Play className="w-4 h-4" />
-                )} />
+                icon={
+                  status === "New" ? (
+                    <Phone className="w-4 h-4" />
+                  ) : (
+                    <Play className="w-4 h-4" />
+                  )
+                }
+              />
             </Tooltip>
           </div>
         </div>

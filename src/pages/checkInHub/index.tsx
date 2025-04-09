@@ -33,11 +33,11 @@ import jwt from "jsonwebtoken";
 import { CallContext } from "@/context/CallContext";
 import generateUUID from "@/utils/uuidGenerator";
 import { CallListContext } from "@/context/CallListContext";
-import { toTitleCase } from "@/utils/stringFunctions";
 import Select from "@/components/ui/Select";
 import ElapsedTime from "@/components/ui/ElapsedTime";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
+import { Location } from "@/utils/types";
 
 export default function Index() {
   const [inCall, setInCall] = useState<{
@@ -94,6 +94,39 @@ export default function Index() {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [isManager, setIsManager] = useState<boolean>(false);
+  const [guestLocation, setGuestLocation] = useState<Location>();
+
+  const fetchUserControl = async (userName: string) => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/user/${userName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setGuestLocation(data[0]);
+        });
+      } else {
+        console.log({ response });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Status" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Status" />
+      ));
+    }
+  };
 
   const checkManager = async () => {
     try {
@@ -800,9 +833,6 @@ export default function Index() {
     <Layout
       headerTitle={
         <div className="flex items-center gap-2">
-          <div className="border-r border-r-border pr-2">
-            <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
-          </div>
           <div>
             <h1 className="font-bold text-lg">CHECK IN HUB</h1>
           </div>
@@ -1021,6 +1051,7 @@ export default function Index() {
                               resumeCall={resumeCall}
                               roomId={card.CallID}
                               startTime={card.CallStartDateTime}
+                              fetchUserControl={fetchUserControl}
                             />
                           ))
                         ) : (
@@ -1049,6 +1080,7 @@ export default function Index() {
                           resumeCall={resumeCall}
                           roomId={card.CallID}
                           startTime={card.CallStartDateTime}
+                          fetchUserControl={fetchUserControl}
                         />
                       ))
                     ) : (
@@ -1070,7 +1102,7 @@ export default function Index() {
                           className="border-green-500 text-green-500"
                         />
                         <h1 className="font-bold text-lg">
-                          {toTitleCase(inCall?.callId || "")}
+                          {guestLocation?.LocationName || "Guest"}
                         </h1>
                       </div>
                       <div className="w-fit">

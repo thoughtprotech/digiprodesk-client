@@ -165,9 +165,6 @@ export default function Index() {
     <Layout
       headerTitle={
         <div className="flex items-center gap-2">
-          <div className="border-r border-r-border pr-2">
-            <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
-          </div>
           <div>
             <h1 className="font-bold text-lg">CHECK-IN TRAILS</h1>
           </div>
@@ -211,10 +208,10 @@ export default function Index() {
                 Assigned To
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                Start Time
+                Start
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
-                End Time
+                End
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
                 Status
@@ -238,14 +235,12 @@ export default function Index() {
                       {row.displayname}
                     </td>
                     <td className="w-1/6 py-2 px-4 border-b border-b-border">
-                      {row?.callstartdatetime
-                        ? new Date(row.callstartdatetime).toLocaleString()
-                        : "N/A"}
+                      {new Date(row?.callstartdatetime).toDateString()}{" "}
+                      {new Date(row?.callstartdatetime).toLocaleTimeString()}
                     </td>
                     <td className="w-1/6 py-2 px-4 border-b border-b-border">
-                      {row?.CallEndDateTime
-                        ? new Date(row.CallEndDateTime).toLocaleTimeString()
-                        : "N/A"}
+                      {new Date(row?.CallEndDateTime).toDateString()}{" "}
+                      {new Date(row?.CallEndDateTime).toLocaleTimeString()}
                     </td>
                     <td className={`w-1/6 py-2 px-4 border-b border-b-border`}>
                       <div

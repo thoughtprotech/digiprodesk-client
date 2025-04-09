@@ -128,9 +128,6 @@ export default function Index() {
     <Layout
       headerTitle={
         <div className="flex items-center gap-2">
-          <div className="border-r border-r-border pr-2">
-            <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
-          </div>
           <div>
             <h1 className="font-bold text-lg">CHECK-IN TRAILS</h1>
           </div>
@@ -167,8 +164,8 @@ export default function Index() {
                     onClick={handleCallClick.bind(null, loc.locationid!)}
                   >
                     <div className="w-full flex items-center gap-2">
-                      <div className="bg-text w-12 h-12 rounded-full flex items-center justify-center">
-                        <h1 className="text-textAlt font-bold text-2xl">
+                      <div className="bg-text w-10 h-10 rounded-full flex items-center justify-center">
+                        <h1 className="text-textAlt font-bold text-xl">
                           {loc?.locationname?.split(" ")[0]?.slice(0, 1) +
                             (loc?.locationname?.split(" ")[1]?.slice(0, 1)
                               ? loc?.locationname?.split(" ")[1]?.slice(0, 1)

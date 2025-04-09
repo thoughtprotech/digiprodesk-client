@@ -19,7 +19,7 @@ import Input from "./ui/Input";
 import toast from "react-hot-toast";
 import Toast from "./ui/Toast";
 import jwt from "jsonwebtoken";
-import { CallQueue, RoleDetail, User } from "@/utils/types";
+import { CallQueue, Location, RoleDetail, User } from "@/utils/types";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
 import { useCallRing } from "./ui/CallRing";
@@ -66,6 +66,7 @@ export default function Index({
     useContext(CallListContext);
   const { socket } = useSocket();
   const [joinedCallIds, setJoinedCallIds] = useState<Set<string>>(new Set());
+  const [userControl, setUserControl] = useState<Location>();
 
   useEffect(() => {
     if (confirmToggleModal) {
@@ -406,6 +407,40 @@ export default function Index({
     }
   };
 
+  const fetchUserControl = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/user`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setUserControl(data[0]);
+        });
+      } else if (response.status === 401) {
+        logOut(router);
+      } else {
+        console.log({ response });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Status" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Status" />
+      ));
+    }
+  };
+
   const heartBeat = async () => {
     try {
       const cookies = parseCookies();
@@ -474,6 +509,7 @@ export default function Index({
     fetchUserDetails();
     fetchRoleDetails();
     fetchUserStatus();
+    fetchUserControl();
   }, []);
 
   useEffect(() => {
@@ -545,6 +581,11 @@ export default function Index({
                   height={1000}
                   className="w-20"
                 />
+              </div>
+              <div className="border-r border-r-border pr-2">
+                <h1 className="font-bold text-xl">
+                  {userControl?.LocationName}
+                </h1>
               </div>
               {headerTitle}
             </div>
