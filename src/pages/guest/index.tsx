@@ -548,10 +548,10 @@ export default function Index() {
           <div className="w-full h-full flex relative">
             {/* Video Section (75% of the width) */}
             <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-              {location?.LocationVideoFeed &&
-              location?.LocationVideoFeed?.length > 0 ? (
+              {location?.LocationAdvertisementVideo &&
+              location?.LocationAdvertisementVideo?.length > 0 ? (
                 <video
-                  src={`${location?.LocationVideoFeed}`}
+                  src={`${location?.LocationAdvertisementVideo}`}
                   autoPlay
                   loop
                   muted
