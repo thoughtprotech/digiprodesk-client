@@ -525,7 +525,7 @@ export default function Index() {
   useEffect(() => {
     setTimeout(() => {
       setAdvertisementStatus("video");
-    }, 10000);
+    }, 30000);
   }, []);
 
   return (
