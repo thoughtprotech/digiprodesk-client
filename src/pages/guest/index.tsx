@@ -416,7 +416,11 @@ export default function Index() {
 
       socket?.on("call-resumed", (data) => {
         if (data.CallID === currentRoomId.current) {
-          call(data.CallAssignedTo);
+          if (data.CallTransferredTo && data.CallTransferredTo !== "") {
+            call(data.CallTransferredTo);
+          } else {
+            call(data.CallAssignedTo);
+          }
           setCallStatus("inProgress");
         }
       });
