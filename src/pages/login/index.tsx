@@ -54,7 +54,7 @@ export default function Login() {
         return toast.custom((t: any) => <Toast content="Logged In Successfully" type="success" t={t} />);
       })
     } else {
-      return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
+      return toast.custom((t: any) => <Toast content="Invalid Credentials Or Inactive User" type="error" t={t} />);
     }
   }
 

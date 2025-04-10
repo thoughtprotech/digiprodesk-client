@@ -153,7 +153,8 @@ export default function Locations({
         if (
           key !== "LocationImage" &&
           key !== "LocationLogo" &&
-          key !== "LocationReceptionistPhoto"
+          key !== "LocationReceptionistPhoto" &&
+          key !== "LocationAdvertisementVideo"
         ) {
           formData.append(key, value);
         }
@@ -172,6 +173,13 @@ export default function Locations({
         formData.append(
           "LocationReceptionistPhoto",
           createLocationFormData.LocationReceptionistPhoto
+        );
+      }
+
+      if (createLocationFormData.LocationAdvertisementVideo) {
+        formData.append(
+          "LocationAdvertisementVideo",
+          createLocationFormData.LocationAdvertisementVideo
         );
       }
 
@@ -269,7 +277,8 @@ export default function Locations({
         if (
           key !== "LocationImage" &&
           key !== "LocationLogo" &&
-          key !== "LocationReceptionistPhoto"
+          key !== "LocationReceptionistPhoto" &&
+          key !== "LocationAdvertisementVideo"
         ) {
           formData.append(key, value);
         }
@@ -288,6 +297,13 @@ export default function Locations({
         formData.append(
           "LocationReceptionistPhoto",
           selectedLocation!.LocationReceptionistPhoto
+        );
+      }
+
+      if (selectedLocation.LocationAdvertisementVideo) {
+        formData.append(
+          "LocationAdvertisementVideo",
+          selectedLocation.LocationAdvertisementVideo
         );
       }
 
@@ -570,6 +586,7 @@ export default function Locations({
                     name="LocationAdvertisementVideo"
                     value={createLocationFormData.LocationAdvertisementVideo}
                     onChange={handleCreateLocationChange}
+                    type="video"
                   />
                 </div>
               </div>
@@ -818,6 +835,7 @@ export default function Locations({
                     name="LocationAdvertisementVideo"
                     value={selectedLocation.LocationAdvertisementVideo}
                     onChange={handleEditLocationChange}
+                    type="video"
                   />
                 </div>
               </div>

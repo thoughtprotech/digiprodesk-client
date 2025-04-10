@@ -574,7 +574,7 @@ export default function Index() {
             <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
               {advertisementStatus === "video" ? (
                 <video
-                  src={`${location?.LocationAdvertisementVideo}`}
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationAdvertisementVideo}`}
                   autoPlay
                   loop
                   muted
