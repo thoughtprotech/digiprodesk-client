@@ -547,6 +547,7 @@ export default function Index({
   }, []);
 
   useEffect(() => {
+    heartBeat();
     const interval = setInterval(() => {
       heartBeat();
     }, 120000);

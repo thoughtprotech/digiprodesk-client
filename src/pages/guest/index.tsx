@@ -60,6 +60,11 @@ export default function Index() {
   const [advertisementStatus, setAdvertisementStatus] = useState<
     "image" | "video"
   >("image");
+  const callStatusRef = useRef(callStatus);
+
+  useEffect(() => {
+    callStatusRef.current = callStatus;
+  }, [callStatus]);
 
   useEffect(() => {
     ringTone.current = new Audio("/sounds/guestRingTone.mp3");
@@ -197,6 +202,16 @@ export default function Index() {
       );
       ringTone?.current?.play();
     }
+    setTimeout(() => {
+      // Use the ref to check the current status.
+      if (callStatusRef.current === "calling") {
+        console.log("CALL MISSED");
+        setCallStatus("missed");
+        setTimeout(() => {
+          router.reload();
+        }, 5000);
+      }
+    }, 30000);
   };
 
   const handleLogOut = async (event: React.FormEvent) => {
@@ -679,6 +694,14 @@ export default function Index() {
           <div className="w-full h-full flex items-center justify-center">
             <h1 className="font-bold text-xl">
               Calling Virtual Receptionist...
+            </h1>
+          </div>
+        )}
+        {callStatus === "missed" && (
+          <div className="w-full h-full flex items-center justify-center">
+            <h1 className="font-bold text-xl">
+              Looks like the call wasn&apos;t picked up, please try again after
+              sometime
             </h1>
           </div>
         )}
