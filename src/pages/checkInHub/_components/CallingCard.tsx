@@ -4,8 +4,10 @@ import { Phone, Play } from "lucide-react";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import Button from "@/components/ui/Button";
-import { toTitleCase } from "@/utils/stringFunctions";
 import ElapsedTime from "@/components/ui/ElapsedTime";
+import { parseCookies } from "nookies";
+import { useEffect, useState } from "react";
+import { Location } from "@/utils/types";
 
 export default function CallingCard({
   title,
@@ -33,6 +35,8 @@ export default function CallingCard({
   startTime: string | undefined;
   fetchGuestLocationDetails: any;
 }) {
+  const [location, setLocation] = useState<Location>();
+
   const handleJoinCall = () => {
     if (inCall.status) {
       return setConfirmEndCall({
@@ -64,6 +68,42 @@ export default function CallingCard({
     ));
   };
 
+  const fetchLocation = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/user/${title}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setLocation(data[0]);
+        });
+      } else {
+        console.log({ response });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching Guest Location" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching Guest Location" />
+      ));
+    }
+  };
+
+  useEffect(() => {
+    fetchLocation();
+  }, [title]);
+
   return (
     <div className="w-full h-full bg-background rounded-lg p-2 flex flex-col space-y-2 justify-between border-2 border-border">
       <div className="w-full flex flex-col gap-2 justify-between pb-1">
@@ -92,7 +132,7 @@ export default function CallingCard({
         </div>
         <div className="h-fit flex justify-between items-start space-x-3">
           <div>
-            <h1 className="font-bold">{toTitleCase(title || "")}</h1>
+            <h1 className="font-bold">{location?.LocationName}</h1>
           </div>
           <div>
             <Tooltip
