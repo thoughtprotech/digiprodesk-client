@@ -119,12 +119,12 @@ export default function Index() {
       } else {
         console.log({ response });
         return toast.custom((t: any) => (
-          <Toast t={t} type="error" content="Error Fetching User Status" />
+          <Toast t={t} type="error" content="Error Fetching Guest Location" />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Fetching User Status" />
+        <Toast t={t} type="error" content="Error Fetching Guest Location" />
       ));
     }
   };
@@ -202,7 +202,7 @@ export default function Index() {
           <Toast
             t={t}
             type="error"
-            content="Error Fetching User Location List 1"
+            content="Error Fetching User Location List"
           />
         ));
       }
@@ -212,7 +212,7 @@ export default function Index() {
         <Toast
           t={t}
           type="error"
-          content="Error Fetching User Location List 2"
+          content="Error Fetching User Location List"
         />
       ));
     }
