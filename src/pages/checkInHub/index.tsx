@@ -95,7 +95,7 @@ export default function Index() {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [isManager, setIsManager] = useState<boolean>(false);
   // const [guestLocation, setGuestLocation] = useState<Location>();
-  const {guestLocation, setGuestLocation} = useContext(CallDetailsContext);
+  const { guestLocation, setGuestLocation } = useContext(CallDetailsContext);
 
   const fetchGuestLocationDetails = async (userName: string) => {
     const cookies = parseCookies();
@@ -209,11 +209,7 @@ export default function Index() {
     } catch (error: any) {
       console.log("Error HERE", error);
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching User Location List"
-        />
+        <Toast t={t} type="error" content="Error Fetching User Location List" />
       ));
     }
   };
@@ -415,6 +411,24 @@ export default function Index() {
     if (socketRef.current) {
       socketRef.current.emit("hold-call", JSON.stringify({ roomId }));
 
+      if (bookingId.length > 50) {
+        return toast.custom((t: any) => (
+          <Toast t={t} type="warning" content="Booking ID Is Too Long" />
+        ));
+      }
+
+      if (callNotes.length > 2000) {
+        return toast.custom((t: any) => (
+          <Toast t={t} type="warning" content="Call Notes Is Too Long" />
+        ));
+      }
+
+      if (screenshotImage && screenshotImage.length > 0) {
+        updateCallInfo(roomId, bookingId, callNotes, screenshotImage);
+      } else {
+        updateCallInfo(roomId, bookingId, callNotes);
+      }
+
       // Close the PeerJS call if it's active
       if (mediaConnectionRef.current) {
         mediaConnectionRef.current.close();
@@ -434,11 +448,88 @@ export default function Index() {
     }
   };
 
+  const loadImage = async (path: string) => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      // Replace with your image API endpoint
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      // Read the response as a Blob
+      const blob = await response.blob();
+
+      // Convert the Blob to a base64 string using FileReader
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        // Append the base64 string to the images state
+        setScreenshotImage((prevImages) => [...prevImages, base64data]);
+      };
+    } catch (error) {
+      console.error("Error loading image:", error);
+    }
+  };
+
   const resumeCall = (roomId: string) => {
     if (socketRef.current) {
       socketRef.current.emit("resume-call", JSON.stringify({ roomId }));
+      getCallDetails(roomId);
     } else {
       console.log("No Socket Connection");
+    }
+  };
+
+  const getCallDetails = async (callId: string) => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/call/${callId}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        const data = await response.json();
+        const {
+          CallBookingID,
+          CallNotes,
+          CallDocuments,
+        }: {
+          CallBookingID: string;
+          CallNotes: string;
+          CallDocuments: string;
+        } = data;
+        console.log("Call Details Resumed", {
+          CallBookingID,
+          CallNotes,
+          CallDocuments,
+        });
+        setBookingId(CallBookingID);
+        setCallNotes(CallNotes);
+        CallDocuments.split("|").map((item) => loadImage(item));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching Call Info" />
+      ));
     }
   };
 
@@ -830,6 +921,10 @@ export default function Index() {
     setTransferCallModal(true);
   };
 
+  useEffect(() => {
+    console.log({ screenshotImage });
+  }, [screenshotImage]);
+
   return (
     <Layout
       headerTitle={
@@ -1052,7 +1147,9 @@ export default function Index() {
                               resumeCall={resumeCall}
                               roomId={card.CallID}
                               startTime={card.CallStartDateTime}
-                              fetchGuestLocationDetails={fetchGuestLocationDetails}
+                              fetchGuestLocationDetails={
+                                fetchGuestLocationDetails
+                              }
                             />
                           ))
                         ) : (
