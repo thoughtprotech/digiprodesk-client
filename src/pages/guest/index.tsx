@@ -25,8 +25,16 @@ import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
 import ElapsedTime from "@/components/ui/ElapsedTime";
 import logOut from "@/utils/logOut";
-import { useSocket } from "@/context/SocketContext";
-import { io } from "socket.io-client";
+import {
+  createLocalAudioTrack,
+  createLocalVideoTrack,
+  RemoteParticipant,
+  RemoteTrackPublication,
+  RemoteVideoTrack,
+  Room,
+  Track,
+  VideoPresets,
+} from "livekit-client";
 
 export default function Index() {
   const [userId, setUserId] = useState<string>("");
@@ -45,7 +53,6 @@ export default function Index() {
     | "missed"
     | "hostUnavailabe"
   >("notInCall");
-  const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -56,7 +63,6 @@ export default function Index() {
   const passwordRef = useRef<HTMLInputElement>(null);
   const callRingTone = useRef<HTMLAudioElement | null>(null);
   const ringTone = useRef<HTMLAudioElement | null>(null);
-  const { socket } = useSocket();
   const [advertisementStatus, setAdvertisementStatus] = useState<
     "image" | "video"
   >("image");
@@ -190,29 +196,7 @@ export default function Index() {
       });
   };
 
-  const initiateCall = () => {
-    const roomId = generateUUID();
-    currentRoomId.current = roomId;
-    setInCall(true);
-    setCallStatus("calling");
-    if (socketRef.current) {
-      socketRef.current.emit(
-        "initiate-call",
-        JSON.stringify({ roomId, LocationID: location?.LocationID })
-      );
-      ringTone?.current?.play();
-    }
-    setTimeout(() => {
-      // Use the ref to check the current status.
-      if (callStatusRef.current === "calling") {
-        console.log("CALL MISSED");
-        setCallStatus("missed");
-        setTimeout(() => {
-          router.reload();
-        }, 5000);
-      }
-    }, 30000);
-  };
+  const initiateCall = () => {};
 
   const handleLogOut = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -388,160 +372,169 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    if (userId !== "") {
-      const peer = new Peer(userId, {
-        config: {
-          iceServers: [
-            {
-              urls: process.env.NEXT_PUBLIC_TURN_SERVER_URL,
-              username: process.env.NEXT_PUBLIC_TURN_SERVER_USERNAME,
-              credential: process.env.NEXT_PUBLIC_TURN_SERVER_CREDENTIAL,
-            },
-          ],
-        },
-      });
-      peerInstance.current = peer;
-
-      // socketRef.current = socket; // Store socket in ref
-
-      socket?.on("call-joined", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          console.log({ data });
-          if (data.CallTransferredTo && data.CallTransferredTo !== "") {
-            call(data.CallTransferredTo);
-          } else {
-            call(data.CallAssignedTo);
-          }
-          setCallStatus("inProgress");
-          ringTone?.current?.pause();
-          if (ringTone.current) {
-            ringTone.current.currentTime = 0;
-          }
-        }
-      });
-
-      socket?.on("call-on-hold", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          setCallStatus("onHold");
-        }
-      });
-
-      socket?.on("call-transferred", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          setCallStatus("transferred");
-        }
-      });
-
-      socket?.on("call-resumed", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          if (data.CallTransferredTo && data.CallTransferredTo !== "") {
-            call(data.CallTransferredTo);
-          } else {
-            call(data.CallAssignedTo);
-          }
-          setCallStatus("inProgress");
-        }
-      });
-
-      socket?.on("call-ended", async (data) => {
-        if (data.CallID === currentRoomId.current) {
-          if (mediaConnectionRef.current) {
-            mediaConnectionRef.current.close();
-            mediaConnectionRef.current = null;
-          }
-          if (currentUserVideoRef.current) {
-            currentUserVideoRef.current.srcObject = null;
-          }
-          if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop(); // Stop recording
-            mediaRecorderRef.current = null;
-          }
-          if (recordingIntervalRef.current) {
-            clearInterval(recordingIntervalRef.current); // Clear the interval
-            recordingIntervalRef.current = null;
-          }
-          if (
-            currentUserVideoRef.current &&
-            currentUserVideoRef.current.srcObject
-          ) {
-            const stream = currentUserVideoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach((track) => track.stop());
-            currentUserVideoRef.current.srcObject = null;
-          }
-          setInCall(false);
-          setCallStatus("notInCall");
-          router.reload();
-        }
-      });
-
-      socket?.on("incoming-host-call", (data) => {
-        const { roomId, from, to } = data;
-        console.log({ hostCall: data });
-        if (to === userId) {
-          call(from);
-          currentRoomId.current = roomId;
-          setInCall(true);
-          setCallStatus("inProgress");
-          callRingTone?.current?.play();
-          setTimeout(() => {
-            callRingTone?.current?.pause();
-            if (callRingTone.current) {
-              callRingTone.current.currentTime = 0;
-            }
-          }, 4000);
-        }
-      });
-
-      socket?.on("host-unavailable", async (data) => {
-        if (data.CallID === currentRoomId.current) {
-          setInCall(false);
-          setCallStatus("hostUnavailabe");
-          setTimeout(() => {
-            setCallStatus("notInCall");
-          }, 10000);
-        }
-      });
-
-      peer.on("call", (call: MediaConnection) => {
-        navigator.mediaDevices
-          .getUserMedia({ video: true, audio: true })
-          .then((mediaStream: MediaStream) => {
-            if (currentUserVideoRef.current) {
-              currentUserVideoRef.current.srcObject = mediaStream;
-              currentUserVideoRef.current.play();
-            }
-
-            call.answer(mediaStream);
-            call.on("stream", (remoteStream: MediaStream) => {
-              if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = remoteStream;
-                remoteVideoRef.current.play();
-              }
-            });
-
-            mediaConnectionRef.current = call;
-          })
-          .catch((err) => {
-            console.error("Error accessing media devices.", err);
-          });
-      });
-
-      return () => {
-        socket?.disconnect();
-        peerInstance.current?.destroy();
-      };
-    }
-  }, [userId, socket]);
-
-  useEffect(() => {
-    socketRef.current = socket;
-  }, [socket]);
-
-  useEffect(() => {
     setTimeout(() => {
       setAdvertisementStatus("video");
     }, 30000);
   }, []);
+
+  // Livekit
+  const room = "2";
+  const guestVideoRef = useRef<HTMLDivElement>(null);
+  const receptionistVideoRef = useRef<HTMLDivElement>(null);
+  const receptionistVideoActive = useRef(false);
+
+  const lkRoomRef = useRef<Room | null>(null);
+  const localAudioTrackRef = useRef<Track | null>(null);
+
+  const [status, setStatus] = useState<
+    "idle" | "connecting" | "connected" | "error"
+  >("idle");
+
+  useEffect(() => {
+    if (!location) return;
+
+    const connectToRoom = async () => {
+      setStatus("connecting");
+
+      try {
+        const res = await fetch(
+          `/api/token?identity=guest-${location.LocationID?.toString()}&room=${location.LocationID?.toString()}`
+        );
+        const { wsUrl, token } = await res.json();
+
+        const lkRoom = new Room();
+
+        lkRoom.on("participantConnected", handleRemoteParticipant);
+        lkRoom.on("trackPublished", handleTrackPublished);
+
+        await lkRoom.connect(wsUrl, token);
+
+        const videoTrack = await createLocalVideoTrack({
+          resolution: VideoPresets.h180.resolution,
+        });
+        const audioTrack = await createLocalAudioTrack();
+
+        await lkRoom.localParticipant.publishTrack(videoTrack, {
+          simulcast: true,
+        });
+        await lkRoom.localParticipant.publishTrack(audioTrack, {
+          simulcast: true,
+        });
+
+        localAudioTrackRef.current = audioTrack;
+
+        lkRoomRef.current = lkRoom;
+
+        if (guestVideoRef.current) {
+          const videoElement = videoTrack.attach();
+          videoElement.className = "w-full h-full object-cover rounded-md";
+          videoElement.muted = true;
+          guestVideoRef.current.innerHTML = "";
+          guestVideoRef.current.appendChild(videoElement);
+        }
+
+        // Set fallback initially
+        clearReceptionistVideo();
+
+        setStatus("connected");
+
+        // Handle already connected participants
+        lkRoom.remoteParticipants.forEach((p: any) => {
+          handleRemoteParticipant(p);
+        });
+
+        function handleRemoteParticipant(p: RemoteParticipant) {
+          if (!p.identity.startsWith("receptionist")) return;
+
+          p.on("trackSubscribed", (track) => {
+            if (track.kind === Track.Kind.Video) {
+              renderReceptionistVideo(track as RemoteVideoTrack);
+            } else if (track.kind === Track.Kind.Audio) {
+              // Attach remote audio track
+              const audioEl = track.attach();
+              audioEl.autoplay = true;
+              audioEl.controls = false;
+              audioEl.style.display = "none"; // Hide the audio element
+              document.body.appendChild(audioEl);
+            }
+          });
+
+          p.on("trackUnsubscribed", (track: any) => {
+            if (track.kind === Track.Kind.Video) {
+              clearReceptionistVideo();
+            } else if (track.kind === Track.Kind.Audio) {
+              track.detach().forEach((el: any) => el.remove());
+            }
+          });
+
+          // Render already subscribed tracks
+          p.trackPublications.forEach((pub: any) => {
+            if (
+              pub.kind === Track.Kind.Video &&
+              pub.isSubscribed &&
+              pub.track
+            ) {
+              renderReceptionistVideo(pub.track as RemoteVideoTrack);
+            } else if (
+              pub.kind === Track.Kind.Audio &&
+              pub.isSubscribed &&
+              pub.track
+            ) {
+              const audioEl = pub.track.attach();
+              audioEl.autoplay = true;
+              audioEl.controls = false;
+              audioEl.style.display = "none";
+              document.body.appendChild(audioEl);
+            }
+          });
+        }
+
+        function handleTrackPublished(
+          pub: RemoteTrackPublication,
+          participant: RemoteParticipant
+        ) {
+          if (
+            participant.identity.startsWith("receptionist") &&
+            pub.kind === Track.Kind.Video &&
+            pub.isSubscribed
+          ) {
+            const track = pub.track as RemoteVideoTrack;
+            renderReceptionistVideo(track);
+          }
+        }
+
+        function renderReceptionistVideo(track: RemoteVideoTrack) {
+          receptionistVideoActive.current = true;
+
+          if (receptionistVideoRef.current) {
+            receptionistVideoRef.current.innerHTML = "";
+            const el = track.attach();
+            el.className = "w-full h-full object-cover rounded-md";
+            receptionistVideoRef.current.appendChild(el);
+          }
+        }
+
+        function clearReceptionistVideo() {
+          receptionistVideoActive.current = false;
+
+          if (receptionistVideoRef.current) {
+            receptionistVideoRef.current.innerHTML = `
+              <div class="text-white text-center mt-12 text-lg">Virtual Receptionist</div>
+            `;
+          }
+        }
+      } catch (err) {
+        console.error("Guest connect error:", err);
+        setStatus("error");
+      }
+    };
+
+    connectToRoom();
+
+    return () => {
+      // Optionally: add disconnect logic
+    };
+  }, [location]);
 
   return (
     <WithRole>
