@@ -402,7 +402,9 @@ export default function Index() {
         );
         const { wsUrl, token } = await res.json();
 
-        const lkRoom = new Room();
+        const lkRoom = new Room({
+          adaptiveStream: true, // Optional, allows dynamic track resolution based on visibility
+        });
 
         lkRoom.on("participantConnected", handleRemoteParticipant);
         lkRoom.on("trackPublished", handleTrackPublished);
@@ -410,12 +412,16 @@ export default function Index() {
         await lkRoom.connect(wsUrl, token);
 
         const videoTrack = await createLocalVideoTrack({
-          resolution: VideoPresets.h180.resolution,
+          resolution: VideoPresets.h720.resolution,
         });
         const audioTrack = await createLocalAudioTrack();
 
         await lkRoom.localParticipant.publishTrack(videoTrack, {
           simulcast: true,
+          videoEncoding: {
+            maxBitrate: 2_000_000, // 2 Mbps
+            maxFramerate: 30,
+          },
         });
         await lkRoom.localParticipant.publishTrack(audioTrack, {
           simulcast: true,

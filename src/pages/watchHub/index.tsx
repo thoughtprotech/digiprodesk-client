@@ -246,16 +246,30 @@ function PropertyFeed({
 
   return (
     <LiveKitRoom
-      serverUrl={wsUrl}
-      token={token}
-      connectOptions={{ autoSubscribe: true }}
-      video={true}
-      audio={true}
-      publishDefaults={{ simulcast: true }}
-      onConnected={() => {
-        console.log("Receptionist connected and can publish tracks.");
-      }}
-    >
+  serverUrl={wsUrl}
+  token={token}
+  connectOptions={{
+    autoSubscribe: true,
+    dynacast: true,
+    bandwidthProfile: {
+      video: {
+        mode: 'presentation',
+        maxTracks: 1,
+        trackSwitchOffMode: 'predicted',
+      },
+    },
+  }}
+  video={true}
+  audio={true}
+  publishDefaults={{
+    simulcast: true,
+    videoEncoding: {
+      maxBitrate: 2500_000,
+      maxFramerate: 30,
+    },
+    resolution: { width: 1280, height: 720 },
+  }}
+>
       <div className="relative w-full h-96">
         <VideoGrid audioMuted={audioMuted} />
         <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded">
