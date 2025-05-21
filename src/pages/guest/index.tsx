@@ -35,14 +35,14 @@ import {
   Track,
   VideoPresets,
 } from "livekit-client";
+import { useSocket } from "@/context/SocketContext";
+import { io } from "socket.io-client";
 
 export default function Index() {
-  const [userId, setUserId] = useState<string>("");
+  const [, setUserId] = useState<string>("");
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
-  const peerInstance = useRef<Peer | null>(null);
   const mediaConnectionRef = useRef<MediaConnection | null>(null); // Ref to store the current call
-  const currentRoomId = useRef<string>("");
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<
     | "notInCall"
@@ -53,9 +53,6 @@ export default function Index() {
     | "missed"
     | "hostUnavailabe"
   >("notInCall");
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [volume, setVolume] = useState<number>(1); // Volume range: 0 to 1
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [location, setLocation] = useState<Location>();
@@ -67,6 +64,38 @@ export default function Index() {
     "image" | "video"
   >("image");
   const callStatusRef = useRef(callStatus);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on("call-started", (data) => {
+        if (data === location?.LocationID?.toString()) {
+          console.log("Location ID", location?.LocationID?.toString());
+          console.log({ data });
+          setInCall(true);
+          setCallStatus("inProgress");
+        } else {
+          console.log("NOT MINE");
+        }
+      });
+
+      socketRef.current.on("call-end-guest", (data) => {
+        if (data === location?.LocationID?.toString()) {
+          console.log("Location ID", location?.LocationID?.toString());
+          console.log({ data });
+          setInCall(false);
+          setCallStatus("notInCall");
+        } else {
+          console.log("NOT MINE");
+        }
+      });
+    }
+  }, [socketRef.current]);
 
   useEffect(() => {
     callStatusRef.current = callStatus;
@@ -92,109 +121,6 @@ export default function Index() {
       passwordRef.current?.focus();
     }
   }, [confirmLogoutModal]);
-
-  const call = (remotePeerId: string) => {
-    console.log("Calling peer with ID: ", remotePeerId);
-    // Use modern getUserMedia method
-    navigator?.mediaDevices
-      ?.getUserMedia({ video: true, audio: true })
-      .then((mediaStream: MediaStream) => {
-        if (currentUserVideoRef.current) {
-          currentUserVideoRef.current.srcObject = mediaStream;
-          currentUserVideoRef.current.play();
-        }
-
-        const peerCall = peerInstance.current?.call(remotePeerId, mediaStream);
-        if (peerCall) {
-          mediaConnectionRef.current = peerCall; // Store the current call in the ref
-          peerCall.on("stream", (remoteStream: MediaStream) => {
-            if (remoteVideoRef.current) {
-              remoteVideoRef.current.srcObject = remoteStream;
-              remoteVideoRef.current.play();
-            }
-          });
-        }
-
-        let mimeType;
-        if (MediaRecorder.isTypeSupported("video/mp4;codecs=avc1,mp4a.40.2")) {
-          mimeType = "video/mp4;codecs=avc1,mp4a.40.2";
-        } else if (
-          MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-        ) {
-          mimeType = "video/webm;codecs=vp9,opus";
-        } else {
-          // Fallback – omit mimeType to let the browser choose.
-          mimeType = "";
-        }
-
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          console.warn(
-            "VP8 not supported, falling back to default WebM settings"
-          );
-        }
-
-        // Recording Start
-        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
-
-        // Queue for storing chunks to upload
-        const chunkQueue: Blob[] = [];
-        let isUploading = false;
-
-        const uploadChunk = async () => {
-          if (chunkQueue.length === 0 || isUploading) return;
-
-          isUploading = true;
-          const chunk = chunkQueue.shift(); // Remove the first chunk from the queue
-
-          const formData = new FormData();
-          formData.append("videoChunk", chunk!, "chunk.mp4");
-          formData.append("sessionId", currentRoomId.current);
-          formData.append("user", "guest");
-
-          try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`,
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
-            const result = await response.json();
-            uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
-          } catch (error) {
-            console.error("Error uploading chunk:", error);
-          } finally {
-            isUploading = false;
-            uploadChunk(); // Check for the next chunk in the queue
-          }
-        };
-
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunkQueue.push(event.data); // Add the chunk to the queue
-            uploadChunk(); // Start the upload process
-          }
-        };
-
-        // Start recording, then stop every 2 seconds to prepare for the next chunk
-        mediaRecorder.start();
-
-        recordingIntervalRef.current = setInterval(() => {
-          if (mediaRecorder.state === "recording") {
-            mediaRecorder.requestData();
-            mediaRecorder.stop(); // Stop to trigger ondataavailable event
-            setTimeout(() => {
-              mediaRecorder.start(); // Start again for the next chunk
-            }, 100);
-          }
-        }, 2000); // Send video chunks every 2 seconds
-
-        mediaRecorderRef.current = mediaRecorder;
-      })
-      .catch((err) => {
-        console.error("Error accessing media devices.", err);
-      });
-  };
 
   const initiateCall = () => {};
 
@@ -378,7 +304,6 @@ export default function Index() {
   }, []);
 
   // Livekit
-  const room = "2";
   const guestVideoRef = useRef<HTMLDivElement>(null);
   const receptionistVideoRef = useRef<HTMLDivElement>(null);
   const receptionistVideoActive = useRef(false);
@@ -540,7 +465,19 @@ export default function Index() {
     return () => {
       // Optionally: add disconnect logic
     };
-  }, [location]);
+  }, [location, callStatus]);
+
+  const handleToggleMute = () => {
+    const audioTrack = localAudioTrackRef.current;
+    if (audioTrack) {
+      if (isMuted) {
+        audioTrack.enable();
+      } else {
+        audioTrack.disable();
+      }
+      setIsMuted(!isMuted);
+    }
+  };
 
   return (
     <WithRole>
@@ -619,73 +556,30 @@ export default function Index() {
           </div>
         )}
         {inCall && callStatus === "inProgress" && (
-          <div className="w-full h-full relative">
-            <div className="absolute top-20 right-4">
-              <Tooltip tooltip="Recording" position="bottom">
-                <div className="flex items-center gap-2">
-                  <ElapsedTime startTime={new Date()} />
-                  <Disc className="text-red-500 w-8 h-8" />
-                </div>
-              </Tooltip>
-            </div>
-            <div className="flex flex-col items-center absolute bottom-2 right-2">
-              <video
-                ref={currentUserVideoRef}
-                autoPlay
-                muted
-                className="rounded-lg shadow-lg w-64 h-48 object-cover"
-              />
-            </div>
-            <div>
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                className="w-full h-screen rounded-lg shadow-lg object-cover"
-              />
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-foreground p-2 rounded-md">
-                {/* Volume Slider */}
-                <div className="w-44 flex items-center gap-2 border-r-2 border-r-border pr-3">
-                  {volume === 0 && <VolumeX className="w-9 h-9" />}
-                  {volume > 0 && volume < 0.5 && (
-                    <Volume1 className="w-9 h-9" />
-                  )}
-                  {volume >= 0.5 && <Volume2 className="w-9 h-9" />}
-                  <Tooltip className="mb-2 -translate-x-28" tooltip="Volume">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={volume}
-                      onChange={handleVolumeChange}
-                      className="cursor-pointer appearance-none w-full h-2 bg-zinc-400 rounded-lg focus:outline-none focus:ring-offset-2 accent-indigo-600 transition-all"
-                    />
-                  </Tooltip>
-                </div>
-                <div className="w-16">
-                  <Button
-                    className={
-                      isMuted
-                        ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
-                        : "bg-zinc-500/30 border border-zinc-500 hover:bg-zinc-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
-                    }
-                    color={!isMuted ? "zinc" : null}
-                    icon={
-                      <Tooltip
-                        className="mb-4"
-                        tooltip={isMuted ? "Unmute Mic" : "Mute Mic"}
-                      >
-                        {!isMuted ? (
-                          <Mic className="w-6 h-6" />
-                        ) : (
-                          <MicOff className="w-6 h-6" />
-                        )}
-                      </Tooltip>
-                    }
-                    onClick={toggleMute}
-                  />
-                </div>
+          <div className="w-full h-screen relative bg-red-500u overflow-hidden">
+            <h1>CALL</h1>
+            {/* Host Vieo */}
+            <div
+              className="w-full h-screen aspect-video rounded-md overflow-hidden shadow-md flex items-center justify-center"
+              ref={receptionistVideoRef}
+            >
+              <div className="text-white text-center text-xl font-bold">
+                Waiting for receptionist...
               </div>
+            </div>
+            {/* Guest Video */}
+            <div
+              className="absolute bottom-0 right-0 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
+              ref={guestVideoRef}
+            />
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+              <button
+                onClick={handleToggleMute}
+                className="p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+                aria-label={isMuted ? "Unmute" : "Mute"}
+              >
+                {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+              </button>
             </div>
           </div>
         )}

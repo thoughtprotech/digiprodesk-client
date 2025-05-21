@@ -10,9 +10,11 @@ import {
   Mic,
   MicOff,
   Minimize,
+  PhoneOff,
   PhoneOutgoing,
+  Video,
 } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
 import { Location, User } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
@@ -29,6 +31,8 @@ import {
   TrackReferenceOrPlaceholder,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
+import { useSocket } from "@/context/SocketContext";
+import { io } from "socket.io-client";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -271,7 +275,7 @@ function PropertyFeed({
       }}
     >
       <div className="relative w-full h-fit">
-        <VideoGrid audioMuted={audioMuted} />
+        <VideoGrid audioMuted={audioMuted} roomName={roomName} />
         <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
           {label}{" "}
           <TrackToggle
@@ -300,9 +304,33 @@ function PropertyFeed({
   );
 }
 
-function VideoGrid({ audioMuted }: { audioMuted: boolean }) {
+function VideoGrid({
+  audioMuted,
+  roomName,
+}: {
+  audioMuted: boolean;
+  roomName: string;
+}) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { socket } = useSocket();
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
+
+  useEffect(() => {
+    socketRef.current = socket;
+  }, [socket]);
+
+  const handleStartCall = async (data: any) => {
+    socketRef.current?.emit("start-call", JSON.stringify({ locationID: data }));
+    setIsFullscreen(true);
+    console.log(data);
+  };
+
+  const handleEndCall = async (data: any) => {
+    socketRef.current?.emit("call-end", JSON.stringify({ locationID: data }));
+    setIsFullscreen(false);
+    console.log(data);
+  };
 
   const remoteVideoTracks = tracks.filter(
     (t) =>
@@ -343,10 +371,10 @@ function VideoGrid({ audioMuted }: { audioMuted: boolean }) {
         ))}
         {renderAudioTracks()}
         <button
-          onClick={() => setIsFullscreen(true)}
-          className="absolute top-2 right-2 flex items-center gap-1 bg-black bg-opacity-50 text-white text-sm font-medium px-3 py-1 rounded hover:bg-opacity-70 transition"
+          onClick={() => handleStartCall(roomName)}
+          className="absolute top-2 right-2 flex items-center gap-1 bg-green-500 bg-opacity-70 text-white px-4 py-1 rounded hover:bg-opacity-70 transition"
         >
-          <Maximize className="w-4 h-4" />
+          <PhoneOutgoing className="w-6 h-6" />
         </button>
       </div>
 
@@ -361,12 +389,26 @@ function VideoGrid({ audioMuted }: { audioMuted: boolean }) {
               />
             ))}
             {renderAudioTracks()}
-            <button
-              onClick={() => setIsFullscreen(false)}
-              className="absolute top-4 right-4 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded"
-            >
-              <Minimize className="w-4 h-4" />
-            </button>
+            <div className="absolute bottom-10 w-fit bg-foreground max-w-md left-1/2 -translate-x-1/2 p-4 rounded-md flex items-center gap-4">
+              <button
+                onClick={() => handleEndCall(roomName)}
+                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+              >
+                <Mic className="w-7 h-7" />
+              </button>
+              <button
+                onClick={() => handleEndCall(roomName)}
+                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+              >
+                <Video className="w-7 h-7" />
+              </button>
+              <button
+                onClick={() => handleEndCall(roomName)}
+                className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+              >
+                <PhoneOff className="w-7 h-7" />
+              </button>
+            </div>
           </div>
         </div>
       )}
