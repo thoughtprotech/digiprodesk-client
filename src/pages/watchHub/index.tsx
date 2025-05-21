@@ -246,41 +246,43 @@ function PropertyFeed({
 
   return (
     <LiveKitRoom
-  serverUrl={wsUrl}
-  token={token}
-  connectOptions={{
-    autoSubscribe: true,
-    dynacast: true,
-    bandwidthProfile: {
-      video: {
-        mode: 'presentation',
-        maxTracks: 1,
-        trackSwitchOffMode: 'predicted',
-      },
-    },
-  }}
-  video={true}
-  audio={true}
-  publishDefaults={{
-    simulcast: true,
-    videoEncoding: {
-      maxBitrate: 2500_000,
-      maxFramerate: 30,
-    },
-    resolution: { width: 1280, height: 720 },
-  }}
->
-      <div className="relative w-full h-96">
+      serverUrl={wsUrl}
+      token={token}
+      connectOptions={{
+        autoSubscribe: true,
+        dynacast: true,
+        bandwidthProfile: {
+          video: {
+            mode: "presentation",
+            maxTracks: 1,
+            trackSwitchOffMode: "predicted",
+          },
+        },
+      }}
+      video={true}
+      audio={true}
+      publishDefaults={{
+        simulcast: true,
+        videoEncoding: {
+          maxBitrate: 2500_000,
+          maxFramerate: 30,
+        },
+        resolution: { width: 1280, height: 720 },
+      }}
+    >
+      <div className="relative w-full h-fit">
         <VideoGrid audioMuted={audioMuted} />
-        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded">
+        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
           {label}{" "}
-          <button
-            style={{ color: "white", marginTop: "4px" }}
+          <TrackToggle
+            source={Track.Source.Microphone}
+            style={{ color: "white" }}
             onClick={() => setAudioMuted((prev) => !prev)}
-            aria-label={audioMuted ? "Unmute" : "Mute"}
-          >
-            {audioMuted ? <MicOff size={15} /> : <Mic size={15} />}
-          </button>
+          />
+          <TrackToggle
+            source={Track.Source.Camera}
+            style={{ color: "white" }}
+          />
           <button
             onClick={toggleRecording}
             aria-label={isRecording ? "Stop Recording" : "Start Recording"}
@@ -294,12 +296,6 @@ function PropertyFeed({
           </button>
         </div>
       </div>
-
-      <TrackToggle
-        source={Track.Source.Microphone}
-        style={{ color: "white" }}
-      />
-      <TrackToggle source={Track.Source.Camera} style={{ color: "white" }} />
     </LiveKitRoom>
   );
 }
@@ -334,7 +330,7 @@ function VideoGrid({ audioMuted }: { audioMuted: boolean }) {
   return (
     <>
       <div
-        className={`relative w-full h-full ${
+        className={`relative w-full h-fit bg-red-500 ${
           isFullscreen ? "hidden" : "block"
         }`}
       >
@@ -342,7 +338,7 @@ function VideoGrid({ audioMuted }: { audioMuted: boolean }) {
           <VideoTrack
             key={trackRef.publication.trackSid}
             trackRef={trackRef}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="inset-0 w-full h-full object-cover"
           />
         ))}
         {renderAudioTracks()}
@@ -356,12 +352,12 @@ function VideoGrid({ audioMuted }: { audioMuted: boolean }) {
 
       {isFullscreen && (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-          <div className="relative w-full h-full max-w-screen-lg max-h-screen">
+          <div className="relative w-full h-full max-h-screen">
             {remoteVideoTracks.map((trackRef: any) => (
               <VideoTrack
                 key={trackRef.publication.trackSid}
                 trackRef={trackRef}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             ))}
             {renderAudioTracks()}
