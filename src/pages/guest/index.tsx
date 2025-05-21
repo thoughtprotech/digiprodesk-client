@@ -557,7 +557,7 @@ export default function Index() {
           </div>
         )}
         {inCall && callStatus === "inProgress" && (
-          <div className="w-full h-screen relative bg-red-500u overflow-hidden">
+          <div className="w-3/4 h-screen relative overflow-hidden self-center">
             <h1>CALL</h1>
             {/* Host Vieo */}
             <div
@@ -573,7 +573,7 @@ export default function Index() {
               className="absolute bottom-0 right-0 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
               ref={guestVideoRef}
             />
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 p-2 rounded-md bg-foreground">
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 p-2 rounded-md flex items-center gap-5">
               <button
                 onClick={handleToggleMute}
                 className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
@@ -581,6 +581,9 @@ export default function Index() {
               >
                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
               </button>
+              <div>
+                <input type="range" className="cursor-pointer" />
+              </div>
             </div>
           </div>
         )}

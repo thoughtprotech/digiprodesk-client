@@ -278,6 +278,7 @@ function PropertyFeed({
         <VideoGrid
           audioMuted={audioMuted}
           roomName={roomName}
+          label={label}
           toggleRecording={toggleRecording}
           isRecording={isRecording}
         />
@@ -304,11 +305,13 @@ function VideoGrid({
   roomName,
   toggleRecording,
   isRecording,
+  label,
 }: {
   audioMuted: boolean;
   roomName: string;
   toggleRecording: any;
   isRecording: boolean;
+  label: string;
 }) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -381,55 +384,70 @@ function VideoGrid({
       </div>
 
       {isFullscreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center">
-          <div className="relative w-full h-full max-h-screen">
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex flex-col items-center justify-center gap-5">
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-2xl flex flex-col items-center gap-2 p-4 rounded-md">
+              <div>
+                <h1 className="font-bold text-4xl">{label}</h1>
+              </div>
+              <div className="flex items-center gap-5">
+                <div className="cursor-pointer rounded-md px-4 py-1 bg-highlight">
+                  <Mic />
+                </div>
+                <div className="cursor-pointer rounded-md px-4 py-1 bg-highlight">
+                  <Video />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="relative w-full h-fit max-h-screen flex justify-center">
             {remoteVideoTracks.map((trackRef: any) => (
               <VideoTrack
                 key={trackRef.publication.trackSid}
                 trackRef={trackRef}
-                className="w-full h-full object-contain"
+                className="w-3/4 h-full object-contain rounded-md"
               />
             ))}
             {renderAudioTracks()}
-            <div className="absolute bottom-10 w-fit bg-foreground max-w-md left-1/2 -translate-x-1/2 p-4 rounded-md flex items-center gap-4">
-              <button
-                // onClick={() => handleEndCall(roomName)}
-                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
-              >
-                <TrackToggle
-                  source={Track.Source.Microphone}
-                  style={{ color: "white", scale: 1.5 }}
-                  // onClick={() => setAudioMuted((prev) => !prev)}
-                  className="w-7 h-7 flex items-center justify-center"
-                />
-              </button>
-              <button
-                // onClick={() => handleEndCall(roomName)}
-                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded flex item-center justify-center"
-              >
-                <TrackToggle
-                  source={Track.Source.Camera}
-                  style={{ color: "white", scale: 1.7 }}
-                  // onClick={() => setAudioMuted((prev) => !prev)}
-                  className="w-7 h-7 flex items-center justify-center"
-                />
-                {/* <Video className="w-7 h-7" /> */}
-              </button>
-              <button
-                onClick={() => toggleRecording()}
-                className={`${
-                  isRecording ? "bg-orange-500" : "bg-highlight"
-                } bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded`}
-              >
-                <CircleDot className="w-7 h-7" />
-              </button>
-              <button
-                onClick={() => handleEndCall(roomName)}
-                className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
-              >
-                <PhoneOff className="w-7 h-7" />
-              </button>
-            </div>
+          </div>
+          <div className="w-fit max-w-md p-4 rounded-md flex items-center gap-4">
+            <button
+              // onClick={() => handleEndCall(roomName)}
+              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+            >
+              <TrackToggle
+                source={Track.Source.Microphone}
+                style={{ color: "white", scale: 1.5 }}
+                // onClick={() => setAudioMuted((prev) => !prev)}
+                className="w-7 h-7 flex items-center justify-center"
+              />
+            </button>
+            <button
+              // onClick={() => handleEndCall(roomName)}
+              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded flex item-center justify-center"
+            >
+              <TrackToggle
+                source={Track.Source.Camera}
+                style={{ color: "white", scale: 1.7 }}
+                // onClick={() => setAudioMuted((prev) => !prev)}
+                className="w-7 h-7 flex items-center justify-center"
+              />
+              {/* <Video className="w-7 h-7" /> */}
+            </button>
+            <button
+              onClick={() => toggleRecording()}
+              className={`${
+                isRecording ? "bg-orange-500" : "bg-highlight"
+              } bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded`}
+            >
+              <CircleDot className="w-7 h-7" />
+            </button>
+            <button
+              onClick={() => handleEndCall(roomName)}
+              className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+            >
+              <PhoneOff className="w-7 h-7" />
+            </button>
           </div>
         </div>
       )}
