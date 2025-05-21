@@ -385,6 +385,7 @@ export default function Index() {
               const audioEl = track.attach();
               audioEl.autoplay = true;
               audioEl.controls = false;
+              audioEl.muted = true;
               audioEl.style.display = "none"; // Hide the audio element
               document.body.appendChild(audioEl);
             }
@@ -572,10 +573,10 @@ export default function Index() {
               className="absolute bottom-0 right-0 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
               ref={guestVideoRef}
             />
-            <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 p-2 rounded-md bg-foreground">
               <button
                 onClick={handleToggleMute}
-                className="p-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}

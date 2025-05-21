@@ -191,7 +191,7 @@ function PropertyFeed({
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
-  const [audioMuted, setAudioMuted] = useState(false);
+  const [audioMuted, setAudioMuted] = useState(true);
   const [isRecording, setIsRecording] = useState(false);
   const [egressId, setEgressId] = useState(false);
 
@@ -275,7 +275,12 @@ function PropertyFeed({
       }}
     >
       <div className="relative w-full h-fit">
-        <VideoGrid audioMuted={audioMuted} roomName={roomName} />
+        <VideoGrid
+          audioMuted={audioMuted}
+          roomName={roomName}
+          toggleRecording={toggleRecording}
+          isRecording={isRecording}
+        />
         <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
           {label}{" "}
           <TrackToggle
@@ -283,21 +288,11 @@ function PropertyFeed({
             style={{ color: "white" }}
             onClick={() => setAudioMuted((prev) => !prev)}
           />
-          <TrackToggle
-            source={Track.Source.Camera}
-            style={{ color: "white" }}
-          />
           <button
             onClick={toggleRecording}
             aria-label={isRecording ? "Stop Recording" : "Start Recording"}
             style={{ marginTop: "4px" }}
-          >
-            {isRecording ? (
-              <CircleDot size={15} color="#dc2626" /> // Red when recording
-            ) : (
-              <Circle size={15} color="#9ca3af" /> // Gray when idle
-            )}
-          </button>
+          ></button>
         </div>
       </div>
     </LiveKitRoom>
@@ -307,9 +302,13 @@ function PropertyFeed({
 function VideoGrid({
   audioMuted,
   roomName,
+  toggleRecording,
+  isRecording,
 }: {
   audioMuted: boolean;
   roomName: string;
+  toggleRecording: any;
+  isRecording: boolean;
 }) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -327,6 +326,9 @@ function VideoGrid({
   };
 
   const handleEndCall = async (data: any) => {
+    if (isRecording) {
+      toggleRecording();
+    }
     socketRef.current?.emit("call-end", JSON.stringify({ locationID: data }));
     setIsFullscreen(false);
     console.log(data);
@@ -391,16 +393,35 @@ function VideoGrid({
             {renderAudioTracks()}
             <div className="absolute bottom-10 w-fit bg-foreground max-w-md left-1/2 -translate-x-1/2 p-4 rounded-md flex items-center gap-4">
               <button
-                onClick={() => handleEndCall(roomName)}
+                // onClick={() => handleEndCall(roomName)}
                 className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
               >
-                <Mic className="w-7 h-7" />
+                <TrackToggle
+                  source={Track.Source.Microphone}
+                  style={{ color: "white", scale: 1.5 }}
+                  // onClick={() => setAudioMuted((prev) => !prev)}
+                  className="w-7 h-7 flex items-center justify-center"
+                />
               </button>
               <button
-                onClick={() => handleEndCall(roomName)}
-                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+                // onClick={() => handleEndCall(roomName)}
+                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded flex item-center justify-center"
               >
-                <Video className="w-7 h-7" />
+                <TrackToggle
+                  source={Track.Source.Camera}
+                  style={{ color: "white", scale: 1.7 }}
+                  // onClick={() => setAudioMuted((prev) => !prev)}
+                  className="w-7 h-7 flex items-center justify-center"
+                />
+                {/* <Video className="w-7 h-7" /> */}
+              </button>
+              <button
+                onClick={() => toggleRecording()}
+                className={`${
+                  isRecording ? "bg-orange-500" : "bg-highlight"
+                } bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded`}
+              >
+                <CircleDot className="w-7 h-7" />
               </button>
               <button
                 onClick={() => handleEndCall(roomName)}
