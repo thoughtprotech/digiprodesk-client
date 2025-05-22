@@ -80,7 +80,8 @@ export default function Index() {
           setInCall(true);
           setCallStatus("inProgress");
         } else {
-          console.log("NOT MINE");
+          console.log("Location ID", location?.LocationID?.toString());
+          console.log("NOT MINE", data);
         }
       });
 
@@ -122,7 +123,7 @@ export default function Index() {
     }
   }, [confirmLogoutModal]);
 
-  const initiateCall = () => {};
+  const initiateCall = () => { };
 
   const handleLogOut = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -542,7 +543,7 @@ export default function Index() {
                 <img
                   src={
                     location?.LocationReceptionistPhoto &&
-                    location?.LocationReceptionistPhoto !== ""
+                      location?.LocationReceptionistPhoto !== ""
                       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
                       : "/images/receptionist.png"
                   }
