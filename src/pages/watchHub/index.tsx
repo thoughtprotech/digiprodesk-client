@@ -384,36 +384,36 @@ function VideoGrid({
       </div>
 
       {isFullscreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex flex-col items-center justify-center gap-5">
-          <div className="w-full flex justify-center">
-            <div className="w-full max-w-2xl flex flex-col items-center gap-2 p-4 rounded-md">
-              <div>
-                <h1 className="font-bold text-4xl">{label}</h1>
-              </div>
-              <div className="flex items-center gap-5">
-                <div className="cursor-pointer rounded-md px-4 py-1 bg-highlight">
-                  <Mic />
-                </div>
-                <div className="cursor-pointer rounded-md px-4 py-1 bg-highlight">
-                  <Video />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="relative w-full h-fit max-h-screen flex justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center gap-5">
+          <div className="relative w-3/4 h-fit max-h-screen flex justify-center">
             {remoteVideoTracks.map((trackRef: any) => (
               <VideoTrack
                 key={trackRef.publication.trackSid}
                 trackRef={trackRef}
-                className="w-3/4 h-full object-contain rounded-md"
+                className="w-full h-full object-contain rounded-md"
               />
             ))}
             {renderAudioTracks()}
+            <div className="absolute top-0 left-0 w-full flex bg-black/40 justify-start">
+              <div className="w-full max-w-2xl flex items-center gap-5 p-4 rounded-md">
+                <div>
+                  <h1 className="font-bold text-4xl">{label}</h1>
+                </div>
+                <div className="flex items-center gap-5">
+                  <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
+                    <Mic /> 
+                  </div>
+                  <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
+                    <Video />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="w-fit max-w-md p-4 rounded-md flex items-center gap-4">
+          <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
             <button
               // onClick={() => handleEndCall(roomName)}
-              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
             >
               <TrackToggle
                 source={Track.Source.Microphone}
@@ -424,7 +424,7 @@ function VideoGrid({
             </button>
             <button
               // onClick={() => handleEndCall(roomName)}
-              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded flex item-center justify-center"
+              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
             >
               <TrackToggle
                 source={Track.Source.Camera}
@@ -438,13 +438,13 @@ function VideoGrid({
               onClick={() => toggleRecording()}
               className={`${
                 isRecording ? "bg-orange-500" : "bg-highlight"
-              } bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded`}
+              } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
             >
               <CircleDot className="w-7 h-7" />
             </button>
             <button
               onClick={() => handleEndCall(roomName)}
-              className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
+              className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
             >
               <PhoneOff className="w-7 h-7" />
             </button>
