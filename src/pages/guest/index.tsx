@@ -586,22 +586,23 @@ export default function Index() {
           </div>
         )}
         {inCall && callStatus === "inProgress" && (
-          <div className="w-3/4 h-screen relative overflow-hidden self-center">
-            <h1>CALL</h1>
+          <div className="w-full h-screen relative flex items-center justify-center overflow-hidden self-center">
             {/* Host Vieo */}
-            <div
-              className="w-full h-screen aspect-video rounded-md overflow-hidden shadow-md flex items-center justify-center"
-              ref={receptionistVideoRef}
-            >
-              <div className="text-white text-center text-xl font-bold">
-                Waiting for receptionist...
+            <div className="w-3/4 h-full flex items-center justify-center absolute">
+              <div
+                className="w-full aspect-video rounded-md overflow-hidden shadow-md flex items-center justify-center"
+                ref={receptionistVideoRef}
+              >
+                <div className="text-white text-center text-xl font-bold">
+                  Waiting for receptionist...
+                </div>
               </div>
+              {/* Guest Video */}
+              <div
+                className="absolute bottom-28 -right-10 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
+                ref={guestVideoRef}
+              />
             </div>
-            {/* Guest Video */}
-            <div
-              className="absolute bottom-0 right-0 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
-              ref={guestVideoRef}
-            />
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 p-2 rounded-md flex items-center gap-5">
               <button
                 onClick={handleToggleMute}
@@ -632,7 +633,15 @@ export default function Index() {
               /> 
             </button> */}
               <div>
-                <input type="range" className="cursor-pointer" />
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={volume}
+                  onChange={handleVolumeChange}
+                  style={{ width: "100%" }}
+                />
               </div>
             </div>
           </div>

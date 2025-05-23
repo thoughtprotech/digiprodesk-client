@@ -282,17 +282,8 @@ function PropertyFeed({
           toggleRecording={toggleRecording}
           isRecording={isRecording}
         />
-        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
-          {label}{" "}
-          {/* <TrackToggle
-            source={Track.Source.Microphone}
-            style={{ color: "white" }}
-          /> */}
-          <button
-            onClick={toggleRecording}
-            aria-label={isRecording ? "Stop Recording" : "Start Recording"}
-            style={{ marginTop: "4px" }}
-          ></button>
+        <div className="absolute top-3 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
+          {label}
         </div>
       </div>
     </LiveKitRoom>
@@ -412,17 +403,17 @@ function VideoGrid({
               />
             ))}
             {renderAudioTracks()}
-            <div className="absolute top-0 left-0 w-full flex bg-black/40 justify-start">
-              <div className="w-full max-w-2xl flex items-center gap-5 p-4 rounded-md">
+            <div className="absolute top-0 left-0 w-full flex bg-black/70 justify-start">
+              <div className="w-full max-w-2xl flex items-center gap-5 px-4 py-1 rounded-md">
                 <div>
-                  <h1 className="font-bold text-4xl">{label}</h1>
+                  <h1 className="font-bold text-2xl">{label}</h1>
                 </div>
                 <div className="flex items-center gap-5">
                   <div
                     onClick={() => {
                       sendMuteRequest(roomName);
                     }}
-                    className="cursor-pointer rounded-md px-6 py-2 bg-highlight"
+                    className="cursor-pointer rounded-md px-6 py-1 bg-highlight"
                   >
                     {isRemoteMuted ? <MicOff /> : <Mic />}
                   </div>
