@@ -411,11 +411,13 @@ export default function Index() {
             } else if (
               pub.kind === Track.Kind.Audio &&
               pub.isSubscribed &&
-              pub.track
+              pub.track &&
+              callStatusRef.current === "inProgress"
             ) {
               const audioEl = pub.track.attach();
               audioEl.autoplay = true;
               audioEl.controls = false;
+              audioEl.muted = false;
               audioEl.style.display = "none";
               document.body.appendChild(audioEl);
             }
