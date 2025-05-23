@@ -318,6 +318,14 @@ function VideoGrid({
 
   useEffect(() => {
     socketRef.current = socket;
+
+    socketRef.current?.on("participant-muted-request", (data) => {
+      if (data.locationID === roomName) {
+        setIsRemoteMuted(data.isMuted);
+      } else {
+        console.log("participant-muted-request - NOT MINE");
+      }
+    });
   }, [socket]);
 
   const handleStartCall = async (data: any) => {

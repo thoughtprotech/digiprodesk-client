@@ -497,6 +497,8 @@ export default function Index() {
         audioTrack.disable();
       }
       setIsMuted(!isMuted);
+
+      socketRef.current?.emit("participant-muted", JSON.stringify({ locationID: location?.LocationID?.toString(), isMuted: !isMuted }));
     }
   };
 
