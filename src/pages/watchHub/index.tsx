@@ -314,6 +314,7 @@ function VideoGrid({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);  
+  const [isRemoteMuted, setIsRemoteMuted] = useState<boolean>(false);
 
   useEffect(() => {
     socketRef.current = socket;
@@ -348,6 +349,10 @@ function VideoGrid({
       !t.participant.isLocal
   );
 
+  const sendMuteRequest = (roomName:string) => {
+    socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: !isRemoteMuted }));
+    setIsRemoteMuted((prev) => !prev);
+  }
   const renderAudioTracks = () =>
     remoteAudioTracks.map((trackRef: TrackReferenceOrPlaceholder) => (
       <AudioTrack
@@ -396,12 +401,15 @@ function VideoGrid({
                   <h1 className="font-bold text-4xl">{label}</h1>
                 </div>
                 <div className="flex items-center gap-5">
-                  <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
-                    <Mic /> 
+
+                  <div onClick={() =>  {
+                    sendMuteRequest(roomName)
+                  }} className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
+                    {isRemoteMuted ? <MicOff  /> : <Mic  />}
                   </div>
-                  <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
+                  {/* <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
                     <Video />
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>

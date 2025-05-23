@@ -96,6 +96,22 @@ export default function Index() {
           console.log("NOT MINE");
         }
       });
+
+      socketRef.current.on("mute-participant-request", (data) => {
+        if (data.locationID === location?.LocationID?.toString()) {
+          const audioTrack = localAudioTrackRef.current;
+          if (audioTrack) {
+            if (!data.isMuted) {
+              audioTrack.enable();
+            } else {
+              audioTrack.disable();
+            }
+            setIsMuted(data.isMuted);
+          }
+        } else {
+          console.log("NOT MINE");
+        }
+      });
     }
   }, [socketRef.current, location]);
 
@@ -578,18 +594,18 @@ export default function Index() {
               ref={guestVideoRef}
             />
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 p-2 rounded-md flex items-center gap-5">
-              {/* <button
+              <button
                 onClick={handleToggleMute}
                 className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
-              </button> */}
-              <button
+              </button>
+              {/* <button
               // onClick={() => handleEndCall(roomName)}
               className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
             >
-              <TrackToggle
+               <TrackToggle
                 source={Track.Source.Microphone}
 
                 
@@ -604,8 +620,8 @@ export default function Index() {
                 }}
                 style={{ color: "white", scale: 1.5 }}
                 className="w-6 h-6 flex items-center justify-center"
-              />
-            </button>
+              /> 
+            </button> */}
               <div>
                 <input type="range" className="cursor-pointer" />
               </div>
