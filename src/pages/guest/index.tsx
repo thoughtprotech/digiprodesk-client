@@ -37,6 +37,7 @@ import {
 } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
+import { TrackToggle } from "@livekit/components-react";
 
 export default function Index() {
   const [, setUserId] = useState<string>("");
@@ -72,7 +73,7 @@ export default function Index() {
   }, [socket]);
 
   useEffect(() => {
-    if (socketRef.current) {
+    if (socketRef.current && location) {
       socketRef.current.on("call-started", (data) => {
         if (data === location?.LocationID?.toString()) {
           console.log("Location ID", location?.LocationID?.toString());
@@ -96,7 +97,7 @@ export default function Index() {
         }
       });
     }
-  }, [socketRef.current]);
+  }, [socketRef.current, location]);
 
   useEffect(() => {
     callStatusRef.current = callStatus;
@@ -575,13 +576,34 @@ export default function Index() {
               ref={guestVideoRef}
             />
             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 p-2 rounded-md flex items-center gap-5">
-              <button
+              {/* <button
                 onClick={handleToggleMute}
                 className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-4 py-1 rounded"
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
-              </button>
+              </button> */}
+              <button
+              // onClick={() => handleEndCall(roomName)}
+              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
+            >
+              <TrackToggle
+                source={Track.Source.Microphone}
+
+                
+                onDeviceError={(error) => {
+                  console.error("Microphone device error:", error);
+
+                  toast.custom(() => (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded">
+                      Microphone error: {error?.message || "Unknown error"}
+                    </div>
+                  ));
+                }}
+                style={{ color: "white", scale: 1.5 }}
+                className="w-6 h-6 flex items-center justify-center"
+              />
+            </button>
               <div>
                 <input type="range" className="cursor-pointer" />
               </div>
