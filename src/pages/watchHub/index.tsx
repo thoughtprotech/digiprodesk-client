@@ -191,7 +191,7 @@ function PropertyFeed({
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
-  const [audioMuted, setAudioMuted] = useState(true);
+  
   const [isRecording, setIsRecording] = useState(false);
   const [egressId, setEgressId] = useState(false);
 
@@ -276,7 +276,6 @@ function PropertyFeed({
     >
       <div className="relative w-full h-fit">
         <VideoGrid
-          audioMuted={audioMuted}
           roomName={roomName}
           label={label}
           toggleRecording={toggleRecording}
@@ -284,11 +283,10 @@ function PropertyFeed({
         />
         <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
           {label}{" "}
-          <TrackToggle
+          {/* <TrackToggle
             source={Track.Source.Microphone}
             style={{ color: "white" }}
-            onClick={() => setAudioMuted((prev) => !prev)}
-          />
+          /> */}
           <button
             onClick={toggleRecording}
             aria-label={isRecording ? "Stop Recording" : "Start Recording"}
@@ -301,13 +299,12 @@ function PropertyFeed({
 }
 
 function VideoGrid({
-  audioMuted,
   roomName,
   toggleRecording,
   isRecording,
   label,
 }: {
-  audioMuted: boolean;
+  
   roomName: string;
   toggleRecording: any;
   isRecording: boolean;
@@ -316,7 +313,7 @@ function VideoGrid({
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { socket } = useSocket();
-  const socketRef = useRef<ReturnType<typeof io> | null>(null);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);  
 
   useEffect(() => {
     socketRef.current = socket;
@@ -355,8 +352,7 @@ function VideoGrid({
     remoteAudioTracks.map((trackRef: TrackReferenceOrPlaceholder) => (
       <AudioTrack
         key={trackRef.publication.trackSid}
-        trackRef={trackRef}
-        muted={audioMuted}
+        trackRef={trackRef}        
       />
     ));
 
@@ -374,7 +370,7 @@ function VideoGrid({
             className="inset-0 w-full h-full object-cover"
           />
         ))}
-        {renderAudioTracks()}
+        {/* {renderAudioTracks()} */}
         <button
           onClick={() => handleStartCall(roomName)}
           className="absolute top-2 right-2 flex items-center gap-1 bg-green-500 bg-opacity-70 text-white px-4 py-1 rounded hover:bg-opacity-70 transition"
@@ -417,8 +413,18 @@ function VideoGrid({
             >
               <TrackToggle
                 source={Track.Source.Microphone}
+
+                
+                onDeviceError={(error) => {
+                  console.error("Microphone device error:", error);
+
+                  toast.custom(() => (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded">
+                      Microphone error: {error?.message || "Unknown error"}
+                    </div>
+                  ));
+                }}
                 style={{ color: "white", scale: 1.5 }}
-                // onClick={() => setAudioMuted((prev) => !prev)}
                 className="w-7 h-7 flex items-center justify-center"
               />
             </button>
