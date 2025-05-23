@@ -81,6 +81,7 @@ export default function Index() {
           setInCall(true);
           setCallStatus("inProgress");
         } else {
+          console.log(data.locationID === location?.LocationID?.toString());
           console.log("Location ID", location?.LocationID?.toString());
           console.log("NOT MINE", data);
         }
@@ -140,7 +141,7 @@ export default function Index() {
     }
   }, [confirmLogoutModal]);
 
-  const initiateCall = () => { };
+  const initiateCall = () => {};
 
   const handleLogOut = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -498,7 +499,13 @@ export default function Index() {
       }
       setIsMuted(!isMuted);
 
-      socketRef.current?.emit("participant-muted", JSON.stringify({ locationID: location?.LocationID?.toString(), isMuted: !isMuted }));
+      socketRef.current?.emit(
+        "participant-muted",
+        JSON.stringify({
+          locationID: location?.LocationID?.toString(),
+          isMuted: !isMuted,
+        })
+      );
     }
   };
 
@@ -564,7 +571,7 @@ export default function Index() {
                 <img
                   src={
                     location?.LocationReceptionistPhoto &&
-                      location?.LocationReceptionistPhoto !== ""
+                    location?.LocationReceptionistPhoto !== ""
                       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
                       : "/images/receptionist.png"
                   }

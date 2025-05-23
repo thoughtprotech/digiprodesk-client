@@ -33,6 +33,7 @@ import {
 import { Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
+import generateUUID from "@/utils/uuidGenerator";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -191,7 +192,7 @@ function PropertyFeed({
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
-  
+
   const [isRecording, setIsRecording] = useState(false);
   const [egressId, setEgressId] = useState(false);
 
@@ -304,7 +305,6 @@ function VideoGrid({
   isRecording,
   label,
 }: {
-  
   roomName: string;
   toggleRecording: any;
   isRecording: boolean;
@@ -313,8 +313,9 @@ function VideoGrid({
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const { socket } = useSocket();
-  const socketRef = useRef<ReturnType<typeof io> | null>(null);  
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [isRemoteMuted, setIsRemoteMuted] = useState<boolean>(false);
+  const [currentCallID, setCurrentCallID] = useState<string>("");
 
   useEffect(() => {
     socketRef.current = socket;
@@ -329,7 +330,12 @@ function VideoGrid({
   }, [socket]);
 
   const handleStartCall = async (data: any) => {
-    socketRef.current?.emit("start-call", JSON.stringify({ locationID: data }));
+    const uuid = generateUUID();
+    setCurrentCallID(uuid);
+    socketRef.current?.emit(
+      "start-call",
+      JSON.stringify({ locationID: data, callId: uuid })
+    );
     setIsFullscreen(true);
     console.log(data);
   };
@@ -338,7 +344,10 @@ function VideoGrid({
     if (isRecording) {
       toggleRecording();
     }
-    socketRef.current?.emit("call-end", JSON.stringify({ locationID: data }));
+    socketRef.current?.emit(
+      "call-end",
+      JSON.stringify({ locationID: data, callId: currentCallID })
+    );
     setIsFullscreen(false);
     console.log(data);
   };
@@ -357,16 +366,16 @@ function VideoGrid({
       !t.participant.isLocal
   );
 
-  const sendMuteRequest = (roomName:string) => {
-    socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: !isRemoteMuted }));
+  const sendMuteRequest = (roomName: string) => {
+    socketRef.current?.emit(
+      "mute-participant",
+      JSON.stringify({ locationID: roomName, isMuted: !isRemoteMuted })
+    );
     setIsRemoteMuted((prev) => !prev);
-  }
+  };
   const renderAudioTracks = () =>
     remoteAudioTracks.map((trackRef: TrackReferenceOrPlaceholder) => (
-      <AudioTrack
-        key={trackRef.publication.trackSid}
-        trackRef={trackRef}        
-      />
+      <AudioTrack key={trackRef.publication.trackSid} trackRef={trackRef} />
     ));
 
   return (
@@ -409,11 +418,13 @@ function VideoGrid({
                   <h1 className="font-bold text-4xl">{label}</h1>
                 </div>
                 <div className="flex items-center gap-5">
-
-                  <div onClick={() =>  {
-                    sendMuteRequest(roomName)
-                  }} className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
-                    {isRemoteMuted ? <MicOff  /> : <Mic  />}
+                  <div
+                    onClick={() => {
+                      sendMuteRequest(roomName);
+                    }}
+                    className="cursor-pointer rounded-md px-6 py-2 bg-highlight"
+                  >
+                    {isRemoteMuted ? <MicOff /> : <Mic />}
                   </div>
                   {/* <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
                     <Video />
@@ -429,8 +440,6 @@ function VideoGrid({
             >
               <TrackToggle
                 source={Track.Source.Microphone}
-
-                
                 onDeviceError={(error) => {
                   console.error("Microphone device error:", error);
 
