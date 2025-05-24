@@ -363,6 +363,8 @@ export default function Index() {
 
         await lkRoom.connect(wsUrl, token);
 
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
         const videoTrack = await createLocalVideoTrack({
           resolution: VideoPresets.h720.resolution,
         });
@@ -371,7 +373,7 @@ export default function Index() {
         await lkRoom.localParticipant.publishTrack(videoTrack, {
           simulcast: true,
           videoEncoding: {
-            maxBitrate: 2_000_000, // 2 Mbps
+            maxBitrate: 2_000_000,
             maxFramerate: 30,
           },
         });
@@ -485,8 +487,8 @@ export default function Index() {
           }
         }
       } catch (err) {
-        console.error("Guest connect error:", err);
-        setStatus("error");
+        //console.error("Guest connect error:", err);
+        //setStatus("error");
       }
     };
 
@@ -579,7 +581,7 @@ export default function Index() {
                 <img
                   src={
                     location?.LocationReceptionistPhoto &&
-                    location?.LocationReceptionistPhoto !== ""
+                      location?.LocationReceptionistPhoto !== ""
                       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
                       : "/images/receptionist.png"
                   }
