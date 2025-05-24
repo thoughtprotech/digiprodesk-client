@@ -117,9 +117,14 @@ export default function Index() {
 
   useEffect(() => {
     if (currentCall?.CallID) {
-      const newVideoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall.CallID}.mp4`;
-      setVideoUrl(newVideoUrl);
-      setVideoError(false);
+      fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/video-url?name=livekit-demo/${currentCall?.CallID}.mp4`)
+      .then(res => res.text())
+      .then(url => { 
+        setVideoUrl(url);
+        setVideoError(false);
+        console.log('Video URL fetched successfully:', url);
+      })
+      .catch(err => console.error('Error fetching video URL', err));
     }
   }, [currentCall?.CallID]);
 
@@ -830,7 +835,7 @@ export default function Index() {
               <div className="w-full h-full">
                 {!videoError ? (
                   <div className="w-full h-full">
-                    {currentCall?.CallVideoProcessingStatus === "Completed" ? (
+                    {videoUrl ? (
                       <video
                         className="w-full h-full"
                         key={videoUrl}
@@ -840,19 +845,6 @@ export default function Index() {
                       >
                         <source src={videoUrl} type="video/mp4" />
                       </video>
-                    ) : currentCall?.CallVideoProcessingStatus ===
-                      "Processing" ? (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <h1 className="text-xl font-bold text-textAlt">
-                          Processing Video, Please Wait...
-                        </h1>
-                      </div>
-                    ) : currentCall?.CallVideoProcessingStatus === "Pending" ? (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <h1 className="text-xl font-bold text-textAlt">
-                          Video Processing Is Pending. Please Check Back Later.
-                        </h1>
-                      </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <h1 className="text-xl font-bold text-textAlt">

@@ -209,12 +209,13 @@ function PropertyFeed({
 
   if (!wsUrl || !token) return null;
 
-  const toggleRecording = async () => {
+  const toggleRecording = async (callId: any) => {
     if (!isRecording) {
       try {
+        console.log("Starting recording for callId:", callId);
         const now = new Date();
         const timestamp = now.toISOString().replace(/[:.]/g, "-"); // e.g., "2025-05-10T14-30-15-123Z"
-        const fileName = `${roomName}-recording-${timestamp}`;
+        const fileName = `${callId}`;
         const response = await fetch(
           process.env.NEXT_PUBLIC_STARTRECORDING_API!,
           {
@@ -327,7 +328,7 @@ function VideoGrid({
       data.map((call: Call) => {
         console.log({ call });
         if (
-          call.AssignedToUserName === "host_1" &&
+          call.AssignedToUserName === "host 1" &&
           call.CallStatus === "New" &&
           call.CallPlacedByLocationID?.toString() === roomName
         ) {
@@ -512,7 +513,7 @@ function VideoGrid({
               {/* <Video className="w-7 h-7" /> */}
             </div>
             <button
-              onClick={() => toggleRecording()}
+              onClick={() => toggleRecording(currentCallID)}
               className={`${
                 isRecording ? "bg-orange-500" : "bg-highlight"
               } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
