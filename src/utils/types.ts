@@ -160,7 +160,7 @@ export interface Call {
     | "Error";
   CallPlacedByUserName?: string | null;
   CallPlacedByLocationID?: number;
-  CallAssignedTo?: string | null;
+  AssignedToUserName?: string | null;
   CallTransferredTo?: string | null;
   CallBookingID?: string;
   CallDocumentUploadStatus?: "Success" | "Error" | null;

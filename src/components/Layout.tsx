@@ -554,54 +554,54 @@ export default function Index({
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    try {
-      if (userId && userId !== "" && socket) {
-        socket.emit("get-call-list");
-        socket.on("call-list-update", (data: CallQueue[]) => {
-          console.log("CALL LIST", { callList });
-          console.log("CALL LIST DATA", { data });
-          // Identify new "pending" calls
-          let newPendingCalls = data.filter(
-            (call) =>
-              call.CallStatus === "New" &&
-              call.CallPlacedByUserName !== userId &&
-              call.AssignedToUserName === userId &&
-              !callList.some(
-                (existingCall) => existingCall.CallID === call.CallID
-              ) &&
-              !joinedCallIds.has(call.CallID)
-          );
+  // useEffect(() => {
+  //   try {
+  //     if (userId && userId !== "" && socket) {
+  //       socket.emit("get-call-list");
+  //       socket.on("call-list-update", (data: CallQueue[]) => {
+  //         console.log("CALL LIST", { callList });
+  //         console.log("CALL LIST DATA", { data });
+  //         // Identify new "pending" calls
+  //         let newPendingCalls = data.filter(
+  //           (call) =>
+  //             call.CallStatus === "New" &&
+  //             call.CallPlacedByUserName !== userId &&
+  //             call.AssignedToUserName === userId &&
+  //             !callList.some(
+  //               (existingCall) => existingCall.CallID === call.CallID
+  //             ) &&
+  //             !joinedCallIds.has(call.CallID)
+  //         );
 
-          if (newPendingCalls.length > 0 && router.query.from !== "push") {
-            newPendingCalls.map((call) => {
-              showCallRing(call, () => {
-                setCallToPickUp(call);
-                newPendingCalls = newPendingCalls.filter(
-                  (c) => c.CallID !== call.CallID
-                );
-                fetchGuestLocationDetails(call.CallPlacedByUserName!);
-                setJoinedCallIds((prev) => new Set(prev).add(call.CallID));
-                router.push("/checkInHub");
-              });
-            });
-          }
-          // Update the call list state
-          setCallList(
-            data.filter(
-              (call) =>
-                call.AssignedToUserName === userId &&
-                call.CallPlacedByUserName !== userId
-            )
-          );
-        });
-      }
-    } catch {
-      toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Connecting to Socket" />
-      ));
-    }
-  }, [userId, socket]);
+  //         if (newPendingCalls.length > 0 && router.query.from !== "push") {
+  //           newPendingCalls.map((call) => {
+  //             showCallRing(call, () => {
+  //               setCallToPickUp(call);
+  //               newPendingCalls = newPendingCalls.filter(
+  //                 (c) => c.CallID !== call.CallID
+  //               );
+  //               fetchGuestLocationDetails(call.CallPlacedByUserName!);
+  //               setJoinedCallIds((prev) => new Set(prev).add(call.CallID));
+  //               router.push("/checkInHub");
+  //             });
+  //           });
+  //         }
+  //         // Update the call list state
+  //         setCallList(
+  //           data.filter(
+  //             (call) =>
+  //               call.AssignedToUserName === userId &&
+  //               call.CallPlacedByUserName !== userId
+  //           )
+  //         );
+  //       });
+  //     }
+  //   } catch {
+  //     toast.custom((t: any) => (
+  //       <Toast t={t} type="error" content="Error Connecting to Socket" />
+  //     ));
+  //   }
+  // }, [userId, socket]);
 
   if (user) {
     return (

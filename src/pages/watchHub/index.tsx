@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
-import { Location, User } from "@/utils/types";
+import { Call, Location, User } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
 import { CallContext } from "@/context/CallContext";
 import { useRouter } from "next/router";
@@ -317,6 +317,25 @@ function VideoGrid({
       } else {
         console.log("participant-muted-request - NOT MINE");
       }
+    });
+
+    socketRef.current?.on("call-list-update", (data) => {
+      console.log({ data });
+      data.map((call: Call) => {
+        if (
+          call.AssignedToUserName === "host_1" &&
+          call.CallStatus === "New"
+        ) {
+          setIsFullscreen(true);
+          socketRef.current?.emit(
+            "join-call",
+            JSON.stringify({ roomId: call.CallID })
+          );
+        } else {
+          console.log({ data });
+          console.log("guest-call - NOT MINE");
+        }
+      });
     });
   }, [socket]);
 

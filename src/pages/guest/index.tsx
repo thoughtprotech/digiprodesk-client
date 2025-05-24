@@ -75,13 +75,16 @@ export default function Index() {
   useEffect(() => {
     if (socketRef.current && location) {
       socketRef.current.on("call-started", (data) => {
-        if (data === location?.LocationID?.toString()) {
+        console.log({ data });
+        if (data === location?.LocationID) {
+          console.log("CALL STARTED");
           console.log("Location ID", location?.LocationID?.toString());
           console.log({ data });
           setInCall(true);
           setCallStatus("inProgress");
         } else {
-          console.log(data.locationID === location?.LocationID?.toString());
+          console.log("CALL STARTED ERROR");
+          console.log(data === location?.LocationID);
           console.log("Location ID", location?.LocationID?.toString());
           console.log("NOT MINE", data);
         }
@@ -141,7 +144,20 @@ export default function Index() {
     }
   }, [confirmLogoutModal]);
 
-  const initiateCall = () => {};
+  const initiateCall = () => {
+    if (socketRef.current) {
+      const callId = generateUUID();
+      socketRef.current.emit(
+        "initiate-call",
+        JSON.stringify({
+          roomId: callId,
+          LocationID: location?.LocationID,
+        })
+      );
+      setInCall(true);
+      setCallStatus("calling");
+    }
+  };
 
   const handleLogOut = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -204,14 +220,6 @@ export default function Index() {
       const remoteVideo = remoteVideoRef.current;
       remoteVideo.volume = newVolume; // Set remote video volume
     }
-  };
-
-  const toggleMute = () => {
-    console.log(mediaConnectionRef.current?.localStream.getAudioTracks());
-    const audioTracks =
-      mediaConnectionRef.current?.localStream.getAudioTracks();
-    audioTracks![0].enabled = !audioTracks![0].enabled;
-    setIsMuted(!isMuted);
   };
 
   const fetchLocationData = async () => {
