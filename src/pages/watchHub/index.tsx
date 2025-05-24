@@ -10,6 +10,7 @@ import {
   Mic,
   MicOff,
   Minimize,
+  PhoneCall,
   PhoneOff,
   PhoneOutgoing,
   Video,
@@ -307,6 +308,9 @@ function VideoGrid({
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [isRemoteMuted, setIsRemoteMuted] = useState<boolean>(false);
   const [currentCallID, setCurrentCallID] = useState<string>("");
+  const [incomingCall, setIncomingCall] = useState<Call | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const modalAudioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     socketRef.current = socket;
@@ -321,21 +325,36 @@ function VideoGrid({
 
     socketRef.current?.on("call-list-update", (data) => {
       data.map((call: Call) => {
+        console.log({ call });
         if (
           call.AssignedToUserName === "host_1" &&
           call.CallStatus === "New" &&
           call.CallPlacedByLocationID?.toString() === roomName
         ) {
-          setIsFullscreen(true);
-          setCurrentCallID(call.CallID);
-          socketRef.current?.emit(
-            "join-call",
-            JSON.stringify({ roomId: call.CallID })
-          );
+          console.log({ call });
+          setShowModal(true);
+          setIncomingCall(call);
+          // setIsFullscreen(true);
+          // setCurrentCallID(call.CallID);
+          // socketRef.current?.emit(
+          //   "join-call",
+          //   JSON.stringify({ roomId: call.CallID })
+          // );
         }
       });
     });
   }, [socket]);
+
+  const attendCall = () => {
+    setShowModal(false);
+    setIsFullscreen(true);
+    setCurrentCallID(incomingCall?.CallID!);
+    socketRef.current?.emit(
+      "join-call",
+      JSON.stringify({ roomId: incomingCall?.CallID })
+    );
+    setIncomingCall(null);
+  };
 
   useEffect(() => {
     console.log({ currentCallID });
@@ -391,12 +410,26 @@ function VideoGrid({
       <AudioTrack key={trackRef.publication.trackSid} trackRef={trackRef} />
     ));
 
+  useEffect(() => {
+    const audioEl = modalAudioRef.current;
+    if (!audioEl) return;
+
+    if (showModal) {
+      // rewind and play
+      audioEl.currentTime = 0;
+      audioEl.play().catch(() => {
+        /* handle autoplay-blocked if needed */
+      });
+    } else {
+      audioEl.pause();
+      audioEl.currentTime = 0;
+    }
+  }, [showModal]);
+
   return (
     <>
       <div
-        className={`relative w-full h-fit ${
-          isFullscreen ? "hidden" : "block"
-        }`}
+        className={`relative w-full h-fit ${isFullscreen ? "hidden" : "block"}`}
       >
         {remoteVideoTracks.map((trackRef: any) => (
           <VideoTrack
@@ -492,6 +525,45 @@ function VideoGrid({
             >
               <PhoneOff className="w-7 h-7" />
             </button>
+          </div>
+        </div>
+      )}
+      <audio
+        ref={modalAudioRef}
+        src="/sounds/call-ringtone.mp3" // point to your audio file
+        preload="auto"
+        style={{ display: "none" }}
+      />
+      {showModal && (
+        <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="w-fit max-w-2xl bg-foreground shadow-lg rounded-lg p-4 flex flex-col gap-5 items-center">
+            <div className="w-full border-b border-b-border pb-2">
+              <h1 className="text-center text-orange-500 uppercase font-bold">
+                Incoming Call
+              </h1>
+            </div>
+            <div className="flex items-center gap-5">
+              <div className="w-full">
+                <img
+                  src={`/images/incomingCall.gif`}
+                  alt="User Profile"
+                  className="w-28 h-28 object-cover rounded-full"
+                />
+              </div>
+              <div>
+                <h1 className="font-bold text-3xl">
+                  {incomingCall?.CallPlacedByUserName}
+                </h1>
+              </div>
+            </div>
+            <div className="w-full">
+              <button
+                className="w-full px-4 py-2 flex justify-center rounded-md bg-green-500/50"
+                onClick={() => attendCall()}
+              >
+                <PhoneCall />
+              </button>
+            </div>
           </div>
         </div>
       )}
