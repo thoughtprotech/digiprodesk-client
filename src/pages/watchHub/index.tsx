@@ -320,24 +320,26 @@ function VideoGrid({
     });
 
     socketRef.current?.on("call-list-update", (data) => {
-      console.log({ data });
       data.map((call: Call) => {
         if (
           call.AssignedToUserName === "host_1" &&
-          call.CallStatus === "New"
+          call.CallStatus === "New" &&
+          call.CallPlacedByLocationID?.toString() === roomName
         ) {
           setIsFullscreen(true);
+          setCurrentCallID(call.CallID);
           socketRef.current?.emit(
             "join-call",
             JSON.stringify({ roomId: call.CallID })
           );
-        } else {
-          console.log({ data });
-          console.log("guest-call - NOT MINE");
         }
       });
     });
   }, [socket]);
+
+  useEffect(() => {
+    console.log({ currentCallID });
+  }, [currentCallID]);
 
   const handleStartCall = async (data: any) => {
     const uuid = generateUUID();
@@ -354,6 +356,7 @@ function VideoGrid({
     if (isRecording) {
       toggleRecording();
     }
+    setCurrentCallID("");
     socketRef.current?.emit(
       "call-end",
       JSON.stringify({ locationID: data, callId: currentCallID })
@@ -391,7 +394,7 @@ function VideoGrid({
   return (
     <>
       <div
-        className={`relative w-full h-fit bg-red-500 ${
+        className={`relative w-full h-fit ${
           isFullscreen ? "hidden" : "block"
         }`}
       >
@@ -444,7 +447,7 @@ function VideoGrid({
             </div>
           </div>
           <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
-            <button
+            <div
               // onClick={() => handleEndCall(roomName)}
               className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
             >
@@ -462,8 +465,8 @@ function VideoGrid({
                 style={{ color: "white", scale: 1.5 }}
                 className="w-7 h-7 flex items-center justify-center"
               />
-            </button>
-            <button
+            </div>
+            <div
               // onClick={() => handleEndCall(roomName)}
               className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
             >
@@ -474,7 +477,7 @@ function VideoGrid({
                 className="w-7 h-7 flex items-center justify-center"
               />
               {/* <Video className="w-7 h-7" /> */}
-            </button>
+            </div>
             <button
               onClick={() => toggleRecording()}
               className={`${
