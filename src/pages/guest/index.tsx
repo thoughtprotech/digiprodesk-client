@@ -76,7 +76,7 @@ export default function Index() {
     if (socketRef.current && location) {
       socketRef.current.on("call-started", (data) => {
         console.log({ data });
-        if (data === location?.LocationID) {
+        if (data?.toString() === location?.LocationID?.toString()) {
           console.log("CALL STARTED");
           console.log("Location ID", location?.LocationID?.toString());
           console.log({ data });
@@ -91,6 +91,7 @@ export default function Index() {
       });
 
       socketRef.current.on("call-end-guest", (data) => {
+        console.log(data);
         if (data === location?.LocationID?.toString()) {
           console.log("Location ID", location?.LocationID?.toString());
           console.log({ data });
