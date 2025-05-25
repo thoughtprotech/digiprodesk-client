@@ -483,7 +483,7 @@ export default function Index() {
           <div className="w-1/2 h-full max-h-[50vh] p-2 rounded-md bg-foreground flex flex-col gap-2 overflow-y-auto overflow-x-hidden relative">
             <div className="w-full border-b border-b-border pb-2 sticky top-0 z-50 bg-foreground">
               <div>
-                <h1 className="text-xl font-bold">Check In Details</h1>
+                <h1 className="text-xl font-bold">Call Details</h1>
               </div>
               {currentCall && callLog && (
                 <div className="w-full flex items-center gap-3">
@@ -617,7 +617,7 @@ export default function Index() {
               ) : (
                 <div className="w-full h-full max-h-[50vh] p-2 rounded-md flex flex-col items-center justify-center gap-2 overflow-auto relative">
                   <h1 className="text-xl font-bold text-textAlt">
-                    Select A Check In
+                    Select A Call
                   </h1>
                 </div>
               )}
@@ -700,7 +700,7 @@ export default function Index() {
             ) : (
               <div className="w-full h-full rounded-md flex items-center justify-center">
                 <h1 className="text-xl font-bold text-textAlt">
-                  Select A Check In
+                  Select A Call
                 </h1>
               </div>
             )}
@@ -769,7 +769,7 @@ export default function Index() {
             ) : (
               <div className="w-full h-full rounded-md flex items-center justify-center">
                 <h1 className="text-xl font-bold text-textAlt">
-                  Select A Check In
+                  Select A Call
                 </h1>
               </div>
             )}
@@ -880,7 +880,7 @@ export default function Index() {
               </div>
               <div className="w-full h-full bg-foreground flex items-center justify-center">
                 <h1 className="text-xl font-bold text-textAlt">
-                  Select A Check In
+                  Select A Call
                 </h1>
               </div>
             </div>

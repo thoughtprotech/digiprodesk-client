@@ -7,7 +7,10 @@ import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import { parseCookies } from "nookies";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
-import { DateContextProvider, useDateContext } from "../../../context/DateContext";
+import {
+  DateContextProvider,
+  useDateContext,
+} from "../../../context/DateContext";
 
 export default function Index() {
   const [checkInDetails, setCheckInDetails] = useState<
@@ -129,7 +132,7 @@ export default function Index() {
       headerTitle={
         <div className="flex items-center gap-2">
           <div>
-            <h1 className="font-bold text-lg">CHECK-IN TRAILS</h1>
+            <h1 className="font-bold text-lg">CALLS</h1>
           </div>
         </div>
       }
@@ -183,7 +186,7 @@ export default function Index() {
                         {loc.TotalCheckIns}
                       </h1>
                       <h1 className="text-blue-500 font-bold text-sm text-nowrap">
-                        Check Ins
+                        Calls
                       </h1>
                     </div>
                   </div>

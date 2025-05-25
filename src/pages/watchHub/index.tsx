@@ -436,6 +436,16 @@ function VideoGrid({
         }
       });
     });
+
+    socketRef.current?.on("call-missed", (data) => {
+      if (
+        data.CallAssignedTo === user.UserName &&
+        data.CallStatus === "Missed"
+      ) {
+        setShowModal(false);
+        setIncomingCall(null);
+      }
+    });
   }, [socket, user]);
 
   const attendCall = () => {
@@ -583,7 +593,6 @@ function VideoGrid({
               <TrackToggle
                 source={Track.Source.Microphone}
                 onDeviceError={(error) => {
-
                   toast.custom(() => (
                     <div className="bg-red-500 text-white px-4 py-2 rounded">
                       Microphone error: {error?.message || "Unknown error"}

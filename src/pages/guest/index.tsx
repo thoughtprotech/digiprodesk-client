@@ -127,6 +127,17 @@ export default function Index() {
         }
       });
 
+      socketRef.current.on("call-missed", (data) => {
+        console.log("HOST NOT AVAILABLE", data);
+        if (data.CallID === currentCallID) {
+          setInCall(false);
+          setCallStatus("missed");
+          setTimeout(() => {
+            setCallStatus("notInCall");
+          }, 10000);
+        }
+      });
+
       socketRef.current.on("mute-participant-request", (data) => {
         if (data.locationID === location?.LocationID?.toString()) {
           const audioTrack = localAudioTrackRef.current;

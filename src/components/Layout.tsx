@@ -663,7 +663,7 @@ export default function Index({
                           } rounded-md p-1 cursor-pointer`}
                           onClick={() => router.push("/admin/checkIns")}
                         >
-                          <Tooltip tooltip="Check-In Trails" position="bottom">
+                          <Tooltip tooltip="Calls" position="bottom">
                             <Backpack className="w-5 h-5" />
                           </Tooltip>
                         </div>
@@ -725,7 +725,7 @@ export default function Index({
                           </Tooltip>
                         </div>
                       )}
-                      {roleDetails.find(
+                      {/* {roleDetails.find(
                         (role) =>
                           role.Role.toLowerCase() === user.Role.toLowerCase() &&
                           role.Menu.toLowerCase() === "check-in hub" &&
@@ -743,7 +743,7 @@ export default function Index({
                             <SmartphoneNfc className="w-5 h-5" />
                           </Tooltip>
                         </div>
-                      )}
+                      )} */}
                     </>
                   )}
                   {header}
