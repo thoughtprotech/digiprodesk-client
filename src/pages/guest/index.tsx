@@ -38,8 +38,8 @@ import {
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import { TrackToggle } from "@livekit/components-react";
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import '@tensorflow/tfjs';
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
+import "@tensorflow/tfjs";
 
 export default function Index() {
   const [, setUserId] = useState<string>("");
@@ -69,17 +69,21 @@ export default function Index() {
   const callStatusRef = useRef(callStatus);
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const { socket } = useSocket();
-  
+
   const [hasNotified, setHasNotified] = useState(false); // prevents spam
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null); // loaded model
   const [detectionStarted, setDetectionStarted] = useState(false); // run once
   const hasNotifiedRef = useRef(false); // to track if notification has been sent
+  const [currentCallID, setCurrentCallID] = useState<string>("");
 
   useEffect(() => {
     socketRef.current = socket;
-    cocoSsd.load().then((model: any) => {
-      modelRef.current = model;
-    }).catch(console.error);
+    cocoSsd
+      .load()
+      .then((model: any) => {
+        modelRef.current = model;
+      })
+      .catch(console.error);
   }, [socket]);
 
   useEffect(() => {
@@ -112,6 +116,17 @@ export default function Index() {
         }
       });
 
+      socketRef.current.on("host-unavailable", (data) => {
+        console.log("HOST NOT AVAILABLE", data);
+        if (data.CallID === currentCallID) {
+          setInCall(false);
+          setCallStatus("hostUnavailabe");
+          setTimeout(() => {
+            setCallStatus("notInCall");
+          }, 10000);
+        }
+      });
+
       socketRef.current.on("mute-participant-request", (data) => {
         if (data.locationID === location?.LocationID?.toString()) {
           const audioTrack = localAudioTrackRef.current;
@@ -128,7 +143,7 @@ export default function Index() {
         }
       });
     }
-  }, [socketRef.current, location]);
+  }, [socketRef.current, location, currentCallID]);
 
   useEffect(() => {
     callStatusRef.current = callStatus;
@@ -158,6 +173,7 @@ export default function Index() {
   const initiateCall = () => {
     if (socketRef.current) {
       const callId = generateUUID();
+      setCurrentCallID(callId);
       socketRef.current.emit(
         "initiate-call",
         JSON.stringify({
@@ -408,41 +424,51 @@ export default function Index() {
 
           //Face detection
           detectionInterval = setInterval(async () => {
-            const videoEl = guestVideoRef.current?.querySelector('video');
-          
+            const videoEl = guestVideoRef.current?.querySelector("video");
+
             if (!modelRef.current || !videoEl) return;
-          
-            const predictions = await modelRef.current.detect(videoEl as HTMLVideoElement);
-            const found = predictions.some((p: { class: string; score: number; }) => p.class === 'person' && p.score > 0.6);
-          
+
+            const predictions = await modelRef.current.detect(
+              videoEl as HTMLVideoElement
+            );
+            const found = predictions.some(
+              (p: { class: string; score: number }) =>
+                p.class === "person" && p.score > 0.6
+            );
+
             if (found) {
               if (!hasNotifiedRef.current) {
                 hasNotifiedRef.current = true;
-          
+
                 const dataToPass = {
                   locationID: location?.LocationID?.toString(),
-                  detected: true
+                  detected: true,
                 };
-          
-                console.log("✅ Person detected, notifying receptionist", dataToPass);
-                socketRef.current?.emit('person-detected', dataToPass);
+
+                console.log(
+                  "✅ Person detected, notifying receptionist",
+                  dataToPass
+                );
+                socketRef.current?.emit("person-detected", dataToPass);
               }
             } else {
               if (hasNotifiedRef.current) {
                 hasNotifiedRef.current = false;
-          
+
                 const dataToPass = {
                   locationID: location?.LocationID?.toString(),
-                  detected: false
+                  detected: false,
                 };
-          
-                console.log("❌ Person left, notifying receptionist", dataToPass);
-                socketRef.current?.emit('person-detected', dataToPass);
+
+                console.log(
+                  "❌ Person left, notifying receptionist",
+                  dataToPass
+                );
+                socketRef.current?.emit("person-detected", dataToPass);
               }
             }
           }, 3000);
-           // every 3 seconds
-
+          // every 3 seconds
         }
 
         // Set fallback initially
@@ -631,7 +657,7 @@ export default function Index() {
                 <img
                   src={
                     location?.LocationReceptionistPhoto &&
-                      location?.LocationReceptionistPhoto !== ""
+                    location?.LocationReceptionistPhoto !== ""
                       ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
                       : "/images/receptionist.png"
                   }
@@ -641,10 +667,11 @@ export default function Index() {
                 <h1 className="text-xl font-bold text-white whitespace-nowrap">
                   Meet Virtual Receptionist
                 </h1>
-                <div style={{ display: "none" }}
-                className="absolute bottom-28 -right-10 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
-                ref={guestVideoRef}
-              />
+                <div
+                  style={{ display: "none" }}
+                  className="absolute bottom-28 -right-10 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
+                  ref={guestVideoRef}
+                />
               </div>
             </div>
           </div>
@@ -719,7 +746,7 @@ export default function Index() {
         )}
         {callStatus === "missed" && (
           <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">
+            <h1 className="font-bold text-xl text-center">
               Looks like the call wasn&apos;t picked up, please try again after
               sometime
             </h1>

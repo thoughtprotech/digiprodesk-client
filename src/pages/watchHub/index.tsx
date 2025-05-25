@@ -665,8 +665,8 @@ function VideoGrid({
                 />
               </div>
               <div>
-                <h1 className="font-bold text-3xl">
-                  {incomingCall?.CallPlacedByUserName}
+                <h1 className="font-bold text-3xl whitespace-nowrap">
+                  {incomingCall?.CallPlacedByLocationName}
                 </h1>
               </div>
             </div>

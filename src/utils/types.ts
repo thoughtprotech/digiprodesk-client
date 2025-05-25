@@ -181,6 +181,7 @@ export interface Call {
   ModifiedBy?: string;
   ModifiedOn?: string;
   CallPlacedByLocation: Location | null;
+  CallPlacedByLocationName?: string;
 }
 
 export interface CallLog {
