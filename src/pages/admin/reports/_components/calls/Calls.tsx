@@ -109,7 +109,7 @@ export default function Calls() {
               Location
             </th>
             <th className="py-2 px-4 text-left border-b border-b-border">
-              Check-Ins
+              Calls
             </th>
             <th className="py-2 px-4 text-left border-b border-b-border">
               Missed
