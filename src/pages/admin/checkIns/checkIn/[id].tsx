@@ -71,25 +71,32 @@ export function TimelineCard({
   timestamp: string | Date;
   status: string;
 }) {
+  const statusInfo = callMapping[status];
   return (
     <div className="w-full flex flex-col gap-1">
       <div className="w-full flex flex-col gap-1">
-        <div
-          className={`w-full flex items-center justify-between gap-2 ${callMapping[status].bg} p-1 px-2 rounded-md`}
-        >
-          <div>
-            <h1 className="font-bold text-text text-xs">
-              {callMapping[status].text}
-            </h1>
+        {statusInfo ? (
+          <div
+            className={`w-full flex items-center justify-between gap-2 ${statusInfo.bg} p-1 px-2 rounded-md`}
+          >
+            <div>
+              <h1 className="font-bold text-text text-xs">
+                {statusInfo.text}
+              </h1>
+            </div>
+            <div>
+              <h1
+                className={`text-[0.6rem] ${statusInfo.color} font-bold whitespace-nowrap`}
+              >
+                {new Date(timestamp).toLocaleTimeString()}
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1
-              className={`text-[0.6rem] ${callMapping[status].color} font-bold whitespace-nowrap`}
-            >
-              {new Date(timestamp).toLocaleTimeString()}
-            </h1>
+        ) : (
+          <div >
+            
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -118,13 +125,13 @@ export default function Index() {
   useEffect(() => {
     if (currentCall?.CallID) {
       fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/video-url?name=livekit-demo/${currentCall?.CallID}.mp4`)
-      .then(res => res.text())
-      .then(url => { 
-        setVideoUrl(url);
-        setVideoError(false);
-        console.log('Video URL fetched successfully:', url);
-      })
-      .catch(err => console.error('Error fetching video URL', err));
+        .then(res => res.text())
+        .then(url => {
+          setVideoUrl(url);
+          setVideoError(false);
+          console.log('Video URL fetched successfully:', url);
+        })
+        .catch(err => console.error('Error fetching video URL', err));
     }
   }, [currentCall?.CallID]);
 
@@ -505,7 +512,7 @@ export default function Index() {
                         new Date(
                           callLog![callLog!.length - 1].CallTimeStamp
                         ).getTime() -
-                          new Date(callLog![0].CallTimeStamp).getTime()
+                        new Date(callLog![0].CallTimeStamp).getTime()
                       )}
                     </h1>
                   </div>
@@ -526,9 +533,9 @@ export default function Index() {
                           const difference =
                             index < callLog!.length - 1
                               ? new Date(
-                                  callLog![index + 1].CallTimeStamp
-                                ).getTime() -
-                                new Date(callL.CallTimeStamp).getTime()
+                                callLog![index + 1].CallTimeStamp
+                              ).getTime() -
+                              new Date(callL.CallTimeStamp).getTime()
                               : 0;
                           return (
                             <div key={index} className="flex flex-col gap-1">
@@ -541,7 +548,7 @@ export default function Index() {
                                   <div>
                                     {/* <PhoneIncoming className='w-4 text-sky-500' /> */}
                                     <h1 className="text-[0.6rem] text-textAlt font-bold whitespace-nowrap">
-                                      {}
+                                      { }
                                       {/* Difference of timestamp of next timestamp and current */}
                                       {difference > 0
                                         ? `${formatDuration(difference)}`
@@ -639,7 +646,7 @@ export default function Index() {
               <div>
                 {/* Grid of black boxes */}
                 {currentCall.CallDocuments &&
-                currentCall.CallDocuments !== "" ? (
+                  currentCall.CallDocuments !== "" ? (
                   <div className="w-full h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-2">
                     {currentCall.CallDocuments?.split("|").map((doc, i) => (
                       <div
@@ -715,7 +722,7 @@ export default function Index() {
                       <h1 className="text-textAlt font-bold">Rank</h1>
                       <h1 className="text-2xl font-bold">
                         {currentCall?.CallAnalytics ===
-                        ("POSITIVE" as string) ? (
+                          ("POSITIVE" as string) ? (
                           <span className="text-green-500">Positive</span>
                         ) : currentCall?.CallAnalytics ===
                           ("NEGATIVE" as string) ? (
