@@ -595,7 +595,7 @@ function VideoGrid({
             </div>
           </div>
           <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
-            <div className="w-full flex items-center gap-5 justify-between">
+            <div className="w-full flex items-center gap-2 justify-between">
               <div
                 // onClick={() => handleEndCall(roomName)}
                 className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
