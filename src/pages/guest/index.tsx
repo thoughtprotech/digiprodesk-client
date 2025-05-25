@@ -77,7 +77,7 @@ export default function Index() {
 
   useEffect(() => {
     socketRef.current = socket;
-    cocoSsd.load().then(model => {
+    cocoSsd.load().then((model: any) => {
       modelRef.current = model;
     }).catch(console.error);
   }, [socket]);
@@ -413,7 +413,7 @@ export default function Index() {
             if (!modelRef.current || !videoEl) return;
           
             const predictions = await modelRef.current.detect(videoEl as HTMLVideoElement);
-            const found = predictions.some(p => p.class === 'person' && p.score > 0.6);
+            const found = predictions.some((p: { class: string; score: number; }) => p.class === 'person' && p.score > 0.6);
           
             if (found) {
               if (!hasNotifiedRef.current) {
@@ -456,7 +456,7 @@ export default function Index() {
         });
 
         function handleRemoteParticipant(p: RemoteParticipant) {
-          if (!p.identity.startsWith("receptionist")) return;
+          // if (!p.identity.startsWith("receptionist")) return;
 
           p.on("trackSubscribed", (track) => {
             if (track.kind === Track.Kind.Video) {

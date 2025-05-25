@@ -1,20 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Layout from "@/components/Layout";
-import WatchCard from "./_components/WatchCard";
-import VideoViewer from "@/components/ui/videoViewer";
-import Button from "@/components/ui/Button";
 import {
-  Circle,
   CircleDot,
-  Maximize,
   Mic,
   MicOff,
-  Minimize,
   PhoneCall,
   PhoneOff,
   PhoneOutgoing,
-  Video,
-  User as UserIcon
+  User as UserIcon,
 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
@@ -36,6 +29,8 @@ import { Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import generateUUID from "@/utils/uuidGenerator";
+import jwt from "jsonwebtoken";
+import logOut from "@/utils/logOut";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -197,16 +192,59 @@ function PropertyFeed({
 
   const [isRecording, setIsRecording] = useState(false);
   const [egressId, setEgressId] = useState(false);
+  const [user, setUser] = useState<User>();
+  const router = useRouter();
+
+  const fetchUserDetails = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+    const decoded = jwt.decode(userToken);
+    const { userName } = decoded as { userName: string };
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setUser(data);
+        });
+      } else if (response.status === 401) {
+        logOut(router);
+      } else {
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Details" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Details" />
+      ));
+    }
+  };
 
   useEffect(() => {
-    fetch(`/api/token?identity=receptionist&room=${roomName}`)
+    fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    console.log("START HOST VIDEO", { user });
+    fetch(`/api/token?identity=${user?.UserName}&room=${roomName}`)
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
         setWsUrl(wsUrl);
         setToken(token);
       })
       .catch(console.error);
-  }, [roomName]);
+  }, [roomName, user]);
 
   if (!wsUrl || !token) return null;
 
@@ -315,8 +353,52 @@ function VideoGrid({
   const modalAudioRef = useRef<HTMLAudioElement>(null);
   const [showPersonIcon, setShowPersonIcon] = useState(false);
   const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [user, setUser] = useState<User>();
+  const router = useRouter();
+
+  const fetchUserDetails = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+    const decoded = jwt.decode(userToken);
+    const { userName } = decoded as { userName: string };
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user/${userName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setUser(data);
+        });
+      } else if (response.status === 401) {
+        logOut(router);
+      } else {
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Details" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Details" />
+      ));
+    }
+  };
+
   useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
     socketRef.current = socket;
+    console.log("SOCKET READY", { user });
 
     socketRef.current?.on("participant-muted-request", (data) => {
       if (data.locationID === roomName) {
@@ -352,26 +434,22 @@ function VideoGrid({
     });
 
     socketRef.current?.on("call-list-update", (data) => {
+      console.log("CALL LIST UPDATE");
       data.map((call: Call) => {
         console.log({ call });
         if (
-          call.AssignedToUserName === "host 1" &&
+          call.AssignedToUserName === user.UserName &&
           call.CallStatus === "New" &&
           call.CallPlacedByLocationID?.toString() === roomName
         ) {
-          console.log({ call });
           setShowModal(true);
           setIncomingCall(call);
-          // setIsFullscreen(true);
-          // setCurrentCallID(call.CallID);
-          // socketRef.current?.emit(
-          //   "join-call",
-          //   JSON.stringify({ roomId: call.CallID })
-          // );
+        } else {
+          console.log("NOT MINE", { call });
         }
       });
     });
-  }, [socket]);
+  }, [socket, user]);
 
   const attendCall = () => {
     setShowModal(false);
@@ -389,14 +467,16 @@ function VideoGrid({
   }, [currentCallID]);
 
   const handleStartCall = async (data: any) => {
-    const uuid = generateUUID();
-    setCurrentCallID(uuid);
-    socketRef.current?.emit(
-      "start-call",
-      JSON.stringify({ locationID: data, callId: uuid })
-    );
-    setIsFullscreen(true);
-    console.log(data);
+    if (user) {
+      const uuid = generateUUID();
+      setCurrentCallID(uuid);
+      socketRef.current?.emit(
+        "start-call",
+        JSON.stringify({ locationID: data, callId: uuid })
+      );
+      setIsFullscreen(true);
+      console.log(data);
+    }
   };
 
   const handleEndCall = async (data: any) => {
@@ -547,8 +627,9 @@ function VideoGrid({
             </div>
             <button
               onClick={() => toggleRecording(currentCallID)}
-              className={`${isRecording ? "bg-orange-500" : "bg-highlight"
-                } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
+              className={`${
+                isRecording ? "bg-orange-500" : "bg-highlight"
+              } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
             >
               <CircleDot className="w-7 h-7" />
             </button>
