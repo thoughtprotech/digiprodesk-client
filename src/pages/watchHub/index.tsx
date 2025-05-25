@@ -14,6 +14,7 @@ import {
   PhoneOff,
   PhoneOutgoing,
   Video,
+  User as UserIcon
 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
@@ -312,7 +313,8 @@ function VideoGrid({
   const [incomingCall, setIncomingCall] = useState<Call | null>(null);
   const [showModal, setShowModal] = useState<boolean>(false);
   const modalAudioRef = useRef<HTMLAudioElement>(null);
-
+  const [showPersonIcon, setShowPersonIcon] = useState(false);
+  const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     socketRef.current = socket;
 
@@ -321,6 +323,31 @@ function VideoGrid({
         setIsRemoteMuted(data.isMuted);
       } else {
         console.log("participant-muted-request - NOT MINE");
+      }
+    });
+
+    socketRef.current?.on("person-detected-request", (data) => {
+      if (data.locationID === roomName) {
+        if (data.detected) {
+          setShowPersonIcon(true);
+
+          // Clear old timer and restart 30s timer
+          if (personIconTimerRef.current) {
+            clearTimeout(personIconTimerRef.current);
+          }
+
+          personIconTimerRef.current = setTimeout(() => {
+            setShowPersonIcon(false);
+          }, 30000);
+        } else {
+          setShowPersonIcon(false); // Optional: hide icon early if person left
+          if (personIconTimerRef.current) {
+            clearTimeout(personIconTimerRef.current);
+            personIconTimerRef.current = null;
+          }
+        }
+      } else {
+        console.log("person-detected-request - NOT MINE");
       }
     });
 
@@ -439,6 +466,12 @@ function VideoGrid({
             className="inset-0 w-full h-full object-cover"
           />
         ))}
+        {showPersonIcon && (
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black/60 px-2 py-0.5 rounded z-10">
+            <UserIcon className="w-4 h-4 text-orange-400" />
+            <span className="text-xs font-medium">Person Detected</span>
+          </div>
+        )}
         {/* {renderAudioTracks()} */}
         <button
           onClick={() => handleStartCall(roomName)}
@@ -514,9 +547,8 @@ function VideoGrid({
             </div>
             <button
               onClick={() => toggleRecording(currentCallID)}
-              className={`${
-                isRecording ? "bg-orange-500" : "bg-highlight"
-              } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
+              className={`${isRecording ? "bg-orange-500" : "bg-highlight"
+                } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
             >
               <CircleDot className="w-7 h-7" />
             </button>

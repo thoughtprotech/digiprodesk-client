@@ -11,6 +11,8 @@
   "dependencies": {
     "@livekit/components-react": "^2.9.4",
     "@livekit/components-styles": "^1.1.5",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
+    "@tensorflow/tfjs": "^4.22.0",
     "classnames": "^2.5.1",
     "file-saver": "^2.0.5",
     "html2canvas": "^1.4.1",

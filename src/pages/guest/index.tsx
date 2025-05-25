@@ -38,6 +38,8 @@ import {
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import { TrackToggle } from "@livekit/components-react";
+import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import '@tensorflow/tfjs';
 
 export default function Index() {
   const [, setUserId] = useState<string>("");
@@ -67,9 +69,17 @@ export default function Index() {
   const callStatusRef = useRef(callStatus);
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const { socket } = useSocket();
+  
+  const [hasNotified, setHasNotified] = useState(false); // prevents spam
+  const modelRef = useRef<cocoSsd.ObjectDetection | null>(null); // loaded model
+  const [detectionStarted, setDetectionStarted] = useState(false); // run once
+  const hasNotifiedRef = useRef(false); // to track if notification has been sent
 
   useEffect(() => {
     socketRef.current = socket;
+    cocoSsd.load().then(model => {
+      modelRef.current = model;
+    }).catch(console.error);
   }, [socket]);
 
   useEffect(() => {
@@ -346,6 +356,9 @@ export default function Index() {
   useEffect(() => {
     if (!location) return;
 
+    let detectionInterval: NodeJS.Timeout;
+    setDetectionStarted(true);
+
     const connectToRoom = async () => {
       setStatus("connecting");
 
@@ -392,6 +405,44 @@ export default function Index() {
           videoElement.muted = true;
           guestVideoRef.current.innerHTML = "";
           guestVideoRef.current.appendChild(videoElement);
+
+          //Face detection
+          detectionInterval = setInterval(async () => {
+            const videoEl = guestVideoRef.current?.querySelector('video');
+          
+            if (!modelRef.current || !videoEl) return;
+          
+            const predictions = await modelRef.current.detect(videoEl as HTMLVideoElement);
+            const found = predictions.some(p => p.class === 'person' && p.score > 0.6);
+          
+            if (found) {
+              if (!hasNotifiedRef.current) {
+                hasNotifiedRef.current = true;
+          
+                const dataToPass = {
+                  locationID: location?.LocationID?.toString(),
+                  detected: true
+                };
+          
+                console.log("✅ Person detected, notifying receptionist", dataToPass);
+                socketRef.current?.emit('person-detected', dataToPass);
+              }
+            } else {
+              if (hasNotifiedRef.current) {
+                hasNotifiedRef.current = false;
+          
+                const dataToPass = {
+                  locationID: location?.LocationID?.toString(),
+                  detected: false
+                };
+          
+                console.log("❌ Person left, notifying receptionist", dataToPass);
+                socketRef.current?.emit('person-detected', dataToPass);
+              }
+            }
+          }, 3000);
+           // every 3 seconds
+
         }
 
         // Set fallback initially
@@ -495,10 +546,8 @@ export default function Index() {
 
     connectToRoom();
 
-    return () => {
-      // Optionally: add disconnect logic
-    };
-  }, [location, callStatus]);
+    return () => clearInterval(detectionInterval);
+  }, [location, callStatus, detectionStarted]);
 
   const handleToggleMute = () => {
     const audioTrack = localAudioTrackRef.current;
@@ -592,6 +641,10 @@ export default function Index() {
                 <h1 className="text-xl font-bold text-white whitespace-nowrap">
                   Meet Virtual Receptionist
                 </h1>
+                <div style={{ display: "none" }}
+                className="absolute bottom-28 -right-10 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
+                ref={guestVideoRef}
+              />
               </div>
             </div>
           </div>
