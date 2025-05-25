@@ -491,6 +491,14 @@ function VideoGrid({
       t.participant.identity.includes("guest")
   );
 
+  const localVideoTrack = tracks.find(
+    (t) =>
+      t.publication.kind === "video" &&
+      t.publication.isSubscribed &&
+      t.participant.isLocal &&
+      t.publication.source === Track.Source.Camera
+  );
+
   const remoteAudioTracks = tracks.filter(
     (t) =>
       t.publication.kind === "audio" &&
@@ -563,6 +571,7 @@ function VideoGrid({
                 className="w-full h-full object-contain rounded-md"
               />
             ))}
+
             {renderAudioTracks()}
             <div className="absolute top-0 left-0 w-full flex bg-black/70 justify-start">
               <div className="w-full max-w-2xl flex items-center gap-5 px-4 py-1 rounded-md">
@@ -586,49 +595,60 @@ function VideoGrid({
             </div>
           </div>
           <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
-            <div
-              // onClick={() => handleEndCall(roomName)}
-              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-            >
-              <TrackToggle
-                source={Track.Source.Microphone}
-                onDeviceError={(error) => {
-                  toast.custom(() => (
-                    <div className="bg-red-500 text-white px-4 py-2 rounded">
-                      Microphone error: {error?.message || "Unknown error"}
-                    </div>
-                  ));
-                }}
-                style={{ color: "white", scale: 1.5 }}
-                className="w-7 h-7 flex items-center justify-center"
-              />
+            <div className="w-full flex items-center gap-5 justify-between">
+              <div
+                // onClick={() => handleEndCall(roomName)}
+                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
+              >
+                <TrackToggle
+                  source={Track.Source.Microphone}
+                  onDeviceError={(error) => {
+                    toast.custom(() => (
+                      <div className="bg-red-500 text-white px-4 py-2 rounded">
+                        Microphone error: {error?.message || "Unknown error"}
+                      </div>
+                    ));
+                  }}
+                  style={{ color: "white", scale: 1.5 }}
+                  className="w-7 h-7 flex items-center justify-center"
+                />
+              </div>
+              <div
+                // onClick={() => handleEndCall(roomName)}
+                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
+              >
+                <TrackToggle
+                  source={Track.Source.Camera}
+                  style={{ color: "white", scale: 1.7 }}
+                  // onClick={() => setAudioMuted((prev) => !prev)}
+                  className="w-7 h-7 flex items-center justify-center"
+                />
+                {/* <Video className="w-7 h-7" /> */}
+              </div>
+              <button
+                onClick={() => toggleRecording(currentCallID)}
+                className={`${
+                  isRecording ? "bg-orange-500" : "bg-highlight"
+                } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
+              >
+                <CircleDot className="w-7 h-7" />
+              </button>
+              <button
+                onClick={() => handleEndCall(roomName)}
+                className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
+              >
+                <PhoneOff className="w-7 h-7" />
+              </button>
             </div>
-            <div
-              // onClick={() => handleEndCall(roomName)}
-              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
-            >
-              <TrackToggle
-                source={Track.Source.Camera}
-                style={{ color: "white", scale: 1.7 }}
-                // onClick={() => setAudioMuted((prev) => !prev)}
-                className="w-7 h-7 flex items-center justify-center"
-              />
-              {/* <Video className="w-7 h-7" /> */}
-            </div>
-            <button
-              onClick={() => toggleRecording(currentCallID)}
-              className={`${
-                isRecording ? "bg-orange-500" : "bg-highlight"
-              } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
-            >
-              <CircleDot className="w-7 h-7" />
-            </button>
-            <button
-              onClick={() => handleEndCall(roomName)}
-              className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-            >
-              <PhoneOff className="w-7 h-7" />
-            </button>
+            {/* local preview in bottom-right */}
+            {localVideoTrack && (
+              <div className="bottom-4 right-4 max-w-96 aspect-video rounded-md overflow-hidden">
+                <VideoTrack
+                  trackRef={localVideoTrack}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
