@@ -113,7 +113,6 @@ export default function Index() {
         <Toast t={t} content="Location Not Mapped To This User" type="error" />
       ));
     } else {
-      console.log(guestId);
       setGuestCallId(guestId);
       router.push("/checkInHub");
     }
@@ -236,7 +235,6 @@ function PropertyFeed({
 
   useEffect(() => {
     if (!user) return;
-    console.log("START HOST VIDEO", { user });
     fetch(`/api/token?identity=${user?.UserName}&room=${roomName}`)
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -251,7 +249,6 @@ function PropertyFeed({
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
       try {
-        console.log("Starting recording for callId:", callId);
         const now = new Date();
         const timestamp = now.toISOString().replace(/[:.]/g, "-"); // e.g., "2025-05-10T14-30-15-123Z"
         const fileName = `${callId}`;
@@ -270,7 +267,6 @@ function PropertyFeed({
         );
         const data = await response.json();
         if (response.ok) {
-          console.log("Recording started:", data);
           setIsRecording(true);
           setEgressId(data.egressId);
         } else {
@@ -398,13 +394,10 @@ function VideoGrid({
   useEffect(() => {
     if (!user) return;
     socketRef.current = socket;
-    console.log("SOCKET READY", { user });
 
     socketRef.current?.on("participant-muted-request", (data) => {
       if (data.locationID === roomName) {
         setIsRemoteMuted(data.isMuted);
-      } else {
-        console.log("participant-muted-request - NOT MINE");
       }
     });
 
@@ -428,15 +421,11 @@ function VideoGrid({
             personIconTimerRef.current = null;
           }
         }
-      } else {
-        console.log("person-detected-request - NOT MINE");
       }
     });
 
     socketRef.current?.on("call-list-update", (data) => {
-      console.log("CALL LIST UPDATE");
       data.map((call: Call) => {
-        console.log({ call });
         if (
           call.AssignedToUserName === user.UserName &&
           call.CallStatus === "New" &&
@@ -444,8 +433,6 @@ function VideoGrid({
         ) {
           setShowModal(true);
           setIncomingCall(call);
-        } else {
-          console.log("NOT MINE", { call });
         }
       });
     });
@@ -462,10 +449,6 @@ function VideoGrid({
     setIncomingCall(null);
   };
 
-  useEffect(() => {
-    console.log({ currentCallID });
-  }, [currentCallID]);
-
   const handleStartCall = async (data: any) => {
     if (user) {
       const uuid = generateUUID();
@@ -475,7 +458,6 @@ function VideoGrid({
         JSON.stringify({ locationID: data, callId: uuid })
       );
       setIsFullscreen(true);
-      console.log(data);
     }
   };
 
@@ -489,14 +471,14 @@ function VideoGrid({
       JSON.stringify({ locationID: data, callId: currentCallID })
     );
     setIsFullscreen(false);
-    console.log(data);
   };
 
   const remoteVideoTracks = tracks.filter(
     (t) =>
       t.publication.kind === "video" &&
       t.publication.isSubscribed &&
-      !t.participant.isLocal
+      !t.participant.isLocal &&
+      t.participant.identity.includes("guest")
   );
 
   const remoteAudioTracks = tracks.filter(
@@ -601,7 +583,6 @@ function VideoGrid({
               <TrackToggle
                 source={Track.Source.Microphone}
                 onDeviceError={(error) => {
-                  console.error("Microphone device error:", error);
 
                   toast.custom(() => (
                     <div className="bg-red-500 text-white px-4 py-2 rounded">
