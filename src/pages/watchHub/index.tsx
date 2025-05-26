@@ -236,7 +236,7 @@ function PropertyFeed({
 
   useEffect(() => {
     if (!user) return;
-    fetch(`/api/token?identity=${user?.UserName}&room=${roomName}`)
+    fetch(process.env.NEXT_PUBLIC_BACKEND_URL +`/api/livekit/token?identity=${user?.UserName}&room=${roomName}`)
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
         setWsUrl(wsUrl);

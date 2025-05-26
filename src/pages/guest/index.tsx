@@ -392,7 +392,7 @@ export default function Index() {
 
       try {
         const res = await fetch(
-          `/api/token?identity=guest-${location.LocationID?.toString()}&room=${location.LocationID?.toString()}`
+          process.env.NEXT_PUBLIC_BACKEND_URL +`/api/livekit/token?identity=guest-${location.LocationID?.toString()}&room=${location.LocationID?.toString()}`
         );
         const { wsUrl, token } = await res.json();
 
