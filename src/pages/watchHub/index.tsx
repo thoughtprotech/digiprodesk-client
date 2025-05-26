@@ -7,6 +7,7 @@ import {
   PhoneCall,
   PhoneOff,
   PhoneOutgoing,
+  RefreshCcw,
   User as UserIcon,
 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -451,13 +452,20 @@ function VideoGrid({
   const attendCall = () => {
     setShowModal(false);
     setIsFullscreen(true);
-    setIsRemoteMuted(false);  
+    setIsRemoteMuted(false);
     setCurrentCallID(incomingCall?.CallID!);
     socketRef.current?.emit(
       "join-call",
       JSON.stringify({ roomId: incomingCall?.CallID })
     );
     setIncomingCall(null);
+  };
+
+  const handleRefresh = (data: any) => {
+    socketRef.current?.emit(
+      "location-refresh",
+      JSON.stringify({ locationID: data })
+    );
   };
 
   const handleStartCall = async (data: any) => {
@@ -555,12 +563,23 @@ function VideoGrid({
           </div>
         )}
         {/* {renderAudioTracks()} */}
-        <button
-          onClick={() => handleStartCall(roomName)}
-          className="absolute top-2 right-2 flex items-center gap-1 bg-green-500 bg-opacity-70 text-white px-4 py-1 rounded hover:bg-opacity-70 transition"
-        >
-          <PhoneOutgoing className="w-6 h-6" />
-        </button>
+        <div className="absolute top-2 right-2 flex flex-col gap-2">
+          <button
+            onClick={() => handleStartCall(roomName)}
+            className="flex items-center gap-1 bg-green-500/50 text-white px-4 py-1 rounded hover:bg-green-500/70 transition"
+          >
+            <PhoneOutgoing className="w-6 h-6" />
+          </button>
+
+        </div>
+        <div className="relative w-full h-full">
+          <button
+            onClick={() => handleRefresh(roomName)}
+            className="absolute bottom-2 right-2 flex items-center gap-1 bg-blue-500/50 text-white px-4 py-1 rounded hover:bg-blue-500/70 transition"
+          >
+            <RefreshCcw className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {isFullscreen && (
@@ -629,9 +648,8 @@ function VideoGrid({
               </div>
               <button
                 onClick={() => toggleRecording(currentCallID)}
-                className={`${
-                  isRecording ? "bg-orange-500" : "bg-highlight"
-                } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
+                className={`${isRecording ? "bg-orange-500" : "bg-highlight"
+                  } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
               >
                 <CircleDot className="w-7 h-7" />
               </button>

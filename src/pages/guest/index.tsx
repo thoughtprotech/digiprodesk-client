@@ -156,6 +156,12 @@ export default function Index() {
           console.log("NOT MINE");
         }
       });
+      socketRef.current.on("location-refresh-request", (data) => {
+        if (data.locationID === location?.LocationID?.toString()) {
+          console.log("Reloading page due to location refresh...");
+          window.location.reload();
+        } 
+      });
     }
   }, [socketRef.current, location, currentCallID]);
 
