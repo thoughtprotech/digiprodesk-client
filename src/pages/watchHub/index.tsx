@@ -293,25 +293,9 @@ function PropertyFeed({
       token={token}
       connectOptions={{
         autoSubscribe: true,
-        dynacast: true,
-        bandwidthProfile: {
-          video: {
-            mode: "presentation",
-            maxTracks: 1,
-            trackSwitchOffMode: "predicted",
-          },
-        },
       }}
       video={true}
       audio={true}
-      publishDefaults={{
-        simulcast: true,
-        videoEncoding: {
-          maxBitrate: 2500_000,
-          maxFramerate: 30,
-        },
-        resolution: { width: 1280, height: 720 },
-      }}
     >
       <div className="relative w-full h-fit">
         <VideoGrid

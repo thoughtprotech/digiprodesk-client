@@ -1,13 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Disc,
   LogOut,
   Mic,
   MicOff,
-  Volume1,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import { useRouter } from "next/router";
 import { parseCookies } from "nookies";
@@ -19,11 +15,9 @@ import Toast from "@/components/ui/Toast";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Tooltip from "@/components/ui/ToolTip";
 import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
-import ElapsedTime from "@/components/ui/ElapsedTime";
 import logOut from "@/utils/logOut";
 import {
   createLocalAudioTrack,
@@ -45,7 +39,6 @@ export default function Index() {
   const [, setUserId] = useState<string>("");
   const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
   const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
-  const mediaConnectionRef = useRef<MediaConnection | null>(null); // Ref to store the current call
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<
     | "notInCall"
@@ -70,7 +63,6 @@ export default function Index() {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const { socket } = useSocket();
 
-  const [hasNotified, setHasNotified] = useState(false); // prevents spam
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null); // loaded model
   const [detectionStarted, setDetectionStarted] = useState(false); // run once
   const hasNotifiedRef = useRef(false); // to track if notification has been sent
