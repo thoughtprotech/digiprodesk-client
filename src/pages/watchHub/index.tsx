@@ -309,8 +309,9 @@ function PropertyFeed({
           toggleRecording={toggleRecording}
           isRecording={isRecording}
         />
-        <div className="absolute top-3 left-2 bg-black bg-opacity-50 text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
+        <div className="absolute top-3 left-2 bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
           {label}
+          <Mic className="w-5 h-5" />
         </div>
       </div>
     </LiveKitRoom>
