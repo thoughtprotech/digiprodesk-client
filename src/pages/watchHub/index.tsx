@@ -590,11 +590,11 @@ function VideoGrid({
               <Fullscreen className="" />
             </div>
           </Tooltip>
-          <Tooltip tooltip="Record" position="left">
+          {/* <Tooltip tooltip="Record" position="left">
             <div className="hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
               <CircleDot className="text-orange-500" />
             </div>
-          </Tooltip>
+          </Tooltip> */}
           <Tooltip tooltip="Refresh" position="left">
             <div
               className="hover:bg-blue-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
