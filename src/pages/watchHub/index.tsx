@@ -2,6 +2,7 @@
 import Layout from "@/components/Layout";
 import {
   CircleDot,
+  Fullscreen,
   Mic,
   MicOff,
   PhoneCall,
@@ -32,6 +33,7 @@ import { io } from "socket.io-client";
 import generateUUID from "@/utils/uuidGenerator";
 import jwt from "jsonwebtoken";
 import logOut from "@/utils/logOut";
+import Tooltip from "@/components/ui/ToolTip";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -572,22 +574,34 @@ function VideoGrid({
             <span className="text-xs font-medium">Person Detected</span>
           </div>
         )}
-        {/* {renderAudioTracks()} */}
+        {/* Controls */}
         <div className="absolute top-2 right-2 flex flex-col gap-2">
-          <button
-            onClick={() => handleStartCall(roomName)}
-            className="flex items-center gap-1 bg-green-500/50 text-white px-4 py-1 rounded hover:bg-green-500/70 transition"
-          >
-            <PhoneOutgoing className="w-6 h-6" />
-          </button>
-        </div>
-        <div className="relative w-full h-full">
-          <button
-            onClick={() => handleRefresh(roomName)}
-            className="absolute bottom-2 right-2 flex items-center gap-1 bg-blue-500/50 text-white px-4 py-1 rounded hover:bg-blue-500/70 transition"
-          >
-            <RefreshCcw className="w-6 h-6" />
-          </button>
+          <Tooltip tooltip="Call" position="left">
+            <div
+              className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+              onClick={() => handleStartCall(roomName)}
+            >
+              <PhoneOutgoing className="text-green-500" />
+            </div>
+          </Tooltip>
+          <Tooltip tooltip="Fullscreen" position="left">
+            <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+              <Fullscreen className="" />
+            </div>
+          </Tooltip>
+          <Tooltip tooltip="Record" position="left">
+            <div className="hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+              <CircleDot className="text-orange-500" />
+            </div>
+          </Tooltip>
+          <Tooltip tooltip="Refresh" position="left">
+            <div
+              className="hover:bg-blue-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+              onClick={() => handleRefresh(roomName)}
+            >
+              <RefreshCcw className="text-blue-500" />
+            </div>
+          </Tooltip>
         </div>
       </div>
 
