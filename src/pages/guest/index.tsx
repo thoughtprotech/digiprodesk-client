@@ -95,6 +95,9 @@ export default function Index() {
           console.log("Location ID", location?.LocationID?.toString());
           console.log({ data });
           setInCall(true);
+          const audioTrack = localAudioTrackRef.current;
+          audioTrack?.enable();
+          setIsMuted(false);
           setCallStatus("inProgress");
         } else {
           console.log("CALL STARTED ERROR");

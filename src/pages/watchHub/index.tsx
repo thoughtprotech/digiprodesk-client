@@ -451,6 +451,7 @@ function VideoGrid({
   const attendCall = () => {
     setShowModal(false);
     setIsFullscreen(true);
+    setIsRemoteMuted(false);  
     setCurrentCallID(incomingCall?.CallID!);
     socketRef.current?.emit(
       "join-call",
@@ -468,6 +469,7 @@ function VideoGrid({
         JSON.stringify({ locationID: data, callId: uuid })
       );
       setIsFullscreen(true);
+      setIsRemoteMuted(false);
     }
   };
 
