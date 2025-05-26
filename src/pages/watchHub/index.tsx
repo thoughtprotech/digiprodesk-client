@@ -663,7 +663,7 @@ function VideoGrid({
         style={{ display: "none" }}
       />
       {showModal && (
-        <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/60 flex items-center justify-center z-50">
+        <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/60 flex items-center justify-center z-[60]">
           <div className="w-fit max-w-2xl bg-foreground shadow-lg rounded-lg p-4 flex flex-col gap-5 items-center">
             <div className="w-full border-b border-b-border pb-2">
               <h1 className="text-center text-orange-500 uppercase font-bold">
