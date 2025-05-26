@@ -236,7 +236,10 @@ function PropertyFeed({
 
   useEffect(() => {
     if (!user) return;
-    fetch(process.env.NEXT_PUBLIC_BACKEND_URL +`/api/livekit/token?identity=${user?.UserName}&room=${roomName}`)
+    fetch(
+      process.env.NEXT_PUBLIC_BACKEND_URL +
+        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+    )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
         setWsUrl(wsUrl);
@@ -336,6 +339,29 @@ function VideoGrid({
   const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [user, setUser] = useState<User>();
   const router = useRouter();
+
+  useEffect(() => {
+    if (isFullscreen) {
+      const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = ""; // Most browsers ignore this but it's required
+      };
+
+      window.addEventListener("beforeunload", handleBeforeUnload);
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "F5" || (e.ctrlKey && e.key === "r")) {
+          e.preventDefault();
+          console.log("Refresh blocked");
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("beforeunload", handleBeforeUnload);
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [isFullscreen]);
 
   const fetchUserDetails = async () => {
     const cookies = parseCookies();
@@ -554,7 +580,6 @@ function VideoGrid({
           >
             <PhoneOutgoing className="w-6 h-6" />
           </button>
-
         </div>
         <div className="relative w-full h-full">
           <button
@@ -632,8 +657,9 @@ function VideoGrid({
               </div>
               <button
                 onClick={() => toggleRecording(currentCallID)}
-                className={`${isRecording ? "bg-orange-500" : "bg-highlight"
-                  } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
+                className={`${
+                  isRecording ? "bg-orange-500" : "bg-highlight"
+                } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
               >
                 <CircleDot className="w-7 h-7" />
               </button>
