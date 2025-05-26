@@ -240,7 +240,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -309,10 +309,6 @@ function PropertyFeed({
           toggleRecording={toggleRecording}
           isRecording={isRecording}
         />
-        <div className="absolute top-3 left-2 bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 py-1 rounded flex gap-2">
-          {label}
-          <Mic className="w-5 h-5" />
-        </div>
       </div>
     </LiveKitRoom>
   );
@@ -569,41 +565,59 @@ function VideoGrid({
             className="inset-0 w-full h-full object-cover"
           />
         ))}
+        {/* {renderAudioTracks()} */}
+        {/* Local Video Track */}
         {showPersonIcon && (
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black/60 px-2 py-0.5 rounded z-10">
             <UserIcon className="w-4 h-4 text-orange-400" />
             <span className="text-xs font-medium">Person Detected</span>
           </div>
         )}
+
+        <div className="absolute top-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
+          <div className="text-xs font-semibold truncate text-ellipsis">
+            {label}
+          </div>
+          <div className="flex flex-row-reverse items-center">
+            <Tooltip tooltip="Off" position="bottom">
+              <div
+                className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
+              >
+                <Mic className="w-4 h-4" />
+              </div>
+            </Tooltip>
+            <Tooltip tooltip="Refresh" position="bottom">
+              <div
+                className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
+                onClick={() => handleRefresh(roomName)}
+              >
+                <RefreshCcw className="text-cyan-400 w-4 h-4" />
+              </div>
+            </Tooltip>
+          </div>
+        </div>
         {/* Controls */}
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
-          <Tooltip tooltip="Call" position="left">
+        <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
+          <Tooltip tooltip="Call" position="bottom">
             <div
               className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
               onClick={() => handleStartCall(roomName)}
             >
-              <PhoneOutgoing className="text-green-500" />
+              <PhoneOutgoing className="text-green-500 w-4 h-4" />
             </div>
           </Tooltip>
-          <Tooltip tooltip="Fullscreen" position="left">
-            <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
-              <Fullscreen className="" />
-            </div>
-          </Tooltip>
+
           {/* <Tooltip tooltip="Record" position="left">
             <div className="hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
               <CircleDot className="text-orange-500" />
             </div>
           </Tooltip> */}
-          <Tooltip tooltip="Refresh" position="left">
-            <div
-              className="hover:bg-blue-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
-              onClick={() => handleRefresh(roomName)}
-            >
-              <RefreshCcw className="text-blue-500" />
+
+          <Tooltip tooltip="Fullscreen" position="bottom">
+            <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+              <Fullscreen className="w-4 h-4" />
             </div>
-          </Tooltip>
-        </div>
+          </Tooltip></div>
       </div>
 
       {isFullscreen && (
@@ -672,9 +686,8 @@ function VideoGrid({
               </div>
               <button
                 onClick={() => toggleRecording(currentCallID)}
-                className={`${
-                  isRecording ? "bg-orange-500" : "bg-highlight"
-                } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
+                className={`${isRecording ? "bg-orange-500" : "bg-highlight"
+                  } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
               >
                 <CircleDot className="w-7 h-7" />
               </button>
