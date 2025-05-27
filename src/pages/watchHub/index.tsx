@@ -115,7 +115,7 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    console.log({filteredUserLocationData})
+    console.log({ filteredUserLocationData });
   }, [filteredUserLocationData]);
 
   return (
@@ -229,7 +229,12 @@ function PropertyFeed({
       .catch(console.error);
   }, [roomName, user]);
 
-  if (!wsUrl || !token) return <div className="w-full h-full flex items-center justify-center">Loading...</div>;
+  if (!wsUrl || !token)
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        Loading...
+      </div>
+    );
 
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
@@ -554,17 +559,17 @@ function VideoGrid({
     }
   }, [showModal]);
 
-  if(remoteVideoTracks.length === 0) {
+  if (remoteVideoTracks.length === 0) {
     return (
       <div className="w-full h-fit flex items-center justify-center relative">
         <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 left-2">
-            {label}
-          </div>
-          <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 right-2">
-            <h1>User Not Online</h1>
-          </div>
+          {label}
         </div>
-    )
+        <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 right-2">
+          <h1>Location Offline</h1>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -581,10 +586,10 @@ function VideoGrid({
         ))}
         {renderAudioTracks()}
         {/* Local Video Track */}
-        {showPersonIcon && (
-          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 px-2 py-0.5 rounded z-10">
+        {!showPersonIcon && (
+          <div className="absolute bottom-[2px] left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
             <UserIcon className="w-4 h-4 text-orange-400" />
-            <span className="text-xs font-medium">Person Detected</span>
+            <span className="text-xs font-semibold">Guest</span>
           </div>
         )}
 
@@ -632,7 +637,7 @@ function VideoGrid({
               </div>
             ) : (
               <div
-                className="hover:bg-green-red/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
                 onClick={() => handleEndCall(roomName)}
               >
                 <PhoneOff className="text-red-500 w-4 h-4" />
@@ -677,8 +682,35 @@ function VideoGrid({
           </Tooltip>
         </div>
         {currentCallID.length > 0 && (
-          <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
+          <div className="absolute bottom-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Call In Progress</h1>
+          </div>
+        )}
+        {currentCallID.length > 0 && (
+          <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium rounded flex">
+            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+              <TrackToggle
+                source={Track.Source.Microphone}
+                onDeviceError={(error) => {
+                  toast.custom(() => (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded">
+                      Microphone error: {error?.message || "Unknown error"}
+                    </div>
+                  ));
+                }}
+                style={{ color: "white", scale: 0.9 }}
+                className="flex items-center justify-center w-4 h-4"
+              />
+            </div>
+            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+              <TrackToggle
+                source={Track.Source.Camera}
+                style={{ color: "white", scale: 0.9 }}
+                // onClick={() => setAudioMuted((prev) => !prev)}
+                className="flex items-center justify-center w-4 h-4"
+              />
+              {/* <Video className="w-7 h-7" /> */}
+            </div>
           </div>
         )}
       </div>
