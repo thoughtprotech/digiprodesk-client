@@ -109,24 +109,14 @@ export default function Index() {
     setFilteredUserLocationData(filteredUserList);
   };
 
-  const handleCallGuest = (locationId: number) => {
-    const guestId = userList.find(
-      (user) => user.LocationID === locationId
-    )?.UserName;
-    if (!guestId) {
-      return toast.custom((t: any) => (
-        <Toast t={t} content="Location Not Mapped To This User" type="error" />
-      ));
-    } else {
-      setGuestCallId(guestId);
-      router.push("/checkInHub");
-    }
-  };
-
   useEffect(() => {
     fetchUserLocationList();
     fetchUserList();
   }, []);
+
+  useEffect(() => {
+    console.log({filteredUserLocationData})
+  }, [filteredUserLocationData]);
 
   return (
     <Layout
@@ -138,7 +128,7 @@ export default function Index() {
         </div>
       }
     >
-      <div className="w-full h-full flex flex-col gap-2 bg-background px-2">
+      <div className="w-full h-full flex flex-col gap-2 px-2">
         <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
           <div className="w-64 flex gap-1">
             <SearchInput
@@ -147,27 +137,8 @@ export default function Index() {
             />
           </div>
         </div>
-        <div className="w-full h-full overflow-y-auto overflow-x-hidden pb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 items-stretch">
-          {filteredUserLocationData.map((location, index) => (
-            // <VideoViewer
-            //   key={index}
-            //   title={location.LocationName}
-            //   src={location?.LocationVideoFeed || ""}
-            //   component={
-            //     <Button
-            //       text="Call"
-            //       color="green"
-            //       icon={<PhoneOutgoing className="w-5 h-5" />}
-            //       onClick={handleCallGuest.bind(null, location.LocationID!)}
-            //     />
-            //   }
-            // >
-            //   <WatchCard
-            //     title={location.LocationName}
-            //     src={location?.LocationVideoFeed}
-            //     onClick={handleCallGuest.bind(null, location.LocationID!)}
-            //   />
-            // </VideoViewer>
+        <div className="w-full h-full pb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          {filteredUserLocationData.map((location) => (
             <div
               key={location.LocationID}
               className="relative bg-black rounded overflow-hidden"
