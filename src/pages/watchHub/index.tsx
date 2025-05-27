@@ -3,8 +3,10 @@ import Layout from "@/components/Layout";
 import {
   CircleDot,
   Fullscreen,
+  Maximize,
   Mic,
   MicOff,
+  Minimize,
   PhoneCall,
   PhoneOff,
   PhoneOutgoing,
@@ -633,7 +635,7 @@ function VideoGrid({
               </div>
             </Tooltip>
           )}
-          
+
           <Tooltip
             tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
             position="bottom"
@@ -672,7 +674,7 @@ function VideoGrid({
                 }
               }}
             >
-              <Fullscreen className="w-4 h-4" />
+              <Maximize className="w-4 h-4" />
             </div>
           </Tooltip>
         </div>
@@ -719,56 +721,64 @@ function VideoGrid({
                 </div>
               </div>
               {/* Controls */}
-              {currentCallID.length > 0 && (
-                <div className="absolute top-2 right-2 flex bg-black bg-opacity-50 rounded-md px-2 py-1">
-                  <div className="w-full flex items-center gap-2 justify-between">
-                    <div
-                      className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300"
-                      // onClick={() => handleEndCall(roomName)}
-                    >
-                      <TrackToggle
-                        source={Track.Source.Microphone}
-                        onDeviceError={(error) => {
-                          toast.custom(() => (
-                            <div className="bg-red-500 text-white px-4 py-2 rounded">
-                              Microphone error:{" "}
-                              {error?.message || "Unknown error"}
-                            </div>
-                          ));
-                        }}
-                        style={{ color: "white", scale: 1.3 }}
-                        className="flex items-center justify-center"
-                      />
-                    </div>
-                    <div
-                      className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                      // onClick={() => handleEndCall(roomName)}
-                    >
-                      <TrackToggle
-                        source={Track.Source.Camera}
-                        style={{ color: "white", scale: 1.4 }}
-                        // onClick={() => setAudioMuted((prev) => !prev)}
-                        className="flex items-center justify-center"
-                      />
-                      {/* <Video className="w-7 h-7" /> */}
-                    </div>
-                    <button
-                      className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
-                        isRecording && "bg-orange-500/30"
-                      }`}
-                      onClick={() => toggleRecording(currentCallID)}
-                    >
-                      <CircleDot className="text-orange-500" />
-                    </button>
-                    <button
-                      className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
-                      onClick={() => handleEndCall(roomName)}
-                    >
-                      <PhoneOff className="text-red-500" />
-                    </button>
-                  </div>
+              <div className="absolute top-2 right-2 flex bg-black bg-opacity-50 rounded-md px-2 py-1">
+                <div className="w-full flex items-center gap-2 justify-between">
+                  {currentCallID.length > 0 && (
+                    <>
+                      <div
+                        className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300"
+                        // onClick={() => handleEndCall(roomName)}
+                      >
+                        <TrackToggle
+                          source={Track.Source.Microphone}
+                          onDeviceError={(error) => {
+                            toast.custom(() => (
+                              <div className="bg-red-500 text-white px-4 py-2 rounded">
+                                Microphone error:{" "}
+                                {error?.message || "Unknown error"}
+                              </div>
+                            ));
+                          }}
+                          style={{ color: "white", scale: 1.3 }}
+                          className="flex items-center justify-center"
+                        />
+                      </div>
+                      <div
+                        className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
+                        // onClick={() => handleEndCall(roomName)}
+                      >
+                        <TrackToggle
+                          source={Track.Source.Camera}
+                          style={{ color: "white", scale: 1.4 }}
+                          // onClick={() => setAudioMuted((prev) => !prev)}
+                          className="flex items-center justify-center"
+                        />
+                        {/* <Video className="w-7 h-7" /> */}
+                      </div>
+                      <button
+                        className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
+                          isRecording && "bg-orange-500/30"
+                        }`}
+                        onClick={() => toggleRecording(currentCallID)}
+                      >
+                        <CircleDot className="text-orange-500" />
+                      </button>
+                      <button
+                        className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                        onClick={() => handleEndCall(roomName)}
+                      >
+                        <PhoneOff className="text-red-500" />
+                      </button>
+                    </>
+                  )}
+                  <button
+                    className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                    onClick={() => setIsFullscreen(false)}
+                  >
+                    <Minimize className="w-6 h-6" />
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
             {currentCallID.length > 0 && (
               <div className="w-fit h-full max-w-md px-4 rounded-md flex flex-col items-center justify-end gap-4">
@@ -783,13 +793,6 @@ function VideoGrid({
                 )}
               </div>
             )}
-          </div>
-
-          <div
-            className="absolute top-20 right-20 cursor-pointer"
-            onClick={() => setIsFullscreen(false)}
-          >
-            <X className="w-6 h-6" />
           </div>
         </div>
       )}
