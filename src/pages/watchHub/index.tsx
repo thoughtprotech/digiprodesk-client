@@ -513,7 +513,9 @@ function VideoGrid({
         setIsRemoteMuted(false);
       }
     } else {
-      toast.error("End Current Call");
+      toast.custom((t: any) => (
+        <Toast t={t} content="End Current Call" type="warning" />
+      ));
     }
   };
 
@@ -672,7 +674,19 @@ function VideoGrid({
           <Tooltip tooltip="Fullscreen" position="bottom">
             <div
               className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
-              onClick={() => setIsFullscreen(true)}
+              onClick={() => {
+                if (inCall) {
+                  if (currentCallID.length !== 0) {
+                    setIsFullscreen(true);
+                  } else {
+                    toast.custom((t: any) => (
+                      <Toast t={t} content="End Current Call" type="warning" />
+                    ));
+                  }
+                } else {
+                  setIsFullscreen(true);
+                }
+              }}
             >
               <Fullscreen className="w-4 h-4" />
             </div>
