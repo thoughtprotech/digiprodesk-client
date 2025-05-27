@@ -678,9 +678,11 @@ function VideoGrid({
             </div>
           </Tooltip>
         </div>
-        <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
-          <h1>In Progress..</h1>
-        </div>
+        {currentCallID.length > 0 && (
+          <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
+            <h1>In Progress..</h1>
+          </div>
+        )}
       </div>
 
       {isFullscreen && (
