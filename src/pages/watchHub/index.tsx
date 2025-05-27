@@ -2,7 +2,6 @@
 import Layout from "@/components/Layout";
 import {
   CircleDot,
-  Fullscreen,
   Maximize,
   Mic,
   MicOff,
@@ -12,7 +11,6 @@ import {
   PhoneOutgoing,
   RefreshCcw,
   User as UserIcon,
-  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
@@ -28,7 +26,6 @@ import {
   useTracks,
   VideoTrack,
   TrackReferenceOrPlaceholder,
-  useTrackToggle,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
