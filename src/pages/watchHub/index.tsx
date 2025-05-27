@@ -592,7 +592,9 @@ function VideoGrid({
         </div>
         {/* Controls */}
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
-          <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium rounded flex">
+          
+          {currentCallID.length > 0 && 
+          (<div className="flex">
             <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
               <TrackToggle
                 source={Track.Source.Microphone}
@@ -611,12 +613,10 @@ function VideoGrid({
               <TrackToggle
                 source={Track.Source.Camera}
                 style={{ color: "white", scale: 0.9 }}
-                // onClick={() => setAudioMuted((prev) => !prev)}
                 className="flex items-center justify-center w-4 h-4"
               />
-              {/* <Video className="w-7 h-7" /> */}
             </div>
-          </div>
+          </div>)}
           <Tooltip
             tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
             position="bottom"
