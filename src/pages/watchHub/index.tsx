@@ -128,7 +128,7 @@ export default function Index() {
         </div>
       }
     >
-      <div className="w-full h-full flex flex-col gap-2 px-2">
+      <div className="w-full flex-1 flex flex-col gap-2 px-2">
         <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
           <div className="w-64 flex gap-1">
             <SearchInput

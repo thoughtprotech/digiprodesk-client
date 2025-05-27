@@ -725,25 +725,6 @@ export default function Index({
                           </Tooltip>
                         </div>
                       )}
-                      {/* {roleDetails.find(
-                        (role) =>
-                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
-                          role.Menu.toLowerCase() === "check-in hub" &&
-                          role.Action.toLowerCase() === "view, edit"
-                      ) && (
-                        <div
-                          className={`${
-                            router.pathname === "/checkInHub"
-                              ? "bg-highlight"
-                              : "hover:bg-highlight"
-                          } rounded-md p-1 cursor-pointer`}
-                          onClick={() => router.push("/checkInHub")}
-                        >
-                          <Tooltip tooltip="Check-In Hub" position="bottom">
-                            <SmartphoneNfc className="w-5 h-5" />
-                          </Tooltip>
-                        </div>
-                      )} */}
                     </>
                   )}
                   {header}
@@ -966,7 +947,7 @@ export default function Index({
               </Modal>
             )}
           </div>
-          <div className="p-2 overflow-auto">{children}</div>
+          <div className="p-2 flex-1 overflow-auto">{children}</div>
           {CallRingComponent}
         </div>
       </WithRole>
