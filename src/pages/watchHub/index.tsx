@@ -586,7 +586,7 @@ function VideoGrid({
         ))}
         {renderAudioTracks()}
         {/* Local Video Track */}
-        {!showPersonIcon && (
+        {showPersonIcon && (
           <div className="absolute bottom-[2px] left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
             <UserIcon className="w-4 h-4 text-orange-400" />
             <span className="text-xs font-semibold">Guest</span>
