@@ -680,7 +680,7 @@ function VideoGrid({
         </div>
         {currentCallID.length > 0 && (
           <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
-            <h1>In Progress..</h1>
+            <h1 className="text-xs font-semibold">Call In Progress</h1>
           </div>
         )}
       </div>
