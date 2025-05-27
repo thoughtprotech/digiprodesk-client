@@ -28,6 +28,7 @@ import {
   useTracks,
   VideoTrack,
   TrackReferenceOrPlaceholder,
+  useTrackToggle,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
@@ -601,27 +602,39 @@ function VideoGrid({
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
           {currentCallID.length > 0 && (
             <div className="flex">
-              <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
-                <TrackToggle
-                  source={Track.Source.Microphone}
-                  onDeviceError={(error) => {
-                    toast.custom(() => (
-                      <div className="bg-red-500 text-white px-4 py-2 rounded">
-                        Microphone error: {error?.message || "Unknown error"}
-                      </div>
-                    ));
-                  }}
-                  style={{ color: "white", scale: 0.9 }}
-                  className="flex items-center justify-center w-4 h-4"
-                />
-              </div>
-              <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
-                <TrackToggle
-                  source={Track.Source.Camera}
-                  style={{ color: "white", scale: 0.9 }}
-                  className="flex items-center justify-center w-4 h-4"
-                />
-              </div>
+              <Tooltip
+                tooltip={isSelfMuted ? "Unmute" : "Mute"}
+                position="bottom"
+              >
+                <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+                  <TrackToggle
+                    source={Track.Source.Microphone}
+                    onDeviceError={(error) => {
+                      toast.custom(() => (
+                        <div className="bg-red-500 text-white px-4 py-2 rounded">
+                          Microphone error: {error?.message || "Unknown error"}
+                        </div>
+                      ));
+                    }}
+                    style={{ color: "white", scale: 0.9 }}
+                    className="flex items-center justify-center w-4 h-4"
+                    onClick={() => setIsSelfMuted(!isSelfMuted)}
+                  />
+                </div>
+              </Tooltip>
+              <Tooltip
+                tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
+                position="bottom"
+              >
+                <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+                  <TrackToggle
+                    source={Track.Source.Camera}
+                    style={{ color: "white", scale: 0.9 }}
+                    className="flex items-center justify-center w-4 h-4"
+                    onClick={() => setIsSelfCamera(!isSelfCamera)}
+                  />
+                </div>
+              </Tooltip>
             </div>
           )}
           {currentCallID.length > 0 && (
@@ -730,14 +743,11 @@ function VideoGrid({
                 <div className="w-full flex items-center gap-2 justify-between">
                   {currentCallID.length > 0 && (
                     <>
-                      <div
-                        className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300"
-                        // onClick={() => handleEndCall(roomName)}
+                      <Tooltip
+                        tooltip={isSelfMuted ? "Unmute" : "Mute"}
+                        position="bottom"
                       >
-                        <Tooltip
-                          tooltip={isSelfMuted ? "Unmute" : "Mute"}
-                          position="bottom"
-                        >
+                        <div className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300">
                           <TrackToggle
                             source={Track.Source.Microphone}
                             onDeviceError={(error) => {
@@ -754,8 +764,8 @@ function VideoGrid({
                               setIsSelfMuted(!isSelfMuted);
                             }}
                           />
-                        </Tooltip>
-                      </div>
+                        </div>
+                      </Tooltip>
                       <Tooltip
                         tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
                         position="bottom"
@@ -796,7 +806,7 @@ function VideoGrid({
                       </Tooltip>
                     </>
                   )}
-                  <Tooltip tooltip="Minimise" position="bottom">
+                  <Tooltip tooltip="Minimize" position="bottom">
                     <button
                       className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
                       onClick={() => setIsFullscreen(false)}
