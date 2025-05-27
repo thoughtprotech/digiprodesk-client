@@ -137,11 +137,11 @@ export default function Index() {
             />
           </div>
         </div>
-        <div className="w-full h-full pb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+        <div className="w-full pb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {filteredUserLocationData.map((location) => (
             <div
               key={location.LocationID}
-              className="relative bg-black rounded overflow-hidden"
+              className="relative bg-black rounded overflow-hidden aspect-video"
             >
               <PropertyFeed
                 roomName={location.LocationID?.toString()!}
@@ -229,7 +229,7 @@ function PropertyFeed({
       .catch(console.error);
   }, [roomName, user]);
 
-  if (!wsUrl || !token) return null;
+  if (!wsUrl || !token) return <div className="w-full h-full flex items-center justify-center">Loading...</div>;
 
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
@@ -553,6 +553,19 @@ function VideoGrid({
       audioEl.currentTime = 0;
     }
   }, [showModal]);
+
+  if(remoteVideoTracks.length === 0) {
+    return (
+      <div className="w-full h-fit flex items-center justify-center relative">
+        <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 left-2">
+            {label}
+          </div>
+          <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 right-2">
+            <h1>User Not Online</h1>
+          </div>
+        </div>
+    )
+  }
 
   return (
     <>
