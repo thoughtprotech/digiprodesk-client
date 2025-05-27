@@ -297,6 +297,8 @@ function VideoGrid({
   const [showPersonIcon, setShowPersonIcon] = useState(false);
   const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [user, setUser] = useState<User>();
+  const [isSelfMuted, setIsSelfMuted] = useState<boolean>(false);
+  const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -568,7 +570,10 @@ function VideoGrid({
             {label}
           </div>
           <div className="flex flex-row-reverse items-center">
-            <Tooltip tooltip={isRemoteMuted ? "On" : "Off"} position="bottom">
+            <Tooltip
+              tooltip={isRemoteMuted ? "Unmute" : "Mute"}
+              position="bottom"
+            >
               <div
                 className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
                 onClick={() => sendMuteRequest(roomName)}
@@ -705,7 +710,7 @@ function VideoGrid({
                   </div>
                   <div className="flex items-center gap-5">
                     <Tooltip
-                      tooltip={isRemoteMuted ? "On" : "Off"}
+                      tooltip={isRemoteMuted ? "Unmute" : "Mute"}
                       position="bottom"
                     >
                       <div
@@ -729,66 +734,94 @@ function VideoGrid({
                         className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300"
                         // onClick={() => handleEndCall(roomName)}
                       >
-                        <TrackToggle
-                          source={Track.Source.Microphone}
-                          onDeviceError={(error) => {
-                            toast.custom(() => (
-                              <div className="bg-red-500 text-white px-4 py-2 rounded">
-                                Microphone error:{" "}
-                                {error?.message || "Unknown error"}
-                              </div>
-                            ));
-                          }}
-                          style={{ color: "white", scale: 1.3 }}
-                          className="flex items-center justify-center"
-                        />
+                        <Tooltip
+                          tooltip={isSelfMuted ? "Unmute" : "Mute"}
+                          position="bottom"
+                        >
+                          <TrackToggle
+                            source={Track.Source.Microphone}
+                            onDeviceError={(error) => {
+                              toast.custom(() => (
+                                <div className="bg-red-500 text-white px-4 py-2 rounded">
+                                  Microphone error:{" "}
+                                  {error?.message || "Unknown error"}
+                                </div>
+                              ));
+                            }}
+                            style={{ color: "white", scale: 1.3 }}
+                            className="flex items-center justify-center"
+                            onClick={() => {
+                              setIsSelfMuted(!isSelfMuted);
+                            }}
+                          />
+                        </Tooltip>
                       </div>
-                      <div
-                        className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                        // onClick={() => handleEndCall(roomName)}
+                      <Tooltip
+                        tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
+                        position="bottom"
                       >
-                        <TrackToggle
-                          source={Track.Source.Camera}
-                          style={{ color: "white", scale: 1.4 }}
-                          // onClick={() => setAudioMuted((prev) => !prev)}
-                          className="flex items-center justify-center"
-                        />
-                        {/* <Video className="w-7 h-7" /> */}
-                      </div>
-                      <button
-                        className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
-                          isRecording && "bg-orange-500/30"
-                        }`}
-                        onClick={() => toggleRecording(currentCallID)}
-                      >
-                        <CircleDot className="text-orange-500" />
-                      </button>
-                      <button
-                        className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
-                        onClick={() => handleEndCall(roomName)}
-                      >
-                        <PhoneOff className="text-red-500" />
-                      </button>
+                        <div
+                          className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
+                          // onClick={() => handleEndCall(roomName)}
+                        >
+                          <TrackToggle
+                            source={Track.Source.Camera}
+                            style={{ color: "white", scale: 1.4 }}
+                            // onClick={() => setAudioMuted((prev) => !prev)}
+                            className="flex items-center justify-center"
+                            onClick={() => {
+                              setIsSelfCamera(!isSelfCamera);
+                            }}
+                          />
+                          {/* <Video className="w-7 h-7" /> */}
+                        </div>
+                      </Tooltip>
+                      <Tooltip tooltip="Record" position="bottom">
+                        <button
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
+                            isRecording && "bg-orange-500/30"
+                          }`}
+                          onClick={() => toggleRecording(currentCallID)}
+                        >
+                          <CircleDot className="text-orange-500" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip tooltip="End Call" position="bottom">
+                        <button
+                          className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                          onClick={() => handleEndCall(roomName)}
+                        >
+                          <PhoneOff className="text-red-500" />
+                        </button>
+                      </Tooltip>
                     </>
                   )}
-                  <button
-                    className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
-                    onClick={() => setIsFullscreen(false)}
-                  >
-                    <Minimize className="w-6 h-6" />
-                  </button>
+                  <Tooltip tooltip="Minimise" position="bottom">
+                    <button
+                      className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                      onClick={() => setIsFullscreen(false)}
+                    >
+                      <Minimize className="w-6 h-6" />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
             </div>
             {currentCallID.length > 0 && (
-              <div className="w-fit h-full max-w-md px-4 rounded-md flex flex-col items-center justify-end gap-4">
+              <div className="w-full h-full max-w-md aspect-video px-4 rounded-md flex flex-col items-center justify-end gap-4">
                 {/* local preview in bottom-right */}
                 {localVideoTrack && (
-                  <div className="bottom-4 right-4 max-w-96 aspect-video rounded-md overflow-hidden">
-                    <VideoTrack
-                      trackRef={localVideoTrack}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="bottom-4 right-4 w-full h-full max-w-96 aspect-video rounded-md overflow-hidden bg-black">
+                    {!isSelfCamera ? (
+                      <VideoTrack
+                        trackRef={localVideoTrack}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-black flex items-center justify-center">
+                        <h1 className="font-bold text-gray-400">Camera Off</h1>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
