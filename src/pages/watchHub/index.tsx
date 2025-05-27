@@ -592,6 +592,31 @@ function VideoGrid({
         </div>
         {/* Controls */}
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
+          <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium rounded flex">
+            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+              <TrackToggle
+                source={Track.Source.Microphone}
+                onDeviceError={(error) => {
+                  toast.custom(() => (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded">
+                      Microphone error: {error?.message || "Unknown error"}
+                    </div>
+                  ));
+                }}
+                style={{ color: "white", scale: 0.9 }}
+                className="flex items-center justify-center w-4 h-4"
+              />
+            </div>
+            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+              <TrackToggle
+                source={Track.Source.Camera}
+                style={{ color: "white", scale: 0.9 }}
+                // onClick={() => setAudioMuted((prev) => !prev)}
+                className="flex items-center justify-center w-4 h-4"
+              />
+              {/* <Video className="w-7 h-7" /> */}
+            </div>
+          </div>
           <Tooltip
             tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
             position="bottom"
@@ -616,7 +641,9 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className="hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                className={`hover:bg-orange-500/30 ${
+                  isRecording && "bg-orange-500/300"
+                } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -652,33 +679,6 @@ function VideoGrid({
         {currentCallID.length > 0 && (
           <div className="absolute bottom-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Call In Progress</h1>
-          </div>
-        )}
-        {currentCallID.length > 0 && (
-          <div className="absolute bottom-[2px] right-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium rounded flex">
-            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
-              <TrackToggle
-                source={Track.Source.Microphone}
-                onDeviceError={(error) => {
-                  toast.custom(() => (
-                    <div className="bg-red-500 text-white px-4 py-2 rounded">
-                      Microphone error: {error?.message || "Unknown error"}
-                    </div>
-                  ));
-                }}
-                style={{ color: "white", scale: 0.9 }}
-                className="flex items-center justify-center w-4 h-4"
-              />
-            </div>
-            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
-              <TrackToggle
-                source={Track.Source.Camera}
-                style={{ color: "white", scale: 0.9 }}
-                // onClick={() => setAudioMuted((prev) => !prev)}
-                className="flex items-center justify-center w-4 h-4"
-              />
-              {/* <Video className="w-7 h-7" /> */}
-            </div>
           </div>
         )}
       </div>
