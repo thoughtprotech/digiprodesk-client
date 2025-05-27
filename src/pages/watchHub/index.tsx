@@ -596,7 +596,7 @@ function VideoGrid({
         {renderAudioTracks()}
         {/* Local Video Track */}
         {showPersonIcon && (
-          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black/60 px-2 py-0.5 rounded z-10">
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 px-2 py-0.5 rounded z-10">
             <UserIcon className="w-4 h-4 text-orange-400" />
             <span className="text-xs font-medium">Person Detected</span>
           </div>
@@ -651,11 +651,20 @@ function VideoGrid({
             )}
           </Tooltip>
 
-          {/* <Tooltip tooltip="Record" position="left">
-            <div className="hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
-              <CircleDot className="text-orange-500" />
-            </div>
-          </Tooltip> */}
+          {currentCallID.length > 0 && (
+            <Tooltip tooltip="Record" position="bottom">
+              <div
+                className="hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                onClick={() => {
+                  if (!isRecording) {
+                    toggleRecording(currentCallID);
+                  }
+                }}
+              >
+                <CircleDot className="text-orange-500 w-4 h-4" />
+              </div>
+            </Tooltip>
+          )}
 
           <Tooltip tooltip="Fullscreen" position="bottom">
             <div
@@ -670,95 +679,106 @@ function VideoGrid({
 
       {isFullscreen && (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-[80] flex items-center justify-center gap-5">
-          <div className="relative w-3/4 h-fit max-h-screen flex justify-center">
-            {remoteVideoTracks.map((trackRef: any) => (
-              <VideoTrack
-                key={trackRef.publication.trackSid}
-                trackRef={trackRef}
-                className="w-full h-full object-contain rounded-md"
-              />
-            ))}
+          <div className="w-full h-fit max-h-screen flex justify-center items-end">
+            <div className="relative w-3/4 flex justify-center">
+              {remoteVideoTracks.map((trackRef: any) => (
+                <VideoTrack
+                  key={trackRef.publication.trackSid}
+                  trackRef={trackRef}
+                  className="w-full h-full object-contain rounded-md"
+                />
+              ))}
 
-            {renderAudioTracks()}
-            <div className="absolute top-0 left-0 w-full flex bg-black/70 justify-start">
-              <div className="w-full max-w-2xl flex items-center gap-5 px-4 py-1 rounded-md">
-                <div>
-                  <h1 className="font-bold text-2xl">{label}</h1>
-                </div>
-                <div className="flex items-center gap-5">
-                  <div
-                    onClick={() => {
-                      sendMuteRequest(roomName);
-                    }}
-                    className="cursor-pointer rounded-md px-6 py-1 bg-highlight"
-                  >
-                    {isRemoteMuted ? <MicOff /> : <Mic />}
+              {renderAudioTracks()}
+              <div className="absolute top-2 left-2 w-fit rounded-md flex items-center bg-black bg-opacity-50 justify-start">
+                <div className="w-full max-w-2xl flex items-center gap-5 px-4 py-1 rounded-md">
+                  <div>
+                    <h1 className="font-bold text-2xl">{label}</h1>
                   </div>
-                  {/* <div className="cursor-pointer rounded-md px-6 py-2 bg-highlight">
-                    <Video />
-                  </div> */}
+                  <div className="flex items-center gap-5">
+                    <Tooltip
+                      tooltip={isRemoteMuted ? "On" : "Off"}
+                      position="bottom"
+                    >
+                      <div
+                        className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
+                        onClick={() => {
+                          sendMuteRequest(roomName);
+                        }}
+                      >
+                        {isRemoteMuted ? <MicOff /> : <Mic />}
+                      </div>
+                    </Tooltip>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-          {currentCallID.length > 0 && (
-            <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
-              <div className="w-full flex items-center gap-2 justify-between">
-                <div
-                  // onClick={() => handleEndCall(roomName)}
-                  className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-                >
-                  <TrackToggle
-                    source={Track.Source.Microphone}
-                    onDeviceError={(error) => {
-                      toast.custom(() => (
-                        <div className="bg-red-500 text-white px-4 py-2 rounded">
-                          Microphone error: {error?.message || "Unknown error"}
-                        </div>
-                      ));
-                    }}
-                    style={{ color: "white", scale: 1.5 }}
-                    className="w-7 h-7 flex items-center justify-center"
-                  />
-                </div>
-                <div
-                  // onClick={() => handleEndCall(roomName)}
-                  className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
-                >
-                  <TrackToggle
-                    source={Track.Source.Camera}
-                    style={{ color: "white", scale: 1.7 }}
-                    // onClick={() => setAudioMuted((prev) => !prev)}
-                    className="w-7 h-7 flex items-center justify-center"
-                  />
-                  {/* <Video className="w-7 h-7" /> */}
-                </div>
-                <button
-                  onClick={() => toggleRecording(currentCallID)}
-                  className={`${
-                    isRecording ? "bg-orange-500" : "bg-highlight"
-                  } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
-                >
-                  <CircleDot className="w-7 h-7" />
-                </button>
-                <button
-                  onClick={() => handleEndCall(roomName)}
-                  className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-                >
-                  <PhoneOff className="w-7 h-7" />
-                </button>
-              </div>
-              {/* local preview in bottom-right */}
-              {localVideoTrack && (
-                <div className="bottom-4 right-4 max-w-96 aspect-video rounded-md overflow-hidden">
-                  <VideoTrack
-                    trackRef={localVideoTrack}
-                    className="w-full h-full object-cover"
-                  />
+              {/* Controls */}
+              {currentCallID.length > 0 && (
+                <div className="absolute top-2 right-2 flex bg-black bg-opacity-50 rounded-md px-2 py-1">
+                  <div className="w-full flex items-center gap-2 justify-between">
+                    <div
+                      className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300"
+                      // onClick={() => handleEndCall(roomName)}
+                    >
+                      <TrackToggle
+                        source={Track.Source.Microphone}
+                        onDeviceError={(error) => {
+                          toast.custom(() => (
+                            <div className="bg-red-500 text-white px-4 py-2 rounded">
+                              Microphone error:{" "}
+                              {error?.message || "Unknown error"}
+                            </div>
+                          ));
+                        }}
+                        style={{ color: "white", scale: 1.3 }}
+                        className="flex items-center justify-center"
+                      />
+                    </div>
+                    <div
+                      className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
+                      // onClick={() => handleEndCall(roomName)}
+                    >
+                      <TrackToggle
+                        source={Track.Source.Camera}
+                        style={{ color: "white", scale: 1.4 }}
+                        // onClick={() => setAudioMuted((prev) => !prev)}
+                        className="flex items-center justify-center"
+                      />
+                      {/* <Video className="w-7 h-7" /> */}
+                    </div>
+                    <button
+                      className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
+                        isRecording && "bg-orange-500/30"
+                      }`}
+                      onClick={() => toggleRecording(currentCallID)}
+                    >
+                      <CircleDot className="text-orange-500" />
+                    </button>
+                    <button
+                      className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                      onClick={() => handleEndCall(roomName)}
+                    >
+                      <PhoneOff className="text-red-500" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
-          )}
+            {currentCallID.length > 0 && (
+              <div className="w-fit h-full max-w-md px-4 rounded-md flex flex-col items-center justify-end gap-4">
+                {/* local preview in bottom-right */}
+                {localVideoTrack && (
+                  <div className="bottom-4 right-4 max-w-96 aspect-video rounded-md overflow-hidden">
+                    <VideoTrack
+                      trackRef={localVideoTrack}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div
             className="absolute top-20 right-20 cursor-pointer"
             onClick={() => setIsFullscreen(false)}
