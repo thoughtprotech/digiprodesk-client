@@ -633,7 +633,10 @@ function VideoGrid({
         </div>
         {/* Controls */}
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
-          <Tooltip tooltip="Call" position="bottom">
+          <Tooltip
+            tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
+            position="bottom"
+          >
             {currentCallID.length === 0 ? (
               <div
                 className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
