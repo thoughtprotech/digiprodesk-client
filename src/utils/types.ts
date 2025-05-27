@@ -182,6 +182,7 @@ export interface Call {
   ModifiedOn?: string;
   CallPlacedByLocation: Location | null;
   CallPlacedByLocationName?: string;
+  CallAssignedTo?: string;
 }
 
 export interface CallLog {

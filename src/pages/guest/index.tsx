@@ -1,13 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  LogOut,
-  Mic,
-  MicOff,
-} from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
+import { LogOut, Mic, MicOff } from "lucide-react";
 import { useRouter } from "next/router";
 import { parseCookies } from "nookies";
-import Peer, { MediaConnection } from "peerjs";
 import { useEffect, useRef, useState } from "react";
 import jwt from "jsonwebtoken";
 import toast from "react-hot-toast";
@@ -31,7 +26,6 @@ import {
 } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
-import { TrackToggle } from "@livekit/components-react";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 
@@ -88,6 +82,7 @@ export default function Index() {
           console.log({ data });
           setInCall(true);
           const audioTrack = localAudioTrackRef.current;
+          // @ts-expect-error
           audioTrack?.enable();
           setIsMuted(false);
           setCallStatus("inProgress");
@@ -138,8 +133,10 @@ export default function Index() {
           const audioTrack = localAudioTrackRef.current;
           if (audioTrack) {
             if (!data.isMuted) {
+              // @ts-expect-error
               audioTrack.enable();
             } else {
+              // @ts-expect-error
               audioTrack.disable();
             }
             setIsMuted(data.isMuted);
@@ -152,7 +149,7 @@ export default function Index() {
         if (data.locationID === location?.LocationID?.toString()) {
           console.log("Reloading page due to location refresh...");
           window.location.reload();
-        } 
+        }
       });
     }
   }, [socketRef.current, location, currentCallID]);
@@ -377,7 +374,7 @@ export default function Index() {
   const lkRoomRef = useRef<Room | null>(null);
   const localAudioTrackRef = useRef<Track | null>(null);
 
-  const [status, setStatus] = useState<
+  const [, setStatus] = useState<
     "idle" | "connecting" | "connected" | "error"
   >("idle");
 
@@ -392,7 +389,8 @@ export default function Index() {
 
       try {
         const res = await fetch(
-          process.env.NEXT_PUBLIC_BACKEND_URL +`/api/livekit/token?identity=guest-${location.LocationID?.toString()}&room=${location.LocationID?.toString()}`
+          process.env.NEXT_PUBLIC_BACKEND_URL +
+            `/api/livekit/token?identity=guest-${location.LocationID?.toString()}&room=${location.LocationID?.toString()}`
         );
         const { wsUrl, token } = await res.json();
 
@@ -577,7 +575,7 @@ export default function Index() {
           }
         }
       } catch (err) {
-        //console.error("Guest connect error:", err);
+        console.error("Guest connect error:", err);
         //setStatus("error");
       }
     };
@@ -591,8 +589,10 @@ export default function Index() {
     const audioTrack = localAudioTrackRef.current;
     if (audioTrack) {
       if (isMuted) {
+        // @ts-expect-error
         audioTrack.enable();
       } else {
+        // @ts-expect-error
         audioTrack.disable();
       }
       setIsMuted(!isMuted);
@@ -714,27 +714,6 @@ export default function Index() {
               >
                 {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
               </button>
-              {/* <button
-              // onClick={() => handleEndCall(roomName)}
-              className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-            >
-               <TrackToggle
-                source={Track.Source.Microphone}
-
-                
-                onDeviceError={(error) => {
-                  console.error("Microphone device error:", error);
-
-                  toast.custom(() => (
-                    <div className="bg-red-500 text-white px-4 py-2 rounded">
-                      Microphone error: {error?.message || "Unknown error"}
-                    </div>
-                  ));
-                }}
-                style={{ color: "white", scale: 1.5 }}
-                className="w-6 h-6 flex items-center justify-center"
-              /> 
-            </button> */}
               <div>
                 <input
                   type="range"

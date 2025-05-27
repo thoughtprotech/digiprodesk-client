@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-asserted-optional-chain */
 import Layout from "@/components/Layout";
 import {
   CircleDot,
@@ -12,11 +12,10 @@ import {
   User as UserIcon,
   X,
 } from "lucide-react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
 import { Call, Location, User } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
-import { CallContext } from "@/context/CallContext";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
@@ -43,12 +42,8 @@ export default function Index() {
   const [filteredUserLocationData, setFilteredUserLocationData] = useState<
     Location[]
   >([]);
-  const [userList, setUserList] = useState<User[]>([]);
 
-  const { setCallId: setGuestCallId } = useContext(CallContext);
   const [inCall, setInCall] = useState<boolean>(false);
-
-  const router = useRouter();
 
   const fetchUserLocationList = async () => {
     try {
@@ -75,30 +70,6 @@ export default function Index() {
     }
   };
 
-  const fetchUserList = async () => {
-    try {
-      const cookies = parseCookies();
-      const { userToken } = cookies;
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${userToken}`,
-          },
-        }
-      );
-      if (response.status === 200) {
-        const data = await response.json();
-        setUserList(data);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const filterUserLocationList = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -111,7 +82,6 @@ export default function Index() {
 
   useEffect(() => {
     fetchUserLocationList();
-    fetchUserList();
   }, []);
 
   useEffect(() => {
@@ -239,8 +209,6 @@ function PropertyFeed({
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
       try {
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/[:.]/g, "-"); // e.g., "2025-05-10T14-30-15-123Z"
         const fileName = `${callId}`;
         const response = await fetch(
           process.env.NEXT_PUBLIC_STARTRECORDING_API!,
