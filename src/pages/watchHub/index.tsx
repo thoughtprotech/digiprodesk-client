@@ -10,6 +10,7 @@ import {
   PhoneOutgoing,
   RefreshCcw,
   User as UserIcon,
+  X,
 } from "lucide-react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
@@ -45,6 +46,7 @@ export default function Index() {
   const [userList, setUserList] = useState<User[]>([]);
 
   const { setCallId: setGuestCallId } = useContext(CallContext);
+  const [inCall, setInCall] = useState<boolean>(false);
 
   const router = useRouter();
 
@@ -173,6 +175,8 @@ export default function Index() {
               <PropertyFeed
                 roomName={location.LocationID?.toString()!}
                 label={location.LocationName!}
+                inCall={inCall}
+                setInCall={setInCall}
               />
             </div>
           ))}
@@ -185,9 +189,13 @@ export default function Index() {
 function PropertyFeed({
   roomName,
   label,
+  inCall,
+  setInCall,
 }: {
   roomName: string;
   label: string;
+  inCall: boolean;
+  setInCall: any;
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
@@ -240,7 +248,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -308,6 +316,8 @@ function PropertyFeed({
           label={label}
           toggleRecording={toggleRecording}
           isRecording={isRecording}
+          inCall={inCall}
+          setInCall={setInCall}
         />
       </div>
     </LiveKitRoom>
@@ -319,11 +329,15 @@ function VideoGrid({
   toggleRecording,
   isRecording,
   label,
+  inCall,
+  setInCall,
 }: {
   roomName: string;
   toggleRecording: any;
   isRecording: boolean;
   label: string;
+  inCall: boolean;
+  setInCall: any;
 }) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -460,9 +474,13 @@ function VideoGrid({
 
   const attendCall = () => {
     setShowModal(false);
-    setIsFullscreen(true);
+    if (isRecording) {
+      toggleRecording();
+    }
+    // setIsFullscreen(true);
     setIsRemoteMuted(false);
     setCurrentCallID(incomingCall?.CallID!);
+    setInCall(true);
     socketRef.current?.emit(
       "join-call",
       JSON.stringify({ roomId: incomingCall?.CallID })
@@ -478,15 +496,24 @@ function VideoGrid({
   };
 
   const handleStartCall = async (data: any) => {
-    if (user) {
-      const uuid = generateUUID();
-      setCurrentCallID(uuid);
-      socketRef.current?.emit(
-        "start-call",
-        JSON.stringify({ locationID: data, callId: uuid })
-      );
-      setIsFullscreen(true);
-      setIsRemoteMuted(false);
+    if (!inCall) {
+      console.log({ currentCallID });
+      if (user) {
+        if (isRecording) {
+          toggleRecording();
+        }
+        const uuid = generateUUID();
+        setCurrentCallID(uuid);
+        setInCall(true);
+        socketRef.current?.emit(
+          "start-call",
+          JSON.stringify({ locationID: data, callId: uuid })
+        );
+        // setIsFullscreen(true);
+        setIsRemoteMuted(false);
+      }
+    } else {
+      toast.error("End Current Call");
     }
   };
 
@@ -494,6 +521,7 @@ function VideoGrid({
     if (isRecording) {
       toggleRecording();
     }
+    setInCall(false);
     setCurrentCallID("");
     socketRef.current?.emit(
       "call-end",
@@ -565,7 +593,7 @@ function VideoGrid({
             className="inset-0 w-full h-full object-cover"
           />
         ))}
-        {/* {renderAudioTracks()} */}
+        {renderAudioTracks()}
         {/* Local Video Track */}
         {showPersonIcon && (
           <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black/60 px-2 py-0.5 rounded z-10">
@@ -579,32 +607,48 @@ function VideoGrid({
             {label}
           </div>
           <div className="flex flex-row-reverse items-center">
-            <Tooltip tooltip="Off" position="bottom">
+            <Tooltip tooltip={isRemoteMuted ? "On" : "Off"} position="bottom">
               <div
                 className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
+                onClick={() => sendMuteRequest(roomName)}
               >
-                <Mic className="w-4 h-4" />
+                {isRemoteMuted ? (
+                  <MicOff className="w-4 h-4" />
+                ) : (
+                  <Mic className="w-4 h-4" />
+                )}
               </div>
             </Tooltip>
-            <Tooltip tooltip="Refresh" position="bottom">
-              <div
-                className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
-                onClick={() => handleRefresh(roomName)}
-              >
-                <RefreshCcw className="text-cyan-400 w-4 h-4" />
-              </div>
-            </Tooltip>
+            {currentCallID.length === 0 && (
+              <Tooltip tooltip="Refresh" position="bottom">
+                <div
+                  className="hover:bg-blue-500/30 rounded-md cursor-pointer duration-300 px-1 py-1"
+                  onClick={() => handleRefresh(roomName)}
+                >
+                  <RefreshCcw className="text-cyan-400 w-4 h-4" />
+                </div>
+              </Tooltip>
+            )}
           </div>
         </div>
         {/* Controls */}
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
           <Tooltip tooltip="Call" position="bottom">
-            <div
-              className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
-              onClick={() => handleStartCall(roomName)}
-            >
-              <PhoneOutgoing className="text-green-500 w-4 h-4" />
-            </div>
+            {currentCallID.length === 0 ? (
+              <div
+                className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                onClick={() => handleStartCall(roomName)}
+              >
+                <PhoneOutgoing className="text-green-500 w-4 h-4" />
+              </div>
+            ) : (
+              <div
+                className="hover:bg-green-red/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                onClick={() => handleEndCall(roomName)}
+              >
+                <PhoneOff className="text-red-500 w-4 h-4" />
+              </div>
+            )}
           </Tooltip>
 
           {/* <Tooltip tooltip="Record" position="left">
@@ -614,14 +658,18 @@ function VideoGrid({
           </Tooltip> */}
 
           <Tooltip tooltip="Fullscreen" position="bottom">
-            <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+            <div
+              className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+              onClick={() => setIsFullscreen(true)}
+            >
               <Fullscreen className="w-4 h-4" />
             </div>
-          </Tooltip></div>
+          </Tooltip>
+        </div>
       </div>
 
       {isFullscreen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center gap-5">
+        <div className="fixed inset-0 bg-black bg-opacity-75 z-[80] flex items-center justify-center gap-5">
           <div className="relative w-3/4 h-fit max-h-screen flex justify-center">
             {remoteVideoTracks.map((trackRef: any) => (
               <VideoTrack
@@ -653,60 +701,69 @@ function VideoGrid({
               </div>
             </div>
           </div>
-          <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
-            <div className="w-full flex items-center gap-2 justify-between">
-              <div
-                // onClick={() => handleEndCall(roomName)}
-                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-              >
-                <TrackToggle
-                  source={Track.Source.Microphone}
-                  onDeviceError={(error) => {
-                    toast.custom(() => (
-                      <div className="bg-red-500 text-white px-4 py-2 rounded">
-                        Microphone error: {error?.message || "Unknown error"}
-                      </div>
-                    ));
-                  }}
-                  style={{ color: "white", scale: 1.5 }}
-                  className="w-7 h-7 flex items-center justify-center"
-                />
-              </div>
-              <div
-                // onClick={() => handleEndCall(roomName)}
-                className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
-              >
-                <TrackToggle
-                  source={Track.Source.Camera}
-                  style={{ color: "white", scale: 1.7 }}
-                  // onClick={() => setAudioMuted((prev) => !prev)}
-                  className="w-7 h-7 flex items-center justify-center"
-                />
-                {/* <Video className="w-7 h-7" /> */}
-              </div>
-              <button
-                onClick={() => toggleRecording(currentCallID)}
-                className={`${isRecording ? "bg-orange-500" : "bg-highlight"
+          {currentCallID.length > 0 && (
+            <div className="w-fit max-w-md p-4 rounded-md flex flex-col items-center gap-4">
+              <div className="w-full flex items-center gap-2 justify-between">
+                <div
+                  // onClick={() => handleEndCall(roomName)}
+                  className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
+                >
+                  <TrackToggle
+                    source={Track.Source.Microphone}
+                    onDeviceError={(error) => {
+                      toast.custom(() => (
+                        <div className="bg-red-500 text-white px-4 py-2 rounded">
+                          Microphone error: {error?.message || "Unknown error"}
+                        </div>
+                      ));
+                    }}
+                    style={{ color: "white", scale: 1.5 }}
+                    className="w-7 h-7 flex items-center justify-center"
+                  />
+                </div>
+                <div
+                  // onClick={() => handleEndCall(roomName)}
+                  className="bg-highlight bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded flex item-center justify-center"
+                >
+                  <TrackToggle
+                    source={Track.Source.Camera}
+                    style={{ color: "white", scale: 1.7 }}
+                    // onClick={() => setAudioMuted((prev) => !prev)}
+                    className="w-7 h-7 flex items-center justify-center"
+                  />
+                  {/* <Video className="w-7 h-7" /> */}
+                </div>
+                <button
+                  onClick={() => toggleRecording(currentCallID)}
+                  className={`${
+                    isRecording ? "bg-orange-500" : "bg-highlight"
                   } bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded`}
-              >
-                <CircleDot className="w-7 h-7" />
-              </button>
-              <button
-                onClick={() => handleEndCall(roomName)}
-                className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
-              >
-                <PhoneOff className="w-7 h-7" />
-              </button>
-            </div>
-            {/* local preview in bottom-right */}
-            {localVideoTrack && (
-              <div className="bottom-4 right-4 max-w-96 aspect-video rounded-md overflow-hidden">
-                <VideoTrack
-                  trackRef={localVideoTrack}
-                  className="w-full h-full object-cover"
-                />
+                >
+                  <CircleDot className="w-7 h-7" />
+                </button>
+                <button
+                  onClick={() => handleEndCall(roomName)}
+                  className="bg-red-500 bg-opacity-50 text-white text-sm font-medium px-6 py-2 rounded"
+                >
+                  <PhoneOff className="w-7 h-7" />
+                </button>
               </div>
-            )}
+              {/* local preview in bottom-right */}
+              {localVideoTrack && (
+                <div className="bottom-4 right-4 max-w-96 aspect-video rounded-md overflow-hidden">
+                  <VideoTrack
+                    trackRef={localVideoTrack}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+          <div
+            className="absolute top-20 right-20 cursor-pointer"
+            onClick={() => setIsFullscreen(false)}
+          >
+            <X className="w-6 h-6" />
           </div>
         </div>
       )}
