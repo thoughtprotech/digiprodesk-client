@@ -189,7 +189,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -295,10 +295,24 @@ function VideoGrid({
   const [showPersonIcon, setShowPersonIcon] = useState(false);
   const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [user, setUser] = useState<User>();
-  const [isSelfMuted, setIsSelfMuted] = useState<boolean>(false);
+  const [isSelfMuted, setIsSelfMuted] = useState<boolean>(true);
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
 
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (!event.data || typeof event.data !== "object") return;
+      const { type, payload } = event.data;
+      if (type === "CALL_STARTED") {
+        const shouldMute = payload.roomName !== roomName;
+        setIsRemoteMuted(shouldMute);
+        socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: shouldMute }));
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, [roomName]);
   useEffect(() => {
     if (isFullscreen) {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -457,6 +471,15 @@ function VideoGrid({
         );
         // setIsFullscreen(true);
         setIsRemoteMuted(false);
+        window.postMessage(
+          {
+            type: "CALL_STARTED",
+            payload: {
+              roomName: roomName, // or call ID
+            },
+          },
+          "*" // Consider restricting to origin: window.origin
+        );
       }
     } else {
       toast.custom((t: any) => (
@@ -510,7 +533,7 @@ function VideoGrid({
   };
   const renderAudioTracks = () =>
     remoteAudioTracks.map((trackRef: TrackReferenceOrPlaceholder) => (
-      <AudioTrack key={trackRef.publication.trackSid} trackRef={trackRef} />
+      <AudioTrack key={trackRef.publication.trackSid} trackRef={trackRef} muted={isRemoteMuted} />
     ));
 
   useEffect(() => {
@@ -555,7 +578,6 @@ function VideoGrid({
           />
         ))}
         {renderAudioTracks()}
-        {/* Local Video Track */}
         {showPersonIcon && (
           <div className="absolute bottom-[2px] left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
             <UserIcon className="w-4 h-4 text-orange-400" />
@@ -599,26 +621,7 @@ function VideoGrid({
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
           {currentCallID.length > 0 && (
             <div className="flex">
-              <Tooltip
-                tooltip={isSelfMuted ? "Unmute" : "Mute"}
-                position="bottom"
-              >
-                <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
-                  <TrackToggle
-                    source={Track.Source.Microphone}
-                    onDeviceError={(error) => {
-                      toast.custom(() => (
-                        <div className="bg-red-500 text-white px-4 py-2 rounded">
-                          Microphone error: {error?.message || "Unknown error"}
-                        </div>
-                      ));
-                    }}
-                    style={{ color: "white", scale: 0.9 }}
-                    className="flex items-center justify-center w-4 h-4"
-                    onClick={() => setIsSelfMuted(!isSelfMuted)}
-                  />
-                </div>
-              </Tooltip>
+              
               <Tooltip
                 tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
                 position="bottom"
@@ -637,9 +640,8 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className={`hover:bg-orange-500/30 ${
-                  isRecording && "bg-orange-500/300"
-                } px-2 py-1 rounded-md cursor-pointer duration-300`}
+                className={`hover:bg-orange-500/30 ${isRecording && "bg-orange-500/300"
+                  } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -671,7 +673,27 @@ function VideoGrid({
               </div>
             )}
           </Tooltip>
+          <Tooltip
+            tooltip={isSelfMuted ? "Unmute" : "Mute"}
+            position="bottom"
+          >
+            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+              <TrackToggle
+                source={Track.Source.Microphone}
+                onDeviceError={(error) => {
+                  toast.custom(() => (
+                    <div className="bg-red-500 text-white px-4 py-2 rounded">
+                      Microphone error: {error?.message || "Unknown error"}
+                    </div>
+                  ));
+                }}
+                style={{ color: "white", scale: 0.9 }}
+                className="flex items-center justify-center w-4 h-4"
+                onClick={() => setIsSelfMuted(!isSelfMuted)}
+              />
+            </div>
 
+          </Tooltip>
           <Tooltip tooltip="Fullscreen" position="bottom">
             <div
               className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
@@ -740,36 +762,14 @@ function VideoGrid({
                 <div className="w-full flex items-center gap-2 justify-between">
                   {currentCallID.length > 0 && (
                     <>
-                      <Tooltip
-                        tooltip={isSelfMuted ? "Unmute" : "Mute"}
-                        position="bottom"
-                      >
-                        <div className="hover:bg-gray-500/30 px-2 p-2 rounded-md cursor-pointer duration-300">
-                          <TrackToggle
-                            source={Track.Source.Microphone}
-                            onDeviceError={(error) => {
-                              toast.custom(() => (
-                                <div className="bg-red-500 text-white px-4 py-2 rounded">
-                                  Microphone error:{" "}
-                                  {error?.message || "Unknown error"}
-                                </div>
-                              ));
-                            }}
-                            style={{ color: "white", scale: 1.3 }}
-                            className="flex items-center justify-center"
-                            onClick={() => {
-                              setIsSelfMuted(!isSelfMuted);
-                            }}
-                          />
-                        </div>
-                      </Tooltip>
+                      
                       <Tooltip
                         tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
                         position="bottom"
                       >
                         <div
                           className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                          // onClick={() => handleEndCall(roomName)}
+                        // onClick={() => handleEndCall(roomName)}
                         >
                           <TrackToggle
                             source={Track.Source.Camera}
@@ -785,9 +785,8 @@ function VideoGrid({
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
                         <button
-                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
-                            isRecording && "bg-orange-500/30"
-                          }`}
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${isRecording && "bg-orange-500/30"
+                            }`}
                           onClick={() => toggleRecording(currentCallID)}
                         >
                           <CircleDot className="text-orange-500" />

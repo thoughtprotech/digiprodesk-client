@@ -422,7 +422,7 @@ export default function Index() {
         });
 
         localAudioTrackRef.current = audioTrack;
-
+        localAudioTrackRef.current.enable();
         lkRoomRef.current = lkRoom;
 
         if (guestVideoRef.current) {
@@ -502,7 +502,7 @@ export default function Index() {
               const audioEl = track.attach();
               audioEl.autoplay = true;
               audioEl.controls = false;
-              audioEl.muted = true;
+              audioEl.muted = false;
               audioEl.style.display = "none"; // Hide the audio element
               document.body.appendChild(audioEl);
             }
@@ -527,8 +527,7 @@ export default function Index() {
             } else if (
               pub.kind === Track.Kind.Audio &&
               pub.isSubscribed &&
-              pub.track &&
-              callStatusRef.current === "inProgress"
+              pub.track 
             ) {
               const audioEl = pub.track.attach();
               audioEl.autoplay = true;
