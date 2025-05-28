@@ -37,7 +37,7 @@ import generateUUID from "@/utils/uuidGenerator";
 import jwt from "jsonwebtoken";
 import logOut from "@/utils/logOut";
 import Tooltip from "@/components/ui/ToolTip";
-import { useLocalParticipant } from "@livekit/components-react";
+import { useLocalParticipant, ConnectionQualityIndicator } from "@livekit/components-react";
 
 
 export default function Index() {
@@ -286,7 +286,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -361,9 +361,9 @@ function PropertyFeed({
           setInCall={setInCall}
           setCallList={setCallList}
         />
-        
+
       </div>
-      
+
     </LiveKitRoom>
   );
 }
@@ -401,7 +401,7 @@ function VideoGrid({
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
-  
+
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -627,6 +627,7 @@ function VideoGrid({
       t.participant.identity.includes("guest")
   );
 
+
   const localVideoTrack = tracks.find(
     (t) =>
       t.publication.kind === "video" &&
@@ -687,6 +688,7 @@ function VideoGrid({
     );
   }
 
+
   return (
     <>
       <div
@@ -698,8 +700,14 @@ function VideoGrid({
             trackRef={trackRef}
             className="inset-0 w-full h-full object-cover"
           />
+
         ))}
-        
+        {remoteVideoTracks.map((trackRef: any) => (
+          <ConnectionQualityIndicator participant={trackRef.participant} />
+
+        ))}
+
+
         {renderAudioTracks()}
         {showPersonIcon && (
           <div className="absolute bottom-[2px] left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
@@ -762,9 +770,8 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className={`hover:bg-orange-500/30 ${
-                  isRecording && "bg-orange-500/300"
-                } px-2 py-1 rounded-md cursor-pointer duration-300`}
+                className={`hover:bg-orange-500/30 ${isRecording && "bg-orange-500/300"
+                  } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -780,6 +787,7 @@ function VideoGrid({
             tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
             position="bottom"
           >
+
             {currentCallID.length === 0 ? (
               <div
                 className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
@@ -833,7 +841,13 @@ function VideoGrid({
               <Maximize className="w-4 h-4" />
             </div>
           </Tooltip>
-          
+          <div
+            className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+            {remoteVideoTracks.map((trackRef: any) => (
+              <ConnectionQualityIndicator participant={trackRef.participant} />
+
+            ))}
+          </div>
         </div>
         {currentCallID.length > 0 && (
           <div className="absolute bottom-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
@@ -888,7 +902,7 @@ function VideoGrid({
                       >
                         <div
                           className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                          // onClick={() => handleEndCall(roomName)}
+                        // onClick={() => handleEndCall(roomName)}
                         >
                           <TrackToggle
                             source={Track.Source.Camera}
@@ -904,9 +918,8 @@ function VideoGrid({
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
                         <button
-                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
-                            isRecording && "bg-orange-500/30"
-                          }`}
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${isRecording && "bg-orange-500/30"
+                            }`}
                           onClick={() => toggleRecording(currentCallID)}
                         >
                           <CircleDot className="text-orange-500" />
