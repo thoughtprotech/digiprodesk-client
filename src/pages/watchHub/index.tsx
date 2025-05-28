@@ -6,13 +6,16 @@ import {
   Mic,
   MicOff,
   Minimize,
+  Phone,
   PhoneCall,
+  PhoneCallIcon,
+  PhoneIncoming,
   PhoneOff,
   PhoneOutgoing,
   RefreshCcw,
   User as UserIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
 import { Call, Location, User } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
@@ -36,7 +39,6 @@ import logOut from "@/utils/logOut";
 import Tooltip from "@/components/ui/ToolTip";
 import { useLocalParticipant } from "@livekit/components-react";
 
-
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
     []
@@ -46,6 +48,7 @@ export default function Index() {
   >([]);
 
   const [inCall, setInCall] = useState<boolean>(false);
+  const [callList, setCallList] = useState<Call[]>();
 
   const fetchUserLocationList = async () => {
     try {
@@ -108,6 +111,72 @@ export default function Index() {
               onChange={filterUserLocationList}
             />
           </div>
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-full h-fit bg-sky-500/30 hover:bg-sky-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+            >
+              <div className="flex space-x-2 items-center">
+                <div className="border-r-2 border-r-sky-500 pr-2">
+                  <Phone className="w-5 h-5 text-sky-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-xl">
+                    {
+                      callList?.filter(
+                        (call) =>
+                          call.CallStatus === "New" ||
+                          call.CallStatus === "In Progress"
+                      ).length
+                    }
+                  </h1>
+                  <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">
+                    Calls
+                  </h1>
+                </div>
+              </div>
+            </div>
+            <div
+              className={`w-full h-fit bg-green-500/30 hover:bg-green-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+            >
+              <div className="flex space-x-2 items-center">
+                <div className="border-r-2 border-r-green-500 pr-2">
+                  <PhoneIncoming className="w-5 h-5 text-green-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-xl">
+                    {
+                      callList?.filter((call) => call.CallStatus === "New")
+                        .length
+                    }
+                  </h1>
+                  <h1 className="w-fit text-[0.65rem] font-bold text-green-500">
+                    Calls
+                  </h1>
+                </div>
+              </div>
+            </div>
+            <div
+              className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+            >
+              <div className="flex space-x-2 items-center">
+                <div className="border-r-2 border-r-orange-500 pr-2">
+                  <PhoneCallIcon className="w-5 h-5 text-orange-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-xl">
+                    {
+                      callList?.filter(
+                        (call) => call.CallStatus === "In Progress"
+                      ).length
+                    }
+                  </h1>
+                  <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">
+                    Calls
+                  </h1>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="w-full pb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {filteredUserLocationData.map((location) => (
@@ -120,6 +189,7 @@ export default function Index() {
                 label={location.LocationName!}
                 inCall={inCall}
                 setInCall={setInCall}
+                setCallList={setCallList}
               />
             </div>
           ))}
@@ -134,11 +204,13 @@ function PropertyFeed({
   label,
   inCall,
   setInCall,
+  setCallList,
 }: {
   roomName: string;
   label: string;
   inCall: boolean;
   setInCall: any;
+  setCallList: any;
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
@@ -191,7 +263,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -264,6 +336,7 @@ function PropertyFeed({
           isRecording={isRecording}
           inCall={inCall}
           setInCall={setInCall}
+          setCallList={setCallList}
         />
       </div>
     </LiveKitRoom>
@@ -277,6 +350,7 @@ function VideoGrid({
   label,
   inCall,
   setInCall,
+  setCallList,
 }: {
   roomName: string;
   toggleRecording: any;
@@ -284,6 +358,7 @@ function VideoGrid({
   label: string;
   inCall: boolean;
   setInCall: any;
+  setCallList: any;
 }) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -301,6 +376,7 @@ function VideoGrid({
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
+
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (!event.data || typeof event.data !== "object") return;
@@ -308,7 +384,7 @@ function VideoGrid({
       if (type === "CALL_STARTED") {
         const shouldMute = payload.roomName !== roomName;
         setIsSelfMuted(shouldMute);
-        
+
         localParticipant.setMicrophoneEnabled(!shouldMute);
         // setIsRemoteMuted(shouldMute);
         // socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: shouldMute }));
@@ -318,6 +394,7 @@ function VideoGrid({
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
   }, [roomName]);
+
   useEffect(() => {
     if (isFullscreen) {
       const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -382,6 +459,15 @@ function VideoGrid({
 
   useEffect(() => {
     if (!user) return;
+    getCallList();
+  }, [user]);
+
+  const getCallList = () => {
+    socketRef.current?.emit("get-call-list");
+  };
+
+  useEffect(() => {
+    if (!user) return;
     socketRef.current = socket;
 
     socketRef.current?.on("participant-muted-request", (data) => {
@@ -414,6 +500,8 @@ function VideoGrid({
     });
 
     socketRef.current?.on("call-list-update", (data) => {
+      console.log("CALL LIST UPDATE", { data });
+      setCallList(data);
       data.map((call: Call) => {
         if (
           call.AssignedToUserName === user.UserName &&
@@ -538,7 +626,11 @@ function VideoGrid({
   };
   const renderAudioTracks = () =>
     remoteAudioTracks.map((trackRef: TrackReferenceOrPlaceholder) => (
-      <AudioTrack key={trackRef.publication.trackSid} trackRef={trackRef} muted={isRemoteMuted} />
+      <AudioTrack
+        key={trackRef.publication.trackSid}
+        trackRef={trackRef}
+        muted={isRemoteMuted}
+      />
     ));
 
   useEffect(() => {
@@ -626,7 +718,6 @@ function VideoGrid({
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
           {currentCallID.length > 0 && (
             <div className="flex">
-              
               <Tooltip
                 tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
                 position="bottom"
@@ -645,8 +736,9 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className={`hover:bg-orange-500/30 ${isRecording && "bg-orange-500/300"
-                  } px-2 py-1 rounded-md cursor-pointer duration-300`}
+                className={`hover:bg-orange-500/30 ${
+                  isRecording && "bg-orange-500/300"
+                } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -678,10 +770,7 @@ function VideoGrid({
               </div>
             )}
           </Tooltip>
-          <Tooltip
-            tooltip={isSelfMuted ? "Unmute" : "Mute"}
-            position="bottom"
-          >
+          <Tooltip tooltip={isSelfMuted ? "Unmute" : "Mute"} position="bottom">
             <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
               <TrackToggle
                 source={Track.Source.Microphone}
@@ -697,7 +786,6 @@ function VideoGrid({
                 onClick={() => setIsSelfMuted(!isSelfMuted)}
               />
             </div>
-
           </Tooltip>
           <Tooltip tooltip="Fullscreen" position="bottom">
             <div
@@ -767,14 +855,13 @@ function VideoGrid({
                 <div className="w-full flex items-center gap-2 justify-between">
                   {currentCallID.length > 0 && (
                     <>
-                      
                       <Tooltip
                         tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
                         position="bottom"
                       >
                         <div
                           className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                        // onClick={() => handleEndCall(roomName)}
+                          // onClick={() => handleEndCall(roomName)}
                         >
                           <TrackToggle
                             source={Track.Source.Camera}
@@ -790,8 +877,9 @@ function VideoGrid({
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
                         <button
-                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${isRecording && "bg-orange-500/30"
-                            }`}
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
+                            isRecording && "bg-orange-500/30"
+                          }`}
                           onClick={() => toggleRecording(currentCallID)}
                         >
                           <CircleDot className="text-orange-500" />
