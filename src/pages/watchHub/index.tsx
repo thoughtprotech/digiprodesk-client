@@ -2,6 +2,7 @@
 import Layout from "@/components/Layout";
 import {
   CircleDot,
+  MapPin,
   Maximize,
   Mic,
   MicOff,
@@ -37,8 +38,10 @@ import generateUUID from "@/utils/uuidGenerator";
 import jwt from "jsonwebtoken";
 import logOut from "@/utils/logOut";
 import Tooltip from "@/components/ui/ToolTip";
-import { useLocalParticipant, ConnectionQualityIndicator } from "@livekit/components-react";
-
+import {
+  useLocalParticipant,
+  ConnectionQualityIndicator,
+} from "@livekit/components-react";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -49,9 +52,13 @@ export default function Index() {
   >([]);
 
   const [inCall, setInCall] = useState<boolean>(false);
-  const [callList, setCallList] = useState<Call[]>();
+  const [, setCallList] = useState<Call[]>();
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
+  const [guestCount, setGuestCount] = useState<number>(0);
+  const [locationsOnline, setLocationsOnline] = useState<number>(0);
+  const [missedCallCount, setMissedCallCount] = useState<number>(0);
+  const [onHoldCallCount, setOnHoldCallCount] = useState<number>(0);
 
   const fetchUserLocationList = async () => {
     try {
@@ -107,11 +114,22 @@ export default function Index() {
   }, [socket]);
 
   const getCallList = () => {
-    socketRef.current?.emit("get-call-list");
+    socketRef.current?.emit("get-calls");
   };
 
   useEffect(() => {
-    socketRef.current?.on("call-list-update", (data: any) => {
+    socketRef.current?.on("call-update", (data: any) => {
+      console.log(
+        "MISSED CALL COUNT",
+        data?.filter((call: any) => call.CallStatus === "Missed").length
+      );
+      setMissedCallCount(
+        data?.filter((call: any) => call.CallStatus === "Missed").length
+      );
+      setOnHoldCallCount(
+        data?.filter((call: any) => call.CallStatus === "On Hold").length
+      );
+
       setCallList(data);
     });
   }, [socket, socketRef.current]);
@@ -128,73 +146,71 @@ export default function Index() {
     >
       <div className="w-full flex-1 flex flex-col gap-2 px-2">
         <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
-          <div className="w-64 flex gap-1">
-            <SearchInput
-              placeholder="Locations"
-              onChange={filterUserLocationList}
-            />
+          <div className="flex items-center">
+            <div className="w-64 flex gap-1">
+              <SearchInput
+                placeholder="Locations"
+                onChange={filterUserLocationList}
+              />
+            </div>
+            <div
+              className={`w-fit h-fit bg-purple-500/30 hover:bg-purple-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+            >
+              <div className="flex space-x-2 items-center">
+                <div className="border-r-2 border-r-purple-500 pr-2">
+                  <MapPin className="w-5 h-5 text-purple-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-xl">{locationsOnline}</h1>
+                  <h1 className="w-fit text-[0.65rem] font-bold text-purple-500">
+                    Location(s) Online
+                  </h1>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <div
-              className={`w-full h-fit bg-sky-500/30 hover:bg-sky-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
-            >
-              <div className="flex space-x-2 items-center">
-                <div className="border-r-2 border-r-sky-500 pr-2">
-                  <Phone className="w-5 h-5 text-sky-500" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">
-                    {
-                      callList?.filter(
-                        (call) =>
-                          call.CallStatus === "New" ||
-                          call.CallStatus === "In Progress"
-                      ).length || 0
-                    }
-                  </h1>
-                  <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">
-                    All Calls
-                  </h1>
-                </div>
-              </div>
-            </div>
-            <div
-              className={`w-full h-fit bg-green-500/30 hover:bg-green-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
-            >
-              <div className="flex space-x-2 items-center">
-                <div className="border-r-2 border-r-green-500 pr-2">
-                  <PhoneIncoming className="w-5 h-5 text-green-500" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">
-                    {
-                      callList?.filter((call) => call.CallStatus === "New")
-                        .length || 0
-                    }
-                  </h1>
-                  <h1 className="w-fit text-[0.65rem] font-bold text-green-500">
-                    Incoming Calls
-                  </h1>
-                </div>
-              </div>
-            </div>
             <div
               className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
             >
               <div className="flex space-x-2 items-center">
                 <div className="border-r-2 border-r-orange-500 pr-2">
-                  <PhoneCallIcon className="w-5 h-5 text-orange-500" />
+                  <Phone className="w-5 h-5 text-orange-500" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">
-                    {
-                      callList?.filter(
-                        (call) => call.CallStatus === "In Progress"
-                      ).length || 0
-                    }
-                  </h1>
+                  <h1 className="font-bold text-xl">{guestCount}</h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">
-                    In Progress Calls
+                    Guest(s) Detected
+                  </h1>
+                </div>
+              </div>
+            </div>
+            <div
+              className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+            >
+              <div className="flex space-x-2 items-center">
+                <div className="border-r-2 border-r-indigo-500 pr-2">
+                  <PhoneIncoming className="w-5 h-5 text-indigo-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-xl">{onHoldCallCount}</h1>
+                  <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">
+                    Calls On Hold
+                  </h1>
+                </div>
+              </div>
+            </div>
+            <div
+              className={`w-full h-fit bg-red-500/30 hover:bg-red-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+            >
+              <div className="flex space-x-2 items-center">
+                <div className="border-r-2 border-r-red-500 pr-2">
+                  <PhoneCallIcon className="w-5 h-5 text-red-500" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-xl">{missedCallCount}</h1>
+                  <h1 className="w-fit text-[0.65rem] font-bold text-red-500">
+                    Missed Calls
                   </h1>
                 </div>
               </div>
@@ -213,6 +229,8 @@ export default function Index() {
                 inCall={inCall}
                 setInCall={setInCall}
                 setCallList={setCallList}
+                setGuestCount={setGuestCount}
+                setLocationsOnline={setLocationsOnline}
               />
             </div>
           ))}
@@ -228,12 +246,16 @@ function PropertyFeed({
   inCall,
   setInCall,
   setCallList,
+  setGuestCount,
+  setLocationsOnline,
 }: {
   roomName: string;
   label: string;
   inCall: boolean;
   setInCall: any;
   setCallList: any;
+  setGuestCount: any;
+  setLocationsOnline: any;
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
@@ -286,7 +308,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -360,10 +382,10 @@ function PropertyFeed({
           inCall={inCall}
           setInCall={setInCall}
           setCallList={setCallList}
+          setGuestCount={setGuestCount}
+          setLocationsOnline={setLocationsOnline}
         />
-
       </div>
-
     </LiveKitRoom>
   );
 }
@@ -376,6 +398,8 @@ function VideoGrid({
   inCall,
   setInCall,
   setCallList,
+  setGuestCount,
+  setLocationsOnline,
 }: {
   roomName: string;
   toggleRecording: any;
@@ -384,6 +408,8 @@ function VideoGrid({
   inCall: boolean;
   setInCall: any;
   setCallList: any;
+  setGuestCount: any;
+  setLocationsOnline: any;
 }) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -402,6 +428,15 @@ function VideoGrid({
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
 
+  useEffect(() => {
+    setGuestCount((prev: number) => {
+      if (showPersonIcon) {
+        return prev + 1;
+      } else {
+        return Math.max(prev - 1, 0); // Prevent negative guestCount
+      }
+    });
+  }, [showPersonIcon]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -546,6 +581,7 @@ function VideoGrid({
       ) {
         setShowModal(false);
         setIncomingCall(null);
+        socketRef.current?.emit("get-calls");
       }
     });
   }, [socket, user]);
@@ -627,7 +663,6 @@ function VideoGrid({
       t.participant.identity.includes("guest")
   );
 
-
   const localVideoTrack = tracks.find(
     (t) =>
       t.publication.kind === "video" &&
@@ -675,6 +710,14 @@ function VideoGrid({
     }
   }, [showModal]);
 
+  useEffect(() => {
+    if (remoteVideoTracks.length === 0) {
+      setLocationsOnline((prev: number) => Math.max(prev - 1, 0)); // prevent negative count
+    } else {
+      setLocationsOnline((prev: number) => prev + 1);
+    }
+  }, [remoteVideoTracks.length]);
+
   if (remoteVideoTracks.length === 0) {
     return (
       <div className="w-full h-fit flex items-center justify-center relative">
@@ -688,11 +731,12 @@ function VideoGrid({
     );
   }
 
-
   return (
     <>
       <div
-        className={`relative w-full h-fit ${isFullscreen ? "hidden" : "block"}`}
+        className={`relative w-full h-full aspect-video ${
+          isFullscreen ? "hidden" : "block"
+        }`}
       >
         {remoteVideoTracks.map((trackRef: any) => (
           <VideoTrack
@@ -700,22 +744,12 @@ function VideoGrid({
             trackRef={trackRef}
             className="inset-0 w-full h-full object-cover"
           />
-
         ))}
         {remoteVideoTracks.map((trackRef: any) => (
-          <ConnectionQualityIndicator participant={trackRef.participant} />
-
+          <ConnectionQualityIndicator participant={trackRef.participant} key={trackRef.participant} />
         ))}
 
-
         {renderAudioTracks()}
-        {showPersonIcon && (
-          <div className="absolute bottom-[2px] left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
-            <UserIcon className="w-4 h-4 text-orange-400" />
-            <span className="text-xs font-semibold">Guest</span>
-          </div>
-        )}
-
         <div className="absolute top-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
           <div className="text-xs font-semibold truncate text-ellipsis">
             {label}
@@ -770,8 +804,9 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className={`hover:bg-orange-500/30 ${isRecording && "bg-orange-500/300"
-                  } px-2 py-1 rounded-md cursor-pointer duration-300`}
+                className={`hover:bg-orange-500/30 ${
+                  isRecording && "bg-orange-500/300"
+                } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -787,7 +822,6 @@ function VideoGrid({
             tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
             position="bottom"
           >
-
             {currentCallID.length === 0 ? (
               <div
                 className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
@@ -841,16 +875,21 @@ function VideoGrid({
               <Maximize className="w-4 h-4" />
             </div>
           </Tooltip>
-          <div
-            className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
-            {remoteVideoTracks.map((trackRef: any) => (
-              <ConnectionQualityIndicator participant={trackRef.participant} />
 
+          <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+            {remoteVideoTracks.map((trackRef: any) => (
+              <ConnectionQualityIndicator participant={trackRef.participant} key={trackRef.participant} />
             ))}
           </div>
         </div>
+        {showPersonIcon && (
+          <div className="absolute bottom-[18px] right-[2px] flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
+            <UserIcon className="w-4 h-4 text-orange-400" />
+            <span className="text-xs font-semibold">Guest</span>
+          </div>
+        )}
         {currentCallID.length > 0 && (
-          <div className="absolute bottom-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
+          <div className="absolute bottom-[18px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Call In Progress</h1>
           </div>
         )}
@@ -902,7 +941,7 @@ function VideoGrid({
                       >
                         <div
                           className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                        // onClick={() => handleEndCall(roomName)}
+                          // onClick={() => handleEndCall(roomName)}
                         >
                           <TrackToggle
                             source={Track.Source.Camera}
@@ -918,8 +957,9 @@ function VideoGrid({
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
                         <button
-                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${isRecording && "bg-orange-500/30"
-                            }`}
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
+                            isRecording && "bg-orange-500/30"
+                          }`}
                           onClick={() => toggleRecording(currentCallID)}
                         >
                           <CircleDot className="text-orange-500" />
