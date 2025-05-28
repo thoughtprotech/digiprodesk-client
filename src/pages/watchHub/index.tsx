@@ -30,6 +30,7 @@ import {
   useTracks,
   VideoTrack,
   TrackReferenceOrPlaceholder,
+  MediaDeviceMenu,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
@@ -308,7 +309,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -385,6 +386,7 @@ function PropertyFeed({
           setGuestCount={setGuestCount}
           setLocationsOnline={setLocationsOnline}
         />
+
       </div>
     </LiveKitRoom>
   );
@@ -424,6 +426,7 @@ function VideoGrid({
   const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [user, setUser] = useState<User>();
   const [isSelfMuted, setIsSelfMuted] = useState<boolean>(true);
+  const [isSelfDisabled, setIsSelfDisabled] = useState<boolean>(true);
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
@@ -445,10 +448,10 @@ function VideoGrid({
       if (type === "CALL_STARTED") {
         const shouldMute = payload.roomName !== roomName;
         setIsSelfMuted(shouldMute);
-
+        setIsSelfDisabled(shouldMute);
         localParticipant.setMicrophoneEnabled(!shouldMute);
-        // setIsRemoteMuted(shouldMute);
-        // socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: shouldMute }));
+      } else if (type === "CALL_ENDED") {
+        setIsSelfDisabled(false);
       }
     };
 
@@ -600,6 +603,15 @@ function VideoGrid({
       JSON.stringify({ roomId: incomingCall?.CallID })
     );
     setIncomingCall(null);
+    window.postMessage(
+      {
+        type: "CALL_STARTED",
+        payload: {
+          roomName: roomName, // or call ID
+        },
+      },
+      "*" // Consider restricting to origin: window.origin
+    );
   };
 
   const handleRefresh = (data: any) => {
@@ -651,6 +663,15 @@ function VideoGrid({
     socketRef.current?.emit(
       "call-end",
       JSON.stringify({ locationID: data, callId: currentCallID })
+    );
+    window.postMessage(
+      {
+        type: "CALL_ENDED",
+        payload: {
+          roomName: roomName, // or call ID
+        },
+      },
+      "*" // Consider restricting to origin: window.origin
     );
     setIsFullscreen(false);
   };
@@ -734,9 +755,8 @@ function VideoGrid({
   return (
     <>
       <div
-        className={`relative w-full h-full aspect-video ${
-          isFullscreen ? "hidden" : "block"
-        }`}
+        className={`relative w-full h-full aspect-video ${isFullscreen ? "hidden" : "block"
+          }`}
       >
         {remoteVideoTracks.map((trackRef: any) => (
           <VideoTrack
@@ -804,9 +824,8 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className={`hover:bg-orange-500/30 ${
-                  isRecording && "bg-orange-500/300"
-                } px-2 py-1 rounded-md cursor-pointer duration-300`}
+                className={`hover:bg-orange-500/30 ${isRecording && "bg-orange-500/300"
+                  } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -839,7 +858,10 @@ function VideoGrid({
             )}
           </Tooltip>
           <Tooltip tooltip={isSelfMuted ? "Unmute" : "Mute"} position="bottom">
-            <div className="hover:bg-gray-500/30 p-1 rounded-md cursor-pointer duration-300">
+            <div
+              className={`p-1 rounded-md duration-300 ${isSelfDisabled ? "bg-gray-400/30 cursor-not-allowed pointer-events-none" : "hover:bg-gray-500/30 cursor-pointer"
+                }`}
+            >
               <TrackToggle
                 source={Track.Source.Microphone}
                 onDeviceError={(error) => {
@@ -941,7 +963,7 @@ function VideoGrid({
                       >
                         <div
                           className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                          // onClick={() => handleEndCall(roomName)}
+                        // onClick={() => handleEndCall(roomName)}
                         >
                           <TrackToggle
                             source={Track.Source.Camera}
@@ -957,9 +979,8 @@ function VideoGrid({
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
                         <button
-                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
-                            isRecording && "bg-orange-500/30"
-                          }`}
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${isRecording && "bg-orange-500/30"
+                            }`}
                           onClick={() => toggleRecording(currentCallID)}
                         >
                           <CircleDot className="text-orange-500" />
