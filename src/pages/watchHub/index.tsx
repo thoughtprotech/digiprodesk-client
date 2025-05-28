@@ -39,6 +39,7 @@ import logOut from "@/utils/logOut";
 import Tooltip from "@/components/ui/ToolTip";
 import { useLocalParticipant } from "@livekit/components-react";
 
+
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
     []
@@ -49,6 +50,8 @@ export default function Index() {
 
   const [inCall, setInCall] = useState<boolean>(false);
   const [callList, setCallList] = useState<Call[]>();
+  const { socket } = useSocket();
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
 
   const fetchUserLocationList = async () => {
     try {
@@ -93,6 +96,26 @@ export default function Index() {
     console.log({ filteredUserLocationData });
   }, [filteredUserLocationData]);
 
+  useEffect(() => {
+    getCallList();
+  }, [socket, socketRef.current]);
+
+  useEffect(() => {
+    if (socket) {
+      socketRef.current = socket;
+    }
+  }, [socket]);
+
+  const getCallList = () => {
+    socketRef.current?.emit("get-call-list");
+  };
+
+  useEffect(() => {
+    socketRef.current?.on("call-list-update", (data: any) => {
+      setCallList(data);
+    });
+  }, [socket, socketRef.current]);
+
   return (
     <Layout
       headerTitle={
@@ -111,7 +134,7 @@ export default function Index() {
               onChange={filterUserLocationList}
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 whitespace-nowrap">
             <div
               className={`w-full h-fit bg-sky-500/30 hover:bg-sky-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
             >
@@ -126,11 +149,11 @@ export default function Index() {
                         (call) =>
                           call.CallStatus === "New" ||
                           call.CallStatus === "In Progress"
-                      ).length
+                      ).length || 0
                     }
                   </h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-sky-500">
-                    Calls
+                    All Calls
                   </h1>
                 </div>
               </div>
@@ -146,11 +169,11 @@ export default function Index() {
                   <h1 className="font-bold text-xl">
                     {
                       callList?.filter((call) => call.CallStatus === "New")
-                        .length
+                        .length || 0
                     }
                   </h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-green-500">
-                    Calls
+                    Incoming Calls
                   </h1>
                 </div>
               </div>
@@ -167,11 +190,11 @@ export default function Index() {
                     {
                       callList?.filter(
                         (call) => call.CallStatus === "In Progress"
-                      ).length
+                      ).length || 0
                     }
                   </h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">
-                    Calls
+                    In Progress Calls
                   </h1>
                 </div>
               </div>
@@ -338,7 +361,9 @@ function PropertyFeed({
           setInCall={setInCall}
           setCallList={setCallList}
         />
+        
       </div>
+      
     </LiveKitRoom>
   );
 }
@@ -376,6 +401,7 @@ function VideoGrid({
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
+  
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -500,7 +526,6 @@ function VideoGrid({
     });
 
     socketRef.current?.on("call-list-update", (data) => {
-      console.log("CALL LIST UPDATE", { data });
       setCallList(data);
       data.map((call: Call) => {
         if (
@@ -674,6 +699,7 @@ function VideoGrid({
             className="inset-0 w-full h-full object-cover"
           />
         ))}
+        
         {renderAudioTracks()}
         {showPersonIcon && (
           <div className="absolute bottom-[2px] left-1/2 transform -translate-x-1/2 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
@@ -807,6 +833,7 @@ function VideoGrid({
               <Maximize className="w-4 h-4" />
             </div>
           </Tooltip>
+          
         </div>
         {currentCallID.length > 0 && (
           <div className="absolute bottom-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
