@@ -15,7 +15,7 @@ import {
   RefreshCcw,
   User as UserIcon,
 } from "lucide-react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
 import { Call, Location, User } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";

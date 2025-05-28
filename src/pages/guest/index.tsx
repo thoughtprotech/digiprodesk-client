@@ -422,6 +422,7 @@ export default function Index() {
         });
 
         localAudioTrackRef.current = audioTrack;
+        // @ts-expect-error
         localAudioTrackRef.current.enable();
         lkRoomRef.current = lkRoom;
 
