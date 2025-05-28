@@ -34,6 +34,8 @@ import generateUUID from "@/utils/uuidGenerator";
 import jwt from "jsonwebtoken";
 import logOut from "@/utils/logOut";
 import Tooltip from "@/components/ui/ToolTip";
+import { useLocalParticipant } from "@livekit/components-react";
+
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -298,15 +300,18 @@ function VideoGrid({
   const [isSelfMuted, setIsSelfMuted] = useState<boolean>(true);
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
-
+  const { localParticipant } = useLocalParticipant();
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (!event.data || typeof event.data !== "object") return;
       const { type, payload } = event.data;
       if (type === "CALL_STARTED") {
         const shouldMute = payload.roomName !== roomName;
-        setIsRemoteMuted(shouldMute);
-        socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: shouldMute }));
+        setIsSelfMuted(shouldMute);
+        
+        localParticipant.setMicrophoneEnabled(!shouldMute);
+        // setIsRemoteMuted(shouldMute);
+        // socketRef.current?.emit("mute-participant", JSON.stringify({ locationID: roomName, isMuted: shouldMute }));
       }
     };
 
