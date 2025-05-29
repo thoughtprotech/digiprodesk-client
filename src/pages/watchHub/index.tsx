@@ -1037,7 +1037,7 @@ function VideoGrid({
         </div>
         {/* Controls */}
         <div className="absolute top-[2px] right-[2px] flex bg-black bg-opacity-50 rounded-md">
-          {currentCallID.length > 0 && (
+          {status === "inCall" && (
             <div className="flex">
               <Tooltip
                 tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
@@ -1054,7 +1054,7 @@ function VideoGrid({
               </Tooltip>
             </div>
           )}
-          {currentCallID.length > 0 && (
+          {status === "inCall" && !isRecording && (
             <Tooltip tooltip="Record" position="bottom">
               <div
                 className={`hover:bg-orange-500/30 ${
@@ -1240,7 +1240,7 @@ function VideoGrid({
               {/* Controls */}
               <div className="absolute top-2 right-2 flex bg-black bg-opacity-50 rounded-md px-2 py-1">
                 <div className="w-full flex items-center gap-2 justify-between">
-                  {currentCallID.length > 0 && (
+                  {status === "inCall" && (
                     <>
                       <Tooltip
                         tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
@@ -1272,6 +1272,19 @@ function VideoGrid({
                           <CircleDot className="text-orange-500" />
                         </button>
                       </Tooltip>
+                      {status === "inCall" && (
+                        <Tooltip tooltip="Hold Call" position="bottom">
+                          <button
+                            className="hover:bg-indigo-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                            onClick={() => {
+                              setIsFullscreen(false);
+                              holdCall();
+                            }}
+                          >
+                            <Pause className="text-indigo-500" />
+                          </button>
+                        </Tooltip>
+                      )}
                       <Tooltip tooltip="End Call" position="bottom">
                         <button
                           className="hover:bg-red-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
@@ -1281,6 +1294,26 @@ function VideoGrid({
                         </button>
                       </Tooltip>
                     </>
+                  )}
+                  {status === "none" && (
+                    <Tooltip tooltip="Call" position="bottom">
+                      <button
+                        className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                        onClick={() => handleStartCall(roomName)}
+                      >
+                        <PhoneOutgoing className="text-green-500 w-6 h-6" />
+                      </button>
+                    </Tooltip>
+                  )}
+                  {status === "onHold" && (
+                    <Tooltip tooltip="Resume Call" position="bottom">
+                      <button
+                        className="hover:bg-indigo-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+                        onClick={() => resumeCall(roomName)}
+                      >
+                        <Play className="text-indigo-500 w-6 h-6" />
+                      </button>
+                    </Tooltip>
                   )}
                   <Tooltip tooltip="Minimize" position="bottom">
                     <button
@@ -1293,7 +1326,7 @@ function VideoGrid({
                 </div>
               </div>
             </div>
-            {currentCallID.length > 0 && (
+            {status === "inCall" && (
               <div className="w-full h-full max-w-md aspect-video px-4 rounded-md flex flex-col items-center justify-end gap-4">
                 {/* local preview in bottom-right */}
                 {localVideoTrack && (
