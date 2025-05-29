@@ -30,7 +30,6 @@ import {
   useTracks,
   VideoTrack,
   TrackReferenceOrPlaceholder,
-  MediaDeviceMenu,
 } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
@@ -426,7 +425,7 @@ function VideoGrid({
   const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [user, setUser] = useState<User>();
   const [isSelfMuted, setIsSelfMuted] = useState<boolean>(true);
-  const [isSelfDisabled, setIsSelfDisabled] = useState<boolean>(true);
+  const [isSelfDisabled, setIsSelfDisabled] = useState<boolean>(false);
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
@@ -452,6 +451,7 @@ function VideoGrid({
         localParticipant.setMicrophoneEnabled(!shouldMute);
       } else if (type === "CALL_ENDED") {
         setIsSelfDisabled(false);
+        setIsSelfMuted(true);
       }
     };
 
@@ -843,7 +843,11 @@ function VideoGrid({
           >
             {currentCallID.length === 0 ? (
               <div
-                className="hover:bg-green-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+              className={`px-2 py-1 rounded-md duration-300 ${
+                isSelfDisabled
+                  ? "bg-green-500/10 cursor-not-allowed pointer-events-none"
+                  : "hover:bg-green-500/30 cursor-pointer"
+              }`}
                 onClick={() => handleStartCall(roomName)}
               >
                 <PhoneOutgoing className="text-green-500 w-4 h-4" />
@@ -879,7 +883,11 @@ function VideoGrid({
           </Tooltip>
           <Tooltip tooltip="Fullscreen" position="bottom">
             <div
-              className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300"
+              className={`px-2 py-1 rounded-md duration-300 ${
+                isSelfDisabled
+                  ? "bg-gray-400/20 cursor-not-allowed pointer-events-none"
+                  : "hover:bg-gray-500/30 cursor-pointer"
+              }`}
               onClick={() => {
                 if (inCall) {
                   if (currentCallID.length !== 0) {
