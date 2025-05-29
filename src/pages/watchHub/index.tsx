@@ -42,7 +42,7 @@ import {
   useLocalParticipant,
   ConnectionQualityIndicator,
 } from "@livekit/components-react";
-import { useRoomContext } from '@livekit/components-react';
+import { useRoomContext } from "@livekit/components-react";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -309,7 +309,7 @@ function PropertyFeed({
     if (!user) return;
     fetch(
       process.env.NEXT_PUBLIC_BACKEND_URL +
-      `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
+        `/api/livekit/token?identity=${user?.UserName}&room=${roomName}`
     )
       .then((r) => r.json())
       .then(({ wsUrl, token }) => {
@@ -386,7 +386,6 @@ function PropertyFeed({
           setGuestCount={setGuestCount}
           setLocationsOnline={setLocationsOnline}
         />
-
       </div>
     </LiveKitRoom>
   );
@@ -431,20 +430,21 @@ function VideoGrid({
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
   const room = useRoomContext();
+  const [status, setStatus] = useState<"none" | "missed">("none");
 
   useEffect(() => {
     if (!room) return;
-  
+
     // Wait until fully connected
     const handleConnected = () => {
       room.localParticipant.setMicrophoneEnabled(false);
       console.log("Mic muted after connection");
     };
-  
-    room.on('connected', handleConnected);
-  
+
+    room.on("connected", handleConnected);
+
     return () => {
-      room.off('connected', handleConnected);
+      room.off("connected", handleConnected);
     };
   }, [room]);
   useEffect(() => {
@@ -609,6 +609,7 @@ function VideoGrid({
       ) {
         setShowModal(false);
         setIncomingCall(null);
+        setStatus("missed");
         socketRef.current?.emit("get-calls");
       }
     });
@@ -619,6 +620,7 @@ function VideoGrid({
     if (isRecording) {
       toggleRecording();
     }
+    setStatus("none");
     // setIsFullscreen(true);
     setIsRemoteMuted(false);
     setCurrentCallID(incomingCall?.CallID!);
@@ -653,6 +655,7 @@ function VideoGrid({
         if (isRecording) {
           toggleRecording();
         }
+        setStatus("none");
         const uuid = generateUUID();
         setCurrentCallID(uuid);
         setInCall(true);
@@ -780,8 +783,9 @@ function VideoGrid({
   return (
     <>
       <div
-        className={`relative w-full h-full aspect-video ${isFullscreen ? "hidden" : "block"
-          }`}
+        className={`relative w-full h-full aspect-video ${
+          isFullscreen ? "hidden" : "block"
+        }`}
       >
         {remoteVideoTracks.map((trackRef: any) => (
           <VideoTrack
@@ -791,7 +795,10 @@ function VideoGrid({
           />
         ))}
         {remoteVideoTracks.map((trackRef: any) => (
-          <ConnectionQualityIndicator participant={trackRef.participant} key={trackRef.participant} />
+          <ConnectionQualityIndicator
+            participant={trackRef.participant}
+            key={trackRef.participant}
+          />
         ))}
 
         {renderAudioTracks()}
@@ -849,8 +856,9 @@ function VideoGrid({
           {currentCallID.length > 0 && (
             <Tooltip tooltip="Record" position="bottom">
               <div
-                className={`hover:bg-orange-500/30 ${isRecording && "bg-orange-500/300"
-                  } px-2 py-1 rounded-md cursor-pointer duration-300`}
+                className={`hover:bg-orange-500/30 ${
+                  isRecording && "bg-orange-500/300"
+                } px-2 py-1 rounded-md cursor-pointer duration-300`}
                 onClick={() => {
                   if (!isRecording) {
                     toggleRecording(currentCallID);
@@ -868,11 +876,11 @@ function VideoGrid({
           >
             {currentCallID.length === 0 ? (
               <div
-              className={`px-2 py-1 rounded-md duration-300 ${
-                isSelfDisabled
-                  ? "bg-green-500/10 cursor-not-allowed pointer-events-none"
-                  : "hover:bg-green-500/30 cursor-pointer"
-              }`}
+                className={`px-2 py-1 rounded-md duration-300 ${
+                  isSelfDisabled
+                    ? "bg-green-500/10 cursor-not-allowed pointer-events-none"
+                    : "hover:bg-green-500/30 cursor-pointer"
+                }`}
                 onClick={() => handleStartCall(roomName)}
               >
                 <PhoneOutgoing className="text-green-500 w-4 h-4" />
@@ -888,8 +896,11 @@ function VideoGrid({
           </Tooltip>
           <Tooltip tooltip={isSelfMuted ? "Unmute" : "Mute"} position="bottom">
             <div
-              className={`p-1 rounded-md duration-300 ${isSelfDisabled ? "bg-gray-400/30 cursor-not-allowed pointer-events-none" : "hover:bg-gray-500/30 cursor-pointer"
-                }`}
+              className={`p-1 rounded-md duration-300 ${
+                isSelfDisabled
+                  ? "bg-gray-400/30 cursor-not-allowed pointer-events-none"
+                  : "hover:bg-gray-500/30 cursor-pointer"
+              }`}
             >
               <TrackToggle
                 source={Track.Source.Microphone}
@@ -933,7 +944,10 @@ function VideoGrid({
 
           <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
             {remoteVideoTracks.map((trackRef: any) => (
-              <ConnectionQualityIndicator participant={trackRef.participant} key={trackRef.participant} />
+              <ConnectionQualityIndicator
+                participant={trackRef.participant}
+                key={trackRef.participant}
+              />
             ))}
           </div>
         </div>
@@ -946,6 +960,11 @@ function VideoGrid({
         {currentCallID.length > 0 && (
           <div className="absolute bottom-[18px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Call In Progress</h1>
+          </div>
+        )}
+        {status === "missed" && (
+          <div className="absolute bottom-[18px] left-[2px] bg-red-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
+            <h1 className="text-xs font-semibold">Missed Call</h1>
           </div>
         )}
       </div>
@@ -996,7 +1015,7 @@ function VideoGrid({
                       >
                         <div
                           className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                        // onClick={() => handleEndCall(roomName)}
+                          // onClick={() => handleEndCall(roomName)}
                         >
                           <TrackToggle
                             source={Track.Source.Camera}
@@ -1012,8 +1031,9 @@ function VideoGrid({
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
                         <button
-                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${isRecording && "bg-orange-500/30"
-                            }`}
+                          className={`hover:bg-orange-500/30 px-2 py-1 rounded-md cursor-pointer duration-300 ${
+                            isRecording && "bg-orange-500/30"
+                          }`}
                           onClick={() => toggleRecording(currentCallID)}
                         >
                           <CircleDot className="text-orange-500" />
