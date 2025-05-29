@@ -42,6 +42,7 @@ import {
   useLocalParticipant,
   ConnectionQualityIndicator,
 } from "@livekit/components-react";
+import { useRoomContext } from '@livekit/components-react';
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -429,7 +430,23 @@ function VideoGrid({
   const [isSelfCamera, setIsSelfCamera] = useState<boolean>(false);
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
+  const room = useRoomContext();
 
+  useEffect(() => {
+    if (!room) return;
+  
+    // Wait until fully connected
+    const handleConnected = () => {
+      room.localParticipant.setMicrophoneEnabled(false);
+      console.log("Mic muted after connection");
+    };
+  
+    room.on('connected', handleConnected);
+  
+    return () => {
+      room.off('connected', handleConnected);
+    };
+  }, [room]);
   useEffect(() => {
     setGuestCount((prev: number) => {
       if (showPersonIcon) {
@@ -439,6 +456,13 @@ function VideoGrid({
       }
     });
   }, [showPersonIcon]);
+
+  useEffect(() => {
+    if (localParticipant) {
+      localParticipant.setMicrophoneEnabled(false);
+      setIsSelfMuted(true);
+    }
+  }, [localParticipant]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
