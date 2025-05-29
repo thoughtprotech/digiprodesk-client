@@ -528,6 +528,30 @@ function VideoGrid({
   }, [showPersonIcon]);
 
   useEffect(() => {
+    if (showPersonIcon) {
+      setFilters((prev: { guests: never[] }) => {
+        const guests: any = prev?.guests || [];
+        const newId = roomName;
+
+        // Only add if it's not already in the array
+        if (!guests.includes(newId)) {
+          return {
+            ...prev,
+            guests: [...guests, newId],
+          };
+        }
+        // No change needed
+        return prev;
+      });
+    } else {
+      setFilters((prev: any) => ({
+        ...prev,
+        guests: prev?.guests.filter((p: string) => p !== roomName),
+      }));
+    }
+  }, [showPersonIcon]);
+
+  useEffect(() => {
     if (localParticipant) {
       localParticipant.setMicrophoneEnabled(false);
       setIsSelfMuted(true);
