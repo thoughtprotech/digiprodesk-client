@@ -145,10 +145,23 @@ export default function Index() {
           console.log("NOT MINE");
         }
       });
+
       socketRef.current.on("location-refresh-request", (data) => {
         if (data.locationID === location?.LocationID?.toString()) {
           console.log("Reloading page due to location refresh...");
           window.location.reload();
+        }
+      });
+
+      socketRef.current.on("call-on-hold", (data) => {
+        console.log({ data });
+        console.log("INCOMING LOC ID", data.CallPlacedByLocationID);
+        console.log("LOC ID", location?.LocationID?.toString());
+        if (
+          data.CallPlacedByLocationID?.toString() ===
+          location?.LocationID?.toString()
+        ) {
+          setCallStatus("onHold");
         }
       });
     }
@@ -374,9 +387,9 @@ export default function Index() {
   const lkRoomRef = useRef<Room | null>(null);
   const localAudioTrackRef = useRef<Track | null>(null);
 
-  const [, setStatus] = useState<
-    "idle" | "connecting" | "connected" | "error"
-  >("idle");
+  const [, setStatus] = useState<"idle" | "connecting" | "connected" | "error">(
+    "idle"
+  );
 
   useEffect(() => {
     if (!location) return;
@@ -528,7 +541,7 @@ export default function Index() {
             } else if (
               pub.kind === Track.Kind.Audio &&
               pub.isSubscribed &&
-              pub.track 
+              pub.track
             ) {
               const audioEl = pub.track.attach();
               audioEl.autoplay = true;

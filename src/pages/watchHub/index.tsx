@@ -9,12 +9,14 @@ import {
   Mic,
   MicOff,
   Minimize,
+  Pause,
   Phone,
   PhoneCall,
   PhoneCallIcon,
   PhoneIncoming,
   PhoneOff,
   PhoneOutgoing,
+  Play,
   RefreshCcw,
   User as UserIcon,
 } from "lucide-react";
@@ -170,9 +172,10 @@ export default function Index() {
 
   useEffect(() => {
     socketRef.current?.on("call-update", (data: any) => {
+      console.log({ data });
       console.log(
-        "MISSED CALL COUNT",
-        data?.filter((call: any) => call.CallStatus === "Missed").length
+        "ON HOLD CALL COUNT",
+        data?.filter((call: any) => call.CallStatus === "On Hold").length
       );
       setMissedCallCount(
         data?.filter((call: any) => call.CallStatus === "Missed").length
@@ -499,7 +502,9 @@ function VideoGrid({
   const router = useRouter();
   const { localParticipant } = useLocalParticipant();
   const room = useRoomContext();
-  const [status, setStatus] = useState<"none" | "missed">("none");
+  const [status, setStatus] = useState<"none" | "missed" | "onHold" | "inCall">(
+    "none"
+  );
 
   useEffect(() => {
     if (!room) return;
@@ -730,7 +735,7 @@ function VideoGrid({
     if (isRecording) {
       toggleRecording();
     }
-    setStatus("none");
+    setStatus("inCall");
     setFilters((prev: any) => ({
       ...prev,
       missed: prev?.missed.filter((p: string) => p !== roomName),
@@ -755,6 +760,82 @@ function VideoGrid({
     );
   };
 
+  const holdCall = () => {
+    if (isRecording) {
+      toggleRecording();
+    }
+    setStatus("onHold");
+    setFilters((prev: { onHold: never[] }) => {
+      const onHold: any = prev?.onHold || [];
+      const newId = roomName;
+
+      // Only add if it's not already in the array
+      if (!onHold.includes(newId)) {
+        return {
+          ...prev,
+          onHold: [...onHold, newId],
+        };
+      }
+      // No change needed
+      return prev;
+    });
+
+    if (inCall) {
+      setInCall(false);
+    }
+    socketRef.current?.emit(
+      "hold-call",
+      JSON.stringify({ roomId: currentCallID })
+    );
+    window.postMessage(
+      {
+        type: "CALL_ON_HOLD",
+        payload: {
+          roomName: roomName, // or call ID
+        },
+      },
+      "*" // Consider restricting to origin: window.origin
+    );
+  };
+
+  const resumeCall = async (data: any) => {
+    if (!inCall) {
+      console.log({ currentCallID });
+      if (user) {
+        if (isRecording) {
+          toggleRecording();
+        }
+        setStatus("inCall");
+        setFilters((prev: any) => ({
+          ...prev,
+          missed: prev?.missed.filter((p: string) => p !== roomName),
+        }));
+
+        setCurrentCallID(currentCallID);
+        setInCall(true);
+        socketRef.current?.emit(
+          "resume-call",
+          JSON.stringify({ locationID: data, callId: currentCallID })
+        );
+        // setIsFullscreen(true);
+        setIsRemoteMuted(false);
+        window.postMessage(
+          {
+            type: "CALL_STARTED",
+            payload: {
+              roomName: roomName, // or call ID
+            },
+          },
+          "*" // Consider restricting to origin: window.origin
+        );
+      }
+    } else {
+      toast.custom((t: any) => (
+        <Toast t={t} content="End Current Call" type="warning" />
+      ));
+    }
+  };
+
   const handleRefresh = (data: any) => {
     socketRef.current?.emit(
       "location-refresh",
@@ -769,7 +850,7 @@ function VideoGrid({
         if (isRecording) {
           toggleRecording();
         }
-        setStatus("none");
+        setStatus("inCall");
         setFilters((prev: any) => ({
           ...prev,
           missed: prev?.missed.filter((p: string) => p !== roomName),
@@ -806,6 +887,7 @@ function VideoGrid({
       toggleRecording();
     }
     setInCall(false);
+    setStatus("none");
     setCurrentCallID("");
     socketRef.current?.emit(
       "call-end",
@@ -853,6 +935,7 @@ function VideoGrid({
     );
     setIsRemoteMuted((prev) => !prev);
   };
+
   const renderAudioTracks = () =>
     remoteAudioTracks.map((trackRef: TrackReferenceOrPlaceholder) => (
       <AudioTrack
@@ -988,12 +1071,39 @@ function VideoGrid({
               </div>
             </Tooltip>
           )}
-
+          {status === "inCall" && (
+            <Tooltip tooltip="Hold Call" position="bottom">
+              <div
+                className={`px-2 py-1 rounded-md duration-300 ${
+                  isSelfDisabled
+                    ? "bg-indigo-500/10 cursor-not-allowed pointer-events-none"
+                    : "hover:bg-indigo-500/30 cursor-pointer"
+                }`}
+                onClick={() => holdCall()}
+              >
+                <Pause className="text-indigo-500 w-4 h-4" />
+              </div>
+            </Tooltip>
+          )}
+          {status === "onHold" && (
+            <Tooltip tooltip="Resume Call" position="bottom">
+              <div
+                className={`px-2 py-1 rounded-md duration-300 ${
+                  isSelfDisabled
+                    ? "bg-blue-500/10 cursor-not-allowed pointer-events-none"
+                    : "hover:bg-blue-500/30 cursor-pointer"
+                }`}
+                onClick={() => resumeCall(roomName)}
+              >
+                <Play className="text-blue-500 w-4 h-4" />
+              </div>
+            </Tooltip>
+          )}
           <Tooltip
-            tooltip={currentCallID.length === 0 ? "Call" : "End Call"}
+            tooltip={status === "none" ? "Call" : "End Call"}
             position="bottom"
           >
-            {currentCallID.length === 0 ? (
+            {status === "none" ? (
               <div
                 className={`px-2 py-1 rounded-md duration-300 ${
                   isSelfDisabled
@@ -1076,7 +1186,7 @@ function VideoGrid({
             <span className="text-xs font-semibold">Guest</span>
           </div>
         )}
-        {currentCallID.length > 0 && (
+        {status === "inCall" && (
           <div className="absolute bottom-[18px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Call In Progress</h1>
           </div>
@@ -1084,6 +1194,11 @@ function VideoGrid({
         {status === "missed" && (
           <div className="absolute bottom-[18px] left-[2px] bg-red-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Missed Call</h1>
+          </div>
+        )}
+        {status === "onHold" && (
+          <div className="absolute bottom-[18px] left-[2px] bg-blue-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
+            <h1 className="text-xs font-semibold">On Hold</h1>
           </div>
         )}
       </div>
