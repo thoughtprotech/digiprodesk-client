@@ -61,8 +61,6 @@ export default function Index() {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [guestCount, setGuestCount] = useState<number>(0);
   const [locationsOnline, setLocationsOnline] = useState<number>(0);
-  const [missedCallCount, setMissedCallCount] = useState<number>(0);
-  const [onHoldCallCount, setOnHoldCallCount] = useState<number>(0);
   const [filters, setFilters] = useState<{
     onHold: string[];
     missed: string[];
@@ -169,24 +167,6 @@ export default function Index() {
     socketRef.current?.emit("get-calls");
   };
 
-  useEffect(() => {
-    socketRef.current?.on("call-update", (data: any) => {
-      console.log({ data });
-      console.log(
-        "ON HOLD CALL COUNT",
-        data?.filter((call: any) => call.CallStatus === "On Hold").length
-      );
-      setMissedCallCount(
-        data?.filter((call: any) => call.CallStatus === "Missed").length
-      );
-      setOnHoldCallCount(
-        data?.filter((call: any) => call.CallStatus === "On Hold").length
-      );
-
-      setCallList(data);
-    });
-  }, [socket, socketRef.current]);
-
   return (
     <Layout
       headerTitle={
@@ -258,7 +238,7 @@ export default function Index() {
                   <PhoneIncoming className="w-5 h-5 text-indigo-500" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">{onHoldCallCount}</h1>
+                  <h1 className="font-bold text-xl">{filters.onHold.length}</h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">
                     Calls On Hold
                   </h1>
@@ -274,7 +254,7 @@ export default function Index() {
                   <PhoneCallIcon className="w-5 h-5 text-red-500" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">{missedCallCount}</h1>
+                  <h1 className="font-bold text-xl">{filters.missed.length}</h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-red-500">
                     Missed Calls
                   </h1>
@@ -805,9 +785,10 @@ function VideoGrid({
           toggleRecording();
         }
         setStatus("inCall");
+        console.log({ roomName });
         setFilters((prev: any) => ({
           ...prev,
-          missed: prev?.missed.filter((p: string) => p !== roomName),
+          onHold: prev?.onHold.filter((p: string) => p !== roomName),
         }));
 
         setCurrentCallID(currentCallID);
@@ -1102,7 +1083,7 @@ function VideoGrid({
             tooltip={status === "none" ? "Call" : "End Call"}
             position="bottom"
           >
-            {status === "none" ? (
+            {status === "none" || status === "missed" ? (
               <div
                 className={`px-2 py-1 rounded-md duration-300 ${
                   isSelfDisabled
