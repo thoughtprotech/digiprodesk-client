@@ -452,6 +452,7 @@ function VideoGrid({
       } else if (type === "CALL_ENDED") {
         setIsSelfDisabled(false);
         setIsSelfMuted(true);
+        localParticipant.setMicrophoneEnabled(false);
       }
     };
 
