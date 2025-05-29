@@ -777,9 +777,48 @@ function VideoGrid({
     );
   };
 
+  const holdIncomingCall = () => {
+    if (isRecording) {
+      toggleRecording();
+    }
+    setStatus("onHold");
+    setFilters((prev: { onHold: never[] }) => {
+      const onHold: any = prev?.onHold || [];
+      const newId = roomName;
+
+      // Only add if it's not already in the array
+      if (!onHold.includes(newId)) {
+        return {
+          ...prev,
+          onHold: [...onHold, newId],
+        };
+      }
+      // No change needed
+      return prev;
+    });
+
+    if (inCall) {
+      setInCall(false);
+    }
+    socketRef.current?.emit(
+      "hold-call",
+      JSON.stringify({ roomId: incomingCall?.CallID })
+    );
+    window.postMessage(
+      {
+        type: "CALL_ON_HOLD",
+        payload: {
+          roomName: roomName, // or call ID
+        },
+      },
+      "*" // Consider restricting to origin: window.origin
+    );
+  };
+
   const resumeCall = async (data: any) => {
     if (!inCall) {
       console.log({ currentCallID });
+      console.log(incomingCall?.CallID);
       if (user) {
         if (isRecording) {
           toggleRecording();
@@ -791,11 +830,14 @@ function VideoGrid({
           onHold: prev?.onHold.filter((p: string) => p !== roomName),
         }));
 
-        setCurrentCallID(currentCallID);
+        setCurrentCallID(currentCallID || incomingCall?.CallID!);
         setInCall(true);
         socketRef.current?.emit(
           "resume-call",
-          JSON.stringify({ locationID: data, callId: currentCallID })
+          JSON.stringify({
+            locationID: data,
+            callId: currentCallID || incomingCall?.CallID!,
+          })
         );
         // setIsFullscreen(true);
         setIsRemoteMuted(false);
@@ -1357,13 +1399,28 @@ function VideoGrid({
                 </h1>
               </div>
             </div>
-            <div className="w-full">
-              <button
-                className="w-full px-4 py-2 flex justify-center rounded-md bg-green-500/50"
-                onClick={() => attendCall()}
-              >
-                <PhoneCall />
-              </button>
+            <div className="flex items-center gap-2">
+              <div className="w-full">
+                <button
+                  className="w-full px-4 py-2 flex justify-center rounded-md bg-green-500/50 whitespace-nowrap gap-2 font-bold"
+                  onClick={() => attendCall()}
+                >
+                  <PhoneCall />
+                  Accept Call
+                </button>
+              </div>
+              <div className="w-full">
+                <button
+                  className="w-full px-4 py-2 flex justify-center rounded-md bg-indigo-500/50 whitespace-nowrap gap-2 font-bold"
+                  onClick={() => {
+                    setShowModal(false);
+                    holdIncomingCall();
+                  }}
+                >
+                  <Pause />
+                  Hold Call
+                </button>
+              </div>
             </div>
           </div>
         </div>
