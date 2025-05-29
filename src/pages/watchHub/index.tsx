@@ -2,7 +2,6 @@
 import Layout from "@/components/Layout";
 import {
   CircleDot,
-  FilterIcon,
   FilterXIcon,
   MapPin,
   Maximize,
