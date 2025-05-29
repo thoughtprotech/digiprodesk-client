@@ -2,6 +2,8 @@
 import Layout from "@/components/Layout";
 import {
   CircleDot,
+  FilterIcon,
+  FilterXIcon,
   MapPin,
   Maximize,
   Mic,
@@ -60,6 +62,50 @@ export default function Index() {
   const [locationsOnline, setLocationsOnline] = useState<number>(0);
   const [missedCallCount, setMissedCallCount] = useState<number>(0);
   const [onHoldCallCount, setOnHoldCallCount] = useState<number>(0);
+  const [filters, setFilters] = useState<{
+    onHold: string[];
+    missed: string[];
+    guests: string[];
+  }>({
+    onHold: [],
+    missed: [],
+    guests: [],
+  });
+  const [filter, setFilter] = useState<boolean>(false);
+
+  const filterLocations = async (type: "missed" | "onHold" | "guestCount") => {
+    switch (type) {
+      case "missed":
+        setFilteredUserLocationData((prev) =>
+          prev.filter((loc) =>
+            filters.missed.includes(loc.LocationID?.toString()!)
+          )
+        );
+        setFilter(true);
+        break;
+      case "onHold":
+        setFilteredUserLocationData((prev) =>
+          prev.filter((loc) =>
+            filters.onHold.includes(loc.LocationID?.toString()!)
+          )
+        );
+        setFilter(true);
+        break;
+      case "guestCount":
+        setFilteredUserLocationData((prev) =>
+          prev.filter((loc) =>
+            filters.guests.includes(loc.LocationID?.toString()!)
+          )
+        );
+        setFilter(true);
+        break;
+    }
+  };
+
+  const clearFilter = () => {
+    setFilteredUserLocationData(userLocationListData);
+    setFilter(false);
+  };
 
   const fetchUserLocationList = async () => {
     try {
@@ -114,6 +160,10 @@ export default function Index() {
     }
   }, [socket]);
 
+  useEffect(() => {
+    console.log({ filters });
+  }, [filters]);
+
   const getCallList = () => {
     socketRef.current?.emit("get-calls");
   };
@@ -147,13 +197,23 @@ export default function Index() {
     >
       <div className="w-full flex-1 flex flex-col gap-2 px-2">
         <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <div className="w-64 flex gap-1">
               <SearchInput
                 placeholder="Locations"
                 onChange={filterUserLocationList}
               />
             </div>
+            {filter && (
+              <Tooltip tooltip="Clear Filters" position="bottom">
+                <div
+                  className="cursor-pointer p-2 border-2 border-border rounded-md"
+                  onClick={clearFilter}
+                >
+                  <FilterXIcon className="w-5 h-5 text-gray-500" />
+                </div>
+              </Tooltip>
+            )}
             <div
               className={`w-fit h-fit bg-purple-500/30 hover:bg-purple-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
             >
@@ -173,6 +233,7 @@ export default function Index() {
           <div className="flex items-center gap-2 whitespace-nowrap">
             <div
               className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+              onClick={() => filterLocations("guestCount")}
             >
               <div className="flex space-x-2 items-center">
                 <div className="border-r-2 border-r-orange-500 pr-2">
@@ -188,6 +249,7 @@ export default function Index() {
             </div>
             <div
               className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+              onClick={() => filterLocations("onHold")}
             >
               <div className="flex space-x-2 items-center">
                 <div className="border-r-2 border-r-indigo-500 pr-2">
@@ -203,6 +265,7 @@ export default function Index() {
             </div>
             <div
               className={`w-full h-fit bg-red-500/30 hover:bg-red-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+              onClick={() => filterLocations("missed")}
             >
               <div className="flex space-x-2 items-center">
                 <div className="border-r-2 border-r-red-500 pr-2">
@@ -232,6 +295,7 @@ export default function Index() {
                 setCallList={setCallList}
                 setGuestCount={setGuestCount}
                 setLocationsOnline={setLocationsOnline}
+                setFilters={setFilters}
               />
             </div>
           ))}
@@ -249,6 +313,7 @@ function PropertyFeed({
   setCallList,
   setGuestCount,
   setLocationsOnline,
+  setFilters,
 }: {
   roomName: string;
   label: string;
@@ -257,6 +322,7 @@ function PropertyFeed({
   setCallList: any;
   setGuestCount: any;
   setLocationsOnline: any;
+  setFilters: any;
 }) {
   const [wsUrl, setWsUrl] = useState<string>();
   const [token, setToken] = useState<string>();
@@ -385,6 +451,7 @@ function PropertyFeed({
           setCallList={setCallList}
           setGuestCount={setGuestCount}
           setLocationsOnline={setLocationsOnline}
+          setFilters={setFilters}
         />
       </div>
     </LiveKitRoom>
@@ -401,6 +468,7 @@ function VideoGrid({
   setCallList,
   setGuestCount,
   setLocationsOnline,
+  setFilters,
 }: {
   roomName: string;
   toggleRecording: any;
@@ -411,6 +479,7 @@ function VideoGrid({
   setCallList: any;
   setGuestCount: any;
   setLocationsOnline: any;
+  setFilters: any;
 }) {
   const tracks = useTracks();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -447,6 +516,7 @@ function VideoGrid({
       room.off("connected", handleConnected);
     };
   }, [room]);
+
   useEffect(() => {
     setGuestCount((prev: number) => {
       if (showPersonIcon) {
@@ -607,9 +677,25 @@ function VideoGrid({
         data.CallAssignedTo === user.UserName &&
         data.CallStatus === "Missed"
       ) {
+        console.log({ data });
         setShowModal(false);
         setIncomingCall(null);
         setStatus("missed");
+        setFilters((prev: { missed: never[] }) => {
+          const missed: any = prev?.missed || [];
+          const newId = data.CallPlacedByLocationID.toString()!;
+
+          // Only add if it's not already in the array
+          if (!missed.includes(newId)) {
+            return {
+              ...prev,
+              missed: [...missed, newId],
+            };
+          }
+          // No change needed
+          return prev;
+        });
+
         socketRef.current?.emit("get-calls");
       }
     });
@@ -621,7 +707,11 @@ function VideoGrid({
       toggleRecording();
     }
     setStatus("none");
-    // setIsFullscreen(true);
+    setFilters((prev: any) => ({
+      ...prev,
+      missed: prev?.missed.filter((p: string) => p !== roomName),
+    }));
+
     setIsRemoteMuted(false);
     setCurrentCallID(incomingCall?.CallID!);
     setInCall(true);
@@ -656,6 +746,11 @@ function VideoGrid({
           toggleRecording();
         }
         setStatus("none");
+        setFilters((prev: any) => ({
+          ...prev,
+          missed: prev?.missed.filter((p: string) => p !== roomName),
+        }));
+
         const uuid = generateUUID();
         setCurrentCallID(uuid);
         setInCall(true);
