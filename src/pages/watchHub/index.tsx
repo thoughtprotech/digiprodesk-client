@@ -31,6 +31,7 @@ import {
 import "@livekit/components-styles";
 import Tooltip from "@/components/ui/ToolTip";
 import GuestTile from "./_components/GuestTile";
+import generateUUID from "@/utils/uuidGenerator";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -466,6 +467,7 @@ function ParticipantActions({
   const [callStatus, setCallStatus] = useState<
     "notInCall" | "inCall" | "onHold" | "missed"
   >("notInCall");
+  const [currentCallID, setCurrentCallID] = useState<string>("");
 
   useEffect(() => {
     socketRef.current = socket;
@@ -491,10 +493,16 @@ function ParticipantActions({
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
+      const callId = generateUUID();
+      setCurrentCallID(callId);
       setTimeout(() => {
         socketRef.current?.emit(
-          "call-guest-test",
-          JSON.stringify({ guestId: participant.identity, hostId: name })
+          "start-call",
+          JSON.stringify({
+            locationID: participant.identity,
+            hostId: name,
+            callId,
+          })
         );
       }, 1000);
     } else {
@@ -511,8 +519,12 @@ function ParticipantActions({
       setCallStatus("notInCall");
       setTimeout(() => {
         socketRef.current?.emit(
-          "end-call-guest-test",
-          JSON.stringify({ guestId: participant.identity, hostId: name })
+          "call-end",
+          JSON.stringify({
+            locationID: participant.identity,
+            hostId: name,
+            callId: currentCallID,
+          })
         );
       }, 1000);
     } else {

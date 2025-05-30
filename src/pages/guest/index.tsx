@@ -449,28 +449,6 @@ export default function Index() {
     };
   }, [location]);
 
-  const handleToggleMute = () => {
-    const audioTrack = localAudioTrackRef.current;
-    if (audioTrack) {
-      if (isMuted) {
-        // @ts-expect-error
-        audioTrack.enable();
-      } else {
-        // @ts-expect-error
-        audioTrack.disable();
-      }
-      setIsMuted(!isMuted);
-
-      socketRef.current?.emit(
-        "participant-muted",
-        JSON.stringify({
-          locationID: location?.LocationID?.toString(),
-          isMuted: !isMuted,
-        })
-      );
-    }
-  };
-
   const toggleLocalMute = async ({
     source,
     state,
@@ -501,7 +479,7 @@ export default function Index() {
         }
       });
 
-      socketRef.current.on("incoming-call-test", (data) => {
+      socketRef.current.on("call-started", (data) => {
         const { guestId, hostId } = data;
         console.log({ hostId });
         console.log({ guestId });
@@ -523,7 +501,7 @@ export default function Index() {
         }
       });
 
-      socketRef.current.on("end-call-test", (data) => {
+      socketRef.current.on("call-end-guest", (data) => {
         const { guestId, hostId } = data;
         if (guestId === location?.LocationID?.toString()) {
           roomInstance.remoteParticipants.forEach((participant) => {
