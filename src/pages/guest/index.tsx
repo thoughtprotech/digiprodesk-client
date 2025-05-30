@@ -76,38 +76,6 @@ export default function Index() {
 
   useEffect(() => {
     if (socketRef.current && location) {
-      socketRef.current.on("call-started", (data) => {
-        console.log({ data });
-        if (data?.toString() === location?.LocationID?.toString()) {
-          console.log("CALL STARTED");
-          console.log("Location ID", location?.LocationID?.toString());
-          console.log({ data });
-          setInCall(true);
-          const audioTrack = localAudioTrackRef.current;
-          // @ts-expect-error
-          audioTrack?.enable();
-          setIsMuted(false);
-          setCallStatus("inProgress");
-        } else {
-          console.log("CALL STARTED ERROR");
-          console.log(data === location?.LocationID);
-          console.log("Location ID", location?.LocationID?.toString());
-          console.log("NOT MINE", data);
-        }
-      });
-
-      socketRef.current.on("call-end-guest", (data) => {
-        console.log(data);
-        if (data === location?.LocationID?.toString()) {
-          console.log("Location ID", location?.LocationID?.toString());
-          console.log({ data });
-          setInCall(false);
-          setCallStatus("notInCall");
-        } else {
-          console.log("NOT MINE");
-        }
-      });
-
       socketRef.current.on("host-unavailable", (data) => {
         console.log("HOST NOT AVAILABLE", data);
         if (data.CallID === currentCallID) {
@@ -469,14 +437,10 @@ export default function Index() {
 
       socketRef.current.on("call-started", (data) => {
         const { guestId, hostId } = data;
-        console.log({ hostId });
-        console.log({ guestId });
-        console.log(location?.LocationID?.toString());
+        console.log({ guestId, hostId });
 
-        if (guestId === location?.LocationID?.toString()) {
+        if (guestId?.toString() === location?.LocationID?.toString()) {
           roomInstance.remoteParticipants.forEach((participant) => {
-            console.log("Participant:", participant.identity);
-            console.log({ hostId });
             if (participant.identity === hostId) {
               participant.trackPublications.forEach((publication) => {
                 publication.setSubscribed(true);
@@ -484,6 +448,7 @@ export default function Index() {
               roomInstance.localParticipant.setMicrophoneEnabled(true);
               setInCall(true);
               setCallStatus("inProgress");
+              console.log("CALL STARTED");
             }
           });
         }

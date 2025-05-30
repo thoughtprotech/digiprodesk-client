@@ -504,6 +504,32 @@ function ParticipantActions({
     }
   };
 
+  const attendCall = async () => {
+    if (localStatus === "inCall") {
+      return toast.custom((t: any) => {
+        return <Toast t={t} content="End Current Call" type="warning" />;
+      });
+    }
+    if (socketRef.current) {
+      console.log("Socket There", socketRef.current);
+      roomInstance.localParticipant.setCameraEnabled(true);
+      roomInstance.localParticipant.setMicrophoneEnabled(true);
+      setCallStatus("inCall");
+      setLocalStatus("inCall");
+      setCurrentCallID(pendingCall.CallID);
+      setTimeout(() => {
+        socketRef.current?.emit(
+          "join-call",
+          JSON.stringify({
+            roomId: pendingCall.CallID,
+          })
+        );
+      }, 1000);
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
   const callGuest = async () => {
     if (localStatus === "inCall") {
       return toast.custom((t: any) => {
@@ -733,7 +759,14 @@ function ParticipantActions({
               </div>
             </div>
             <div className="w-full flex items-center gap-2 whitespace-nowrap">
-              <button className="w-full px-2 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2">
+              <button
+                className="w-full px-2 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2"
+                onClick={() => {
+                  setPendingCall(null);
+                  setShowModal(false);
+                  attendCall();
+                }}
+              >
                 <PhoneCallIcon className="text-green-500" />
                 <h1 className="font-bold">Attend Call</h1>
               </button>
