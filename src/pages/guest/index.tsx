@@ -32,7 +32,7 @@ import {
   usePersistentUserChoices,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
-import GuestTile from "../watchHub/_components/GuestTile";
+import GuestTile from "../../components/GuestTile";
 
 export default function Index() {
   const [, setUserId] = useState<string>("");

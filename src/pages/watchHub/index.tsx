@@ -29,7 +29,7 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import Tooltip from "@/components/ui/ToolTip";
-import GuestTile from "./_components/GuestTile";
+import GuestTile from "../../components/GuestTile";
 import generateUUID from "@/utils/uuidGenerator";
 
 export default function Index() {
