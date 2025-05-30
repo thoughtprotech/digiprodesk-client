@@ -993,11 +993,11 @@ function VideoGrid({
 
   if (remoteVideoTracks.length === 0) {
     return (
-      <div className="w-full h-fit flex items-center justify-center relative">
+      <div className="w-full h-full flex aspect-video items-center justify-center relative">
         <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 left-2">
           {label}
         </div>
-        <div className="text-xs font-semibold truncate text-ellipsis absolute top-2 right-2">
+        <div className="text-xl text-gray-500 font-semibold truncate text-ellipsis">
           <h1>Location Offline</h1>
         </div>
       </div>
@@ -1007,7 +1007,7 @@ function VideoGrid({
   return (
     <>
       <div
-        className={`relative w-full h-full aspect-video ${
+        className={`relative w-full h-full flex justify-center items-center aspect-video ${
           isFullscreen ? "hidden" : "block"
         }`}
       >
@@ -1018,13 +1018,6 @@ function VideoGrid({
             className="inset-0 w-full h-full object-cover"
           />
         ))}
-        {remoteVideoTracks.map((trackRef: any) => (
-          <ConnectionQualityIndicator
-            participant={trackRef.participant}
-            key={trackRef.participant}
-          />
-        ))}
-
         {renderAudioTracks()}
         <div className="absolute top-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium pl-2 rounded flex">
           <div className="text-xs font-semibold truncate text-ellipsis">
@@ -1193,33 +1186,35 @@ function VideoGrid({
             </div>
           </Tooltip>
 
-          <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
-            {remoteVideoTracks.map((trackRef: any) => (
-              <ConnectionQualityIndicator
-                participant={trackRef.participant}
-                key={trackRef.participant}
-              />
-            ))}
-          </div>
+          <Tooltip tooltip="Signal" position="bottom">
+            <div className="hover:bg-gray-500/30 px-2 py-1 rounded-md cursor-pointer duration-300">
+              {remoteVideoTracks.map((trackRef: any) => (
+                <ConnectionQualityIndicator
+                  participant={trackRef.participant}
+                  key={trackRef.participant}
+                />
+              ))}
+            </div>
+          </Tooltip>
         </div>
         {showPersonIcon && (
-          <div className="absolute bottom-[18px] right-[2px] flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
+          <div className="absolute bottom-[2px] right-[2px] flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
             <UserIcon className="w-4 h-4 text-orange-400" />
             <span className="text-xs font-semibold">Guest</span>
           </div>
         )}
         {status === "inCall" && (
-          <div className="absolute bottom-[18px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
+          <div className="absolute bottom-[2px] left-[2px] bg-black bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Call In Progress</h1>
           </div>
         )}
         {status === "missed" && (
-          <div className="absolute bottom-[18px] left-[2px] bg-red-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
+          <div className="absolute bottom-[2px] left-[2px] bg-red-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">Missed Call</h1>
           </div>
         )}
         {status === "onHold" && (
-          <div className="absolute bottom-[18px] left-[2px] bg-blue-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
+          <div className="absolute bottom-[2px] left-[2px] bg-blue-500 bg-opacity-50 items-center text-white text-sm font-medium px-2 p-1 rounded flex">
             <h1 className="text-xs font-semibold">On Hold</h1>
           </div>
         )}
