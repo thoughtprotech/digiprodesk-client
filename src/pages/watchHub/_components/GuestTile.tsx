@@ -13,15 +13,12 @@ import {
   AudioTrack,
   ConnectionQualityIndicator,
   FocusToggle,
-  LockLockedIcon,
   ParticipantContext,
   ParticipantName,
   ParticipantPlaceholder,
-  TrackMutedIndicator,
   TrackRefContext,
   useEnsureTrackRef,
   useFeatureContext,
-  useIsEncrypted,
   useMaybeLayoutContext,
   useMaybeParticipantContext,
   useMaybeTrackRefContext,
@@ -124,7 +121,6 @@ const GuestTile: (
     onParticipantClick,
     trackRef: trackReference,
   });
-  const isEncrypted = useIsEncrypted(trackReference.participant);
   const layoutContext = useMaybeLayoutContext();
 
   const autoManageSubscription = useFeatureContext()?.autoSubscription;

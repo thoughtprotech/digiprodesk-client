@@ -14,14 +14,13 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
-import { Call, Location, User } from "@/utils/types";
+import { Location } from "@/utils/types";
 import SearchInput from "@/components/ui/Search";
 import jwt from "jsonwebtoken";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import { Participant, Room, Track } from "livekit-client";
 import {
-  ControlBar,
   RoomAudioRenderer,
   RoomContext,
   useRoomContext,
@@ -41,13 +40,11 @@ export default function Index() {
     Location[]
   >([]);
 
-  const [inCall, setInCall] = useState<boolean>(false);
-  const [, setCallList] = useState<Call[]>();
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const [guestCount, setGuestCount] = useState<number>(0);
-  const [locationsOnline, setLocationsOnline] = useState<number>(0);
-  const [filters, setFilters] = useState<{
+  const [guestCount] = useState<number>(0);
+  const [locationsOnline] = useState<number>(0);
+  const [filters] = useState<{
     onHold: string[];
     missed: string[];
     guests: string[];

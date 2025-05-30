@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
-import { LogOut, Mic, MicOff } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/router";
 import { parseCookies } from "nookies";
 import React, { useEffect, useRef, useState } from "react";
@@ -15,22 +15,14 @@ import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
 import logOut from "@/utils/logOut";
 import {
-  createLocalAudioTrack,
-  createLocalVideoTrack,
-  RemoteParticipant,
-  RemoteTrackPublication,
-  RemoteVideoTrack,
   Room,
   Track,
-  VideoPresets,
 } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import "@tensorflow/tfjs";
 import {
-  ControlBar,
-  ParticipantTile,
   RoomAudioRenderer,
   RoomContext,
   useRoomContext,
@@ -41,12 +33,11 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import GuestTile from "../watchHub/_components/GuestTile";
-import Tooltip from "@/components/ui/ToolTip";
 
 export default function Index() {
   const [, setUserId] = useState<string>("");
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
-  const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
+  // const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  // const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<
     | "notInCall"
@@ -57,8 +48,8 @@ export default function Index() {
     | "missed"
     | "hostUnavailabe"
   >("notInCall");
-  const [volume, setVolume] = useState<number>(1); // Volume range: 0 to 1
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  // const [, setVolume] = useState<number>(1); // Volume range: 0 to 1
+  const [, setIsMuted] = useState<boolean>(false);
   const [location, setLocation] = useState<Location>();
   const [user, setUser] = useState<User>();
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -72,8 +63,8 @@ export default function Index() {
   const { socket } = useSocket();
 
   const modelRef = useRef<cocoSsd.ObjectDetection | null>(null); // loaded model
-  const [detectionStarted, setDetectionStarted] = useState(false); // run once
-  const hasNotifiedRef = useRef(false); // to track if notification has been sent
+  // const [detectionStarted, setDetectionStarted] = useState(false); // run once
+  // const hasNotifiedRef = useRef(false); // to track if notification has been sent
   const [currentCallID, setCurrentCallID] = useState<string>("");
 
   useEffect(() => {
@@ -270,20 +261,20 @@ export default function Index() {
     setConfirmLogoutModal(false);
   };
 
-  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(event.target.value);
-    setVolume(newVolume);
+  // const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const newVolume = parseFloat(event.target.value);
+  //   setVolume(newVolume);
 
-    if (currentUserVideoRef.current) {
-      const currentVideo = currentUserVideoRef.current;
-      currentVideo.volume = newVolume; // Set local video volume
-    }
+  //   if (currentUserVideoRef.current) {
+  //     const currentVideo = currentUserVideoRef.current;
+  //     currentVideo.volume = newVolume; // Set local video volume
+  //   }
 
-    if (remoteVideoRef.current) {
-      const remoteVideo = remoteVideoRef.current;
-      remoteVideo.volume = newVolume; // Set remote video volume
-    }
-  };
+  //   if (remoteVideoRef.current) {
+  //     const remoteVideo = remoteVideoRef.current;
+  //     remoteVideo.volume = newVolume; // Set remote video volume
+  //   }
+  // };
 
   const fetchLocationData = async () => {
     try {
@@ -395,19 +386,19 @@ export default function Index() {
 
   // Livekit
   const guestVideoRef = useRef<HTMLDivElement>(null);
-  const receptionistVideoRef = useRef<HTMLDivElement>(null);
-  const receptionistVideoActive = useRef(false);
+  // const receptionistVideoRef = useRef<HTMLDivElement>(null);
+  // const receptionistVideoActive = useRef(false);
   const room = "quickstart-room";
 
-  const lkRoomRef = useRef<Room | null>(null);
+  // const lkRoomRef = useRef<Room | null>(null);
   const localAudioTrackRef = useRef<Track | null>(null);
 
-  const [micEnabled, setMicEnabled] = useState<boolean>(false);
-  const [cameraEnabled, setCameraEnabled] = useState<boolean>(true);
+  const [, setMicEnabled] = useState<boolean>(false);
+  const [, setCameraEnabled] = useState<boolean>(true);
 
-  const [, setStatus] = useState<"idle" | "connecting" | "connected" | "error">(
-    "idle"
-  );
+  // const [, setStatus] = useState<"idle" | "connecting" | "connected" | "error">(
+  //   "idle"
+  // );
 
   const [roomInstance] = useState(
     () =>
