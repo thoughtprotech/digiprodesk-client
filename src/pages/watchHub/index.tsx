@@ -4,6 +4,7 @@ import {
   MapPin,
   Mic,
   MicOff,
+  Pause,
   Phone,
   PhoneCallIcon,
   PhoneIncoming,
@@ -31,6 +32,8 @@ import "@livekit/components-styles";
 import Tooltip from "@/components/ui/ToolTip";
 import GuestTile from "../../components/GuestTile";
 import generateUUID from "@/utils/uuidGenerator";
+import toast from "react-hot-toast";
+import Toast from "@/components/ui/Toast";
 
 export default function Index() {
   const [userLocationListData, setUserLocationListData] = useState<Location[]>(
@@ -61,6 +64,9 @@ export default function Index() {
     type: "none",
   });
 
+  const [localStatus, setLocalStatus] = useState<"notInCall" | "inCall">(
+    "notInCall"
+  );
   const [userId, setUserId] = useState<string>("");
   const room = "quickstart-room";
 
@@ -361,6 +367,8 @@ export default function Index() {
                 filteredUserLocationData={filteredUserLocationData}
                 toggleLocalMute={toggleLocalMute}
                 toggleLocalCamera={toggleLocalCamera}
+                localStatus={localStatus}
+                setLocalStatus={setLocalStatus}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -378,12 +386,16 @@ function MyVideoConference({
   filteredUserLocationData,
   toggleLocalMute,
   toggleLocalCamera,
+  localStatus,
+  setLocalStatus,
 }: {
   name: string;
   roomInstance: any;
   filteredUserLocationData: Location[];
   toggleLocalMute: () => void;
   toggleLocalCamera: () => void;
+  localStatus: "notInCall" | "inCall";
+  setLocalStatus: any;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -436,6 +448,8 @@ function MyVideoConference({
             locationDetails={locationDetails!}
             toggleLocalMute={toggleLocalMute}
             toggleLocalCamera={toggleLocalCamera}
+            localStatus={localStatus}
+            setLocalStatus={setLocalStatus}
           />
         </div>
       ))}
@@ -450,6 +464,8 @@ function ParticipantActions({
   locationDetails,
   toggleLocalMute,
   toggleLocalCamera,
+  localStatus,
+  setLocalStatus,
 }: {
   participant: Participant;
   name: string;
@@ -457,6 +473,8 @@ function ParticipantActions({
   locationDetails: Location;
   toggleLocalMute: () => void;
   toggleLocalCamera: () => void;
+  localStatus: "notInCall" | "inCall";
+  setLocalStatus: any;
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -465,6 +483,9 @@ function ParticipantActions({
     "notInCall" | "inCall" | "onHold" | "missed"
   >("notInCall");
   const [currentCallID, setCurrentCallID] = useState<string>("");
+  const [pendingCall, setPendingCall] = useState<any>();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     socketRef.current = socket;
@@ -484,12 +505,18 @@ function ParticipantActions({
   };
 
   const callGuest = async () => {
+    if (localStatus === "inCall") {
+      return toast.custom((t: any) => {
+        return <Toast t={t} content="End Current Call" type="warning" />;
+      });
+    }
     console.log("Toggling Mic");
     if (socketRef.current) {
       console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
+      setLocalStatus("inCall");
       const callId = generateUUID();
       setCurrentCallID(callId);
       setTimeout(() => {
@@ -514,6 +541,7 @@ function ParticipantActions({
       roomInstance.localParticipant.setCameraEnabled(false);
       roomInstance.localParticipant.setMicrophoneEnabled(false);
       setCallStatus("notInCall");
+      setLocalStatus("notInCall");
       setTimeout(() => {
         socketRef.current?.emit(
           "call-end",
@@ -528,6 +556,61 @@ function ParticipantActions({
       console.log("Socket Not There", socketRef.current);
     }
   };
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on("call-list-update", (data) => {
+        console.log({ data });
+        data.map((call: any) => {
+          console.log({ call });
+          if (
+            call?.AssignedToUserName.toString() === name &&
+            call?.CallStatus === "New"
+          ) {
+            setPendingCall(call);
+            setShowModal(true);
+          }
+        });
+      });
+      socketRef.current.on("call-missed", (data) => {
+        console.log("CALL MISSED", { data });
+        if (
+          data?.CallAssignedTo === name &&
+          data?.CallPlacedByLocationID.toString() === participant.identity &&
+          data?.CallStatus === "Missed"
+        ) {
+          setPendingCall(null);
+          setShowModal(false);
+          setCallStatus("missed");
+        }
+      });
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    console.log({ showModal });
+  }, [showModal]);
+
+  useEffect(() => {
+    const audio = new Audio("/sounds/call-ringtone.mp3");
+    audio.load(); // optional but explicit
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (showModal) {
+      audioRef.current?.play().catch((err) => {
+        console.error("Error playing audio:", err);
+      });
+    } else {
+      audioRef.current?.pause();
+    }
+  }, [showModal]);
 
   return (
     <div>
@@ -626,6 +709,40 @@ function ParticipantActions({
       {callStatus === "missed" && (
         <div className="absolute bottom-[2px] left-[2px] rounded-md bg-red-500/60 px-2 py-1">
           <h1 className="text-xs font-bold">Missed</h1>
+        </div>
+      )}
+      {showModal && (
+        <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center">
+          <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
+            <div>
+              <h1 className="text-orange-500 font-bold">Incoming Call</h1>
+            </div>
+            <div className="flex gap-2 items-center">
+              <div>
+                <img
+                  src={`/images/incomingCall.gif`}
+                  alt="User Profile"
+                  // onError={() => setImgError(true)}
+                  className="w-28 h-28 object-cover rounded-full"
+                />
+              </div>
+              <div>
+                <h1 className="font-bold text-2xl whitespace-nowrap">
+                  {pendingCall?.CallPlacedByLocationName}
+                </h1>
+              </div>
+            </div>
+            <div className="w-full flex items-center gap-2 whitespace-nowrap">
+              <button className="w-full px-2 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2">
+                <PhoneCallIcon className="text-green-500" />
+                <h1 className="font-bold">Attend Call</h1>
+              </button>
+              <button className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2">
+                <Pause className="text-indigo-500" />
+                <h1 className="font-bold">Hold Call</h1>
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

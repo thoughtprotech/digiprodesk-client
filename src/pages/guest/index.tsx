@@ -195,7 +195,7 @@ export default function Index() {
   }, [confirmLogoutModal]);
 
   const initiateCall = () => {
-    if (socketRef.current) {
+    if (socketRef.current && location) {
       const callId = generateUUID();
       setCurrentCallID(callId);
       socketRef.current.emit(
