@@ -18,6 +18,8 @@ import {
   Play,
   RefreshCcw,
   User as UserIcon,
+  X,
+  XCircle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { parseCookies } from "nookies";
@@ -70,7 +72,13 @@ export default function Index() {
     missed: [],
     guests: [],
   });
-  const [filter, setFilter] = useState<boolean>(false);
+  const [filter, setFilter] = useState<{
+    status: boolean;
+    type: "missed" | "onHold" | "guestCount" | "none";
+  }>({
+    status: false,
+    type: "none",
+  });
 
   const filterLocations = async (type: "missed" | "onHold" | "guestCount") => {
     switch (type) {
@@ -80,7 +88,10 @@ export default function Index() {
             filters.missed.includes(loc.LocationID?.toString()!)
           )
         );
-        setFilter(true);
+        setFilter({
+          status: true,
+          type: "missed",
+        });
         break;
       case "onHold":
         setFilteredUserLocationData((prev) =>
@@ -88,7 +99,10 @@ export default function Index() {
             filters.onHold.includes(loc.LocationID?.toString()!)
           )
         );
-        setFilter(true);
+        setFilter({
+          status: true,
+          type: "onHold",
+        });
         break;
       case "guestCount":
         setFilteredUserLocationData((prev) =>
@@ -96,14 +110,20 @@ export default function Index() {
             filters.guests.includes(loc.LocationID?.toString()!)
           )
         );
-        setFilter(true);
+        setFilter({
+          status: true,
+          type: "guestCount",
+        });
         break;
     }
   };
 
   const clearFilter = () => {
     setFilteredUserLocationData(userLocationListData);
-    setFilter(false);
+    setFilter({
+      status: false,
+      type: "none",
+    });
   };
 
   const fetchUserLocationList = async () => {
@@ -180,22 +200,12 @@ export default function Index() {
       <div className="w-full flex-1 flex flex-col gap-2 px-2">
         <div className="w-full flex justify-between items-center gap-2 border-b border-b-border pb-2">
           <div className="flex items-center gap-2">
-            <div className="w-64 flex gap-1">
+            <div className="flex items-center">
               <SearchInput
                 placeholder="Locations"
                 onChange={filterUserLocationList}
               />
             </div>
-            {filter && (
-              <Tooltip tooltip="Clear Filters" position="bottom">
-                <div
-                  className="cursor-pointer p-2 border-2 border-border rounded-md"
-                  onClick={clearFilter}
-                >
-                  <FilterXIcon className="w-5 h-5 text-gray-500" />
-                </div>
-              </Tooltip>
-            )}
             <div
               className={`w-fit h-fit bg-purple-500/30 hover:bg-purple-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
             >
@@ -213,53 +223,87 @@ export default function Index() {
             </div>
           </div>
           <div className="flex items-center gap-2 whitespace-nowrap">
-            <div
-              className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
-              onClick={() => filterLocations("guestCount")}
-            >
-              <div className="flex space-x-2 items-center">
-                <div className="border-r-2 border-r-orange-500 pr-2">
-                  <Phone className="w-5 h-5 text-orange-500" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">{guestCount}</h1>
-                  <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">
-                    Guest(s) Detected
-                  </h1>
+            <div className="relative">
+              <div
+                className={`w-full h-fit bg-orange-500/30 hover:bg-orange-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer relative`}
+                onClick={() => filterLocations("guestCount")}
+              >
+                <div className="flex space-x-2 items-center">
+                  <div className="border-r-2 border-r-orange-500 pr-2">
+                    <Phone className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-bold text-xl">{guestCount}</h1>
+                    <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">
+                      Guest(s) Detected
+                    </h1>
+                  </div>
                 </div>
               </div>
+              {filter.status && filter.type === "guestCount" && (
+                <div
+                  className="absolute -top-1 -right-1 cursor-pointer"
+                  onClick={clearFilter}
+                >
+                  <XCircle className="w-4 h-4 text-orange-500" />
+                </div>
+              )}
             </div>
-            <div
-              className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
-              onClick={() => filterLocations("onHold")}
-            >
-              <div className="flex space-x-2 items-center">
-                <div className="border-r-2 border-r-indigo-500 pr-2">
-                  <PhoneIncoming className="w-5 h-5 text-indigo-500" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">{filters.onHold.length}</h1>
-                  <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">
-                    Calls On Hold
-                  </h1>
+            <div className="relative">
+              <div
+                className={`w-full h-fit bg-indigo-500/30 hover:bg-indigo-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+                onClick={() => filterLocations("onHold")}
+              >
+                <div className="flex space-x-2 items-center">
+                  <div className="border-r-2 border-r-indigo-500 pr-2">
+                    <PhoneIncoming className="w-5 h-5 text-indigo-500" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-bold text-xl">
+                      {filters.onHold.length}
+                    </h1>
+                    <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">
+                      Calls On Hold
+                    </h1>
+                  </div>
                 </div>
               </div>
+              {filter && filter.type === "onHold" && (
+                <div
+                  className="absolute -top-1 -right-1 cursor-pointer"
+                  onClick={clearFilter}
+                >
+                  <XCircle className="w-4 h-4 text-indigo-500" />
+                </div>
+              )}
             </div>
-            <div
-              className={`w-full h-fit bg-red-500/30 hover:bg-red-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
-              onClick={() => filterLocations("missed")}
-            >
-              <div className="flex space-x-2 items-center">
-                <div className="border-r-2 border-r-red-500 pr-2">
-                  <PhoneCallIcon className="w-5 h-5 text-red-500" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">{filters.missed.length}</h1>
-                  <h1 className="w-fit text-[0.65rem] font-bold text-red-500">
-                    Missed Calls
-                  </h1>
+            <div className="relative">
+              <div
+                className={`w-full h-fit bg-red-500/30 hover:bg-red-700/40 duration-300 rounded-md p-2 py-0.5 cursor-pointer`}
+                onClick={() => filterLocations("missed")}
+              >
+                <div className="flex space-x-2 items-center">
+                  <div className="border-r-2 border-r-red-500 pr-2">
+                    <PhoneCallIcon className="w-5 h-5 text-red-500" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-bold text-xl">
+                      {filters.missed.length}
+                    </h1>
+                    <h1 className="w-fit text-[0.65rem] font-bold text-red-500">
+                      Missed Calls
+                    </h1>
+                  </div>
                 </div>
               </div>
+              {filter && filter.type === "missed" && (
+                <div
+                  className="absolute -top-1 -right-1 cursor-pointer"
+                  onClick={clearFilter}
+                >
+                  <XCircle className="w-4 h-4 text-red-500" />
+                </div>
+              )}
             </div>
           </div>
         </div>
