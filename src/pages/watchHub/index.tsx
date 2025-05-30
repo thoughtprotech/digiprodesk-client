@@ -660,6 +660,38 @@ function ParticipantActions({
     }
   };
 
+  const unmuteHostForGuest = async () => {
+    if (socketRef.current) {
+      roomInstance.localParticipant.setMicrophoneEnabled(true);
+      setTimeout(() => {
+        socketRef.current?.emit(
+          "unmute-host",
+          JSON.stringify({
+            guestId: participant.identity,
+          })
+        );
+      }, 1000);
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
+  const muteHostForGuest = async () => {
+    if (socketRef.current) {
+      roomInstance.localParticipant.setMicrophoneEnabled(false);
+      setTimeout(() => {
+        socketRef.current?.emit(
+          "mute-host",
+          JSON.stringify({
+            guestId: participant.identity,
+          })
+        );
+      }, 1000);
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("call-list-update", (data) => {
@@ -741,7 +773,31 @@ function ParticipantActions({
           </Tooltip>
         </div>
       </div>
+      {/* Controls */}
       <div className="absolute top-[2px] right-[2px] rounded-md bg-black/50">
+        {callStatus === "notInCall" && (
+          <Tooltip
+            tooltip={
+              room.localParticipant.isMicrophoneEnabled ? "Mute" : "Unmute"
+            }
+            position="bottom"
+          >
+            <button
+              className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+              onClick={() => {
+                room.localParticipant.isMicrophoneEnabled
+                  ? muteHostForGuest()
+                  : unmuteHostForGuest();
+              }}
+            >
+              {room.localParticipant.isMicrophoneEnabled ? (
+                <Mic className="w-4 h-4" />
+              ) : (
+                <MicOff className="w-4 h-4" />
+              )}
+            </button>
+          </Tooltip>
+        )}
         {callStatus === "inCall" && (
           <>
             <Tooltip

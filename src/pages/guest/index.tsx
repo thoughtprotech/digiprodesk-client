@@ -98,24 +98,6 @@ export default function Index() {
         }
       });
 
-      socketRef.current.on("mute-participant-request", (data) => {
-        if (data.locationID === location?.LocationID?.toString()) {
-          const audioTrack = localAudioTrackRef.current;
-          if (audioTrack) {
-            if (!data.isMuted) {
-              // @ts-expect-error
-              audioTrack.enable();
-            } else {
-              // @ts-expect-error
-              audioTrack.disable();
-            }
-            setIsMuted(data.isMuted);
-          }
-        } else {
-          console.log("NOT MINE");
-        }
-      });
-
       socketRef.current.on("location-refresh-request", (data) => {
         if (data.locationID === location?.LocationID?.toString()) {
           console.log("Reloading page due to location refresh...");
@@ -465,6 +447,36 @@ export default function Index() {
         }
       });
 
+      socketRef.current.on("host-unmute", (data) => {
+        const { guestId, hostId } = data;
+
+        if (guestId?.toString() === location?.LocationID?.toString()) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            if (participant.identity === hostId) {
+              participant.audioTrackPublications.forEach((publication) => {
+                console.log("HOST UNMUTUED", hostId);
+                publication.setSubscribed(true);
+              });
+            }
+          });
+        }
+      });
+
+      socketRef.current.on("host-mute", (data) => {
+        const { guestId, hostId } = data;
+
+        if (guestId?.toString() === location?.LocationID?.toString()) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            if (participant.identity === hostId) {
+              participant.audioTrackPublications.forEach((publication) => {
+                console.log("HOST MUTED", hostId);
+                publication.setSubscribed(false);
+              });
+            }
+          });
+        }
+      });
+
       socketRef.current.on("call-end-guest", (data) => {
         const { guestId, hostId } = data;
         if (guestId === location?.LocationID?.toString()) {
@@ -523,6 +535,7 @@ export default function Index() {
           {!inCall && callStatus === "notInCall" && (
             <div className="w-full h-full flex relative">
               {/* Video Section (75% of the width) */}
+              <RoomAudioRenderer />
               <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
                 {advertisementStatus === "video" ? (
                   <video
