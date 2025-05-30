@@ -9,6 +9,7 @@ import {
   PhoneCallIcon,
   PhoneIncoming,
   PhoneOff,
+  Play,
   Video,
   VideoOff,
   XCircle,
@@ -560,6 +561,81 @@ function ParticipantActions({
     }
   };
 
+  const holdCall = async () => {
+    console.log("Toggling Mic");
+    if (socketRef.current) {
+      console.log("Socket There", socketRef.current);
+      roomInstance.localParticipant.setCameraEnabled(true);
+      roomInstance.localParticipant.setMicrophoneEnabled(true);
+      setCallStatus("onHold");
+      setLocalStatus("notInCall");
+      setTimeout(() => {
+        socketRef.current?.emit(
+          "hold-call",
+          JSON.stringify({
+            roomId: currentCallID,
+          })
+        );
+      }, 1000);
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
+  const holdIncomingCall = async () => {
+    console.log("Toggling Mic");
+    if (socketRef.current) {
+      console.log("Socket There", socketRef.current);
+      roomInstance.localParticipant.setCameraEnabled(true);
+      roomInstance.localParticipant.setMicrophoneEnabled(true);
+      setCallStatus("onHold");
+      setLocalStatus("notInCall");
+      setTimeout(() => {
+        socketRef.current?.emit(
+          "hold-call",
+          JSON.stringify({
+            roomId: pendingCall.CallID,
+          })
+        );
+      }, 1000);
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
+  const resumeCall = async () => {
+    if (localStatus === "inCall") {
+      return toast.custom((t: any) => {
+        return <Toast t={t} content="End Current Call" type="warning" />;
+      });
+    }
+    console.log("Toggling Mic");
+    if (socketRef.current) {
+      console.log("Socket There", socketRef.current);
+      roomInstance.localParticipant.setCameraEnabled(true);
+      roomInstance.localParticipant.setMicrophoneEnabled(true);
+      setCallStatus("inCall");
+      setLocalStatus("inCall");
+      const callId =
+        currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+      if (currentCallID.length === 0) {
+        setCurrentCallID(pendingCall.CallID);
+        setPendingCall(null);
+      }
+      setTimeout(() => {
+        socketRef.current?.emit(
+          "resume-call",
+          JSON.stringify({
+            locationID: participant.identity,
+            callId,
+          })
+        );
+      }, 1000);
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
   const endGuestCall = async () => {
     console.log("Toggling Mic");
     if (socketRef.current) {
@@ -568,6 +644,7 @@ function ParticipantActions({
       roomInstance.localParticipant.setMicrophoneEnabled(false);
       setCallStatus("notInCall");
       setLocalStatus("notInCall");
+      setCurrentCallID("");
       setTimeout(() => {
         socketRef.current?.emit(
           "call-end",
@@ -699,7 +776,25 @@ function ParticipantActions({
                 )}
               </button>
             </Tooltip>
+            <Tooltip tooltip={"Hold Call"} position="bottom">
+              <button
+                className="px-2 py-1 rounded-md cursor-pointer hover:bg-indigo-500/30 duration-300"
+                onClick={holdCall}
+              >
+                <Pause className="text-indigo-500 w-4 h-4" />
+              </button>
+            </Tooltip>
           </>
+        )}
+        {callStatus === "onHold" && (
+          <Tooltip tooltip={"Resume Call"} position="bottom">
+            <button
+              className="px-2 py-1 rounded-md cursor-pointer hover:bg-blue-500/30 duration-300"
+              onClick={resumeCall}
+            >
+              <Play className="text-blue-500 w-4 h-4" />
+            </button>
+          </Tooltip>
         )}
         <Tooltip
           tooltip={callStatus === "notInCall" ? "Call" : "End Call"}
@@ -770,7 +865,13 @@ function ParticipantActions({
                 <PhoneCallIcon className="text-green-500" />
                 <h1 className="font-bold">Attend Call</h1>
               </button>
-              <button className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2">
+              <button
+                className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2"
+                onClick={() => {
+                  holdIncomingCall();
+                  setShowModal(false);
+                }}
+              >
                 <Pause className="text-indigo-500" />
                 <h1 className="font-bold">Hold Call</h1>
               </button>

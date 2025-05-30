@@ -131,6 +131,17 @@ export default function Index() {
           data.CallPlacedByLocationID?.toString() ===
           location?.LocationID?.toString()
         ) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            console.log("Participant:", participant.identity);
+            if (participant.identity === data.CallAssignedTo) {
+              participant.trackPublications.forEach((publication) => {
+                publication.setSubscribed(false);
+              });
+              roomInstance.localParticipant.setMicrophoneEnabled(false);
+              setInCall(false);
+              setCallStatus("notInCall");
+            }
+          });
           setCallStatus("onHold");
         }
       });
