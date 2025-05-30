@@ -645,13 +645,18 @@ function ParticipantActions({
       setCallStatus("notInCall");
       setLocalStatus("notInCall");
       setCurrentCallID("");
+      const callId =
+        currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+      if (currentCallID.length === 0) {
+        setPendingCall(null);
+      }
       setTimeout(() => {
         socketRef.current?.emit(
           "call-end",
           JSON.stringify({
             locationID: participant.identity,
             hostId: name,
-            callId: currentCallID,
+            callId: callId,
           })
         );
       }, 1000);
