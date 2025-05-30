@@ -1146,11 +1146,7 @@ function VideoGrid({
           {status === "onHold" && (
             <Tooltip tooltip="Resume Call" position="bottom">
               <div
-                className={`px-2 py-1 rounded-md duration-300 ${
-                  isSelfDisabled
-                    ? "bg-blue-500/10 cursor-not-allowed pointer-events-none"
-                    : "hover:bg-blue-500/30 cursor-pointer"
-                }`}
+                className={`px-2 py-1 rounded-md duration-300`}
                 onClick={() => resumeCall(roomName)}
               >
                 <Play className="text-blue-500 w-4 h-4" />
@@ -1163,11 +1159,7 @@ function VideoGrid({
           >
             {status === "none" || status === "missed" ? (
               <div
-                className={`px-2 py-1 rounded-md duration-300 ${
-                  isSelfDisabled
-                    ? "bg-green-500/10 cursor-not-allowed pointer-events-none"
-                    : "hover:bg-green-500/30 cursor-pointer"
-                }`}
+                className={`px-2 py-1 rounded-md duration-300`}
                 onClick={() => handleStartCall(roomName)}
               >
                 <PhoneOutgoing className="text-green-500 w-4 h-4" />
@@ -1206,11 +1198,7 @@ function VideoGrid({
           </Tooltip>
           <Tooltip tooltip="Fullscreen" position="bottom">
             <div
-              className={`px-2 py-1 rounded-md duration-300 ${
-                isSelfDisabled
-                  ? "bg-gray-400/20 cursor-not-allowed pointer-events-none"
-                  : "hover:bg-gray-500/30 cursor-pointer"
-              }`}
+              className={`px-2 py-1 rounded-md duration-300`}
               onClick={() => {
                 if (inCall) {
                   if (currentCallID.length !== 0) {
@@ -1307,10 +1295,7 @@ function VideoGrid({
                         tooltip={isSelfCamera ? "Camera On" : "Camera Off"}
                         position="bottom"
                       >
-                        <div
-                          className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300"
-                          // onClick={() => handleEndCall(roomName)}
-                        >
+                        <div className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300">
                           <TrackToggle
                             source={Track.Source.Camera}
                             style={{ color: "white", scale: 1.4 }}
@@ -1320,7 +1305,19 @@ function VideoGrid({
                               setIsSelfCamera(!isSelfCamera);
                             }}
                           />
-                          {/* <Video className="w-7 h-7" /> */}
+                        </div>
+                      </Tooltip>
+                      <Tooltip
+                        tooltip={isSelfMuted ? "Unmute" : "Mute"}
+                        position="bottom"
+                      >
+                        <div className="hover:bg-gray-500/30 p-2 rounded-md cursor-pointer duration-300">
+                          <TrackToggle
+                            source={Track.Source.Microphone}
+                            style={{ color: "white", scale: 1.4 }}
+                            className="flex items-center justify-center"
+                            onClick={() => setIsSelfMuted(!isSelfMuted)}
+                          />
                         </div>
                       </Tooltip>
                       <Tooltip tooltip="Record" position="bottom">
