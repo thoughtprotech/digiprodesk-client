@@ -363,7 +363,7 @@ export default function Index() {
                 toggleLocalCamera={toggleLocalCamera}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
-              <RoomAudioRenderer muted={true} />
+              <RoomAudioRenderer />
             </div>
           </RoomContext.Provider>
         </div>
