@@ -72,8 +72,8 @@ export default function Login() {
 
         const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
 
-        if (decoded.exp > currentTime) {
-          if (decoded.role === "Guest") {
+        if (decoded?.exp > currentTime) {
+          if (decoded?.role === "Guest") {
             router.push('/guest');
           } else {
             router.push('/checkInHub');
