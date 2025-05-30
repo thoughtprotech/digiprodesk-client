@@ -14,10 +14,7 @@ import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
 import logOut from "@/utils/logOut";
-import {
-  Room,
-  Track,
-} from "livekit-client";
+import { Room, Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
@@ -759,7 +756,7 @@ function MyVideoConference() {
 
   // filter out any track from the local participant
   const remoteTracks: TrackReferenceOrPlaceholder[] = allTracks.filter(
-    (t) => t.participant.sid !== localSid
+    (t) => t.participant.sid !== localSid && t.publication?.isSubscribed
   );
 
   const localTrack: TrackReferenceOrPlaceholder[] = allTracks.filter(
