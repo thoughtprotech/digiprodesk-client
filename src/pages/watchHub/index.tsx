@@ -785,9 +785,11 @@ function ParticipantActions({
             <button
               className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
               onClick={() => {
-                room.localParticipant.isMicrophoneEnabled
-                  ? muteHostForGuest()
-                  : unmuteHostForGuest();
+                if (room.localParticipant.isMicrophoneEnabled) {
+                  muteHostForGuest();
+                } else {
+                  unmuteHostForGuest();
+                }
               }}
             >
               {room.localParticipant.isMicrophoneEnabled ? (

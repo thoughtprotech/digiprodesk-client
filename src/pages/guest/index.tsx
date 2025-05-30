@@ -46,7 +46,6 @@ export default function Index() {
     | "hostUnavailabe"
   >("notInCall");
   // const [, setVolume] = useState<number>(1); // Volume range: 0 to 1
-  const [, setIsMuted] = useState<boolean>(false);
   const [location, setLocation] = useState<Location>();
   const [user, setUser] = useState<User>();
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -348,8 +347,6 @@ export default function Index() {
   // const receptionistVideoActive = useRef(false);
   const room = "quickstart-room";
 
-  // const lkRoomRef = useRef<Room | null>(null);
-  const localAudioTrackRef = useRef<Track | null>(null);
 
   const [, setMicEnabled] = useState<boolean>(false);
   const [, setCameraEnabled] = useState<boolean>(true);
