@@ -419,20 +419,6 @@ function MyVideoConference({
     return isNotLocal && hasLocation;
   });
 
-  const [locationDetails, setLocationDetails] = useState<Location>();
-
-  useEffect(() => {
-    for (const t of allTracks) {
-      const found = filteredUserLocationData.find(
-        (loc) => String(loc.LocationID) === t.participant.identity
-      );
-      if (found) {
-        setLocationDetails(found);
-        return; // stop after first match
-      }
-    }
-  }, [allTracks, filteredUserLocationData]);
-
   return (
     <div className="w-full h-full grid grid-cols-4 gap-2">
       {remoteTracks.map((track, index) => (
@@ -446,11 +432,11 @@ function MyVideoConference({
             participant={track.participant}
             name={name}
             roomInstance={roomInstance}
-            locationDetails={locationDetails!}
             toggleLocalMute={toggleLocalMute}
             toggleLocalCamera={toggleLocalCamera}
             localStatus={localStatus}
             setLocalStatus={setLocalStatus}
+            filteredUserLocationData={filteredUserLocationData}
           />
         </div>
       ))}
@@ -462,20 +448,20 @@ function ParticipantActions({
   participant,
   name,
   roomInstance,
-  locationDetails,
   toggleLocalMute,
   toggleLocalCamera,
   localStatus,
   setLocalStatus,
+  filteredUserLocationData,
 }: {
   participant: Participant;
   name: string;
   roomInstance: any;
-  locationDetails: Location;
   toggleLocalMute: () => void;
   toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
+  filteredUserLocationData: Location[];
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -488,6 +474,15 @@ function ParticipantActions({
   const [showModal, setShowModal] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [localMicEnabled, setLocalMicEnabled] = useState<boolean>(false);
+  const [locationDetails, setLocationDetails] = useState<Location>();
+
+  useEffect(() => {
+    filteredUserLocationData.map((loc) => {
+      if (loc.LocationID?.toString() === participant.identity) {
+        setLocationDetails;
+      }
+    });
+  }, [filteredUserLocationData]);
 
   useEffect(() => {
     socketRef.current = socket;
