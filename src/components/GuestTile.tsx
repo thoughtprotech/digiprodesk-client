@@ -11,7 +11,6 @@ import {
 } from "@livekit/components-core";
 import {
   AudioTrack,
-  ConnectionQualityIndicator,
   FocusToggle,
   ParticipantContext,
   ParticipantName,
@@ -175,7 +174,6 @@ const GuestTile: (
                     </>
                   )}
                 </div>
-                <ConnectionQualityIndicator className="lk-participant-metadata-item" />
               </div>
             </>
           )}

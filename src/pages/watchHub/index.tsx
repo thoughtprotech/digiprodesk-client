@@ -3,8 +3,10 @@ import Layout from "@/components/Layout";
 import {
   Disc,
   MapPin,
+  Maximize,
   Mic,
   MicOff,
+  Minimize,
   Pause,
   Phone,
   PhoneCallIcon,
@@ -30,6 +32,7 @@ import {
   useRoomContext,
   useTracks,
   TrackReferenceOrPlaceholder,
+  ConnectionQualityIndicator,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import Tooltip from "@/components/ui/ToolTip";
@@ -429,6 +432,7 @@ function MyVideoConference({
           {/* Render each participant tile manually */}
           <GuestTile trackRef={track} />
           <ParticipantActions
+            track={track}
             remoteTracks={remoteTracks}
             participant={track.participant}
             name={name}
@@ -446,6 +450,7 @@ function MyVideoConference({
 }
 
 function ParticipantActions({
+  track,
   remoteTracks,
   participant,
   name,
@@ -456,6 +461,7 @@ function ParticipantActions({
   filteredUserLocationData,
   setGuestCount,
 }: {
+  track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
   participant: Participant;
   name: string;
@@ -481,6 +487,7 @@ function ParticipantActions({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [egressId, setEgressId] = useState(false);
   const [showPersonIcon, setShowPersonIcon] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
@@ -822,6 +829,7 @@ function ParticipantActions({
 
   return (
     <div>
+      {/* Info */}
       <div className="absolute top-[2px] left-[2px] rounded-md bg-black/50">
         <div className="flex items-center">
           <div className="pl-2 py-1">
@@ -919,10 +927,10 @@ function ParticipantActions({
 
             <Tooltip tooltip={"Hold Call"} position="bottom">
               <button
-                className="px-2 py-1 rounded-md cursor-pointer hover:bg-indigo-500/30 duration-300"
+                className="px-2 py-1 rounded-md cursor-pointer hover:bg-cyan-500/30 duration-300"
                 onClick={holdCall}
               >
-                <Pause className="text-indigo-500 w-4 h-4" />
+                <Pause className="text-cyan-500 w-4 h-4" />
               </button>
             </Tooltip>
           </>
@@ -957,6 +965,16 @@ function ParticipantActions({
             </button>
           )}
         </Tooltip>
+        <Tooltip tooltip="Fullscreen" position="bottom">
+          <button
+            className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+            onClick={() => {
+              setIsFullScreen(true);
+            }}
+          >
+            <Maximize className="w-4 h-4" />
+          </button>
+        </Tooltip>
       </div>
       {callStatus === "inCall" && (
         <div className="absolute bottom-[2px] left-[2px] rounded-md bg-black/60 px-2 py-1">
@@ -974,11 +992,20 @@ function ParticipantActions({
         </div>
       )}
       {showPersonIcon && (
-        <div className="absolute bottom-[2px] right-[2px] flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
+        <div className="absolute bottom-[2px] right-8 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
           <UserIcon className="w-4 h-4 text-orange-400" />
           <span className="text-xs font-semibold">Guest</span>
         </div>
       )}
+      <div className="absolute bottom-[2px] right-[2px] bg-black/50 rounded-md flex items-center justify-center">
+        {remoteTracks.map((trackRef: any) => (
+          <ConnectionQualityIndicator
+            participant={trackRef.participant}
+            key={trackRef.participant}
+            className="scale-75"
+          />
+        ))}
+      </div>
       {showModal &&
         pendingCall?.CallPlacedByLocationID?.toString() ===
           participant?.identity?.toString() && (
@@ -1029,6 +1056,168 @@ function ParticipantActions({
             </div>
           </div>
         )}
+      {isFullScreen && (
+        <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="flex w-full items-end justify-center gap-2 p-4">
+            <div className="w-3/4 relative">
+              <GuestTile trackRef={track} />
+              {/* Info */}
+              <div className="absolute top-2 left-2 rounded-md bg-black/50">
+                <div className="flex items-center">
+                  <div className="pl-2 py-1">
+                    <h1 className="font-bold text-xs">
+                      {locationDetails?.LocationName}
+                    </h1>
+                  </div>
+                  <Tooltip
+                    tooltip={
+                      participant.isMicrophoneEnabled ? "Mute" : "Unmute"
+                    }
+                    position="bottom"
+                  >
+                    <button
+                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                      onClick={toggleMic}
+                    >
+                      {participant.isMicrophoneEnabled ? (
+                        <Mic className="w-4 h-4" />
+                      ) : (
+                        <MicOff className="w-4 h-4" />
+                      )}
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+              {/* Controls */}
+              <div className="absolute top-2 right-2 rounded-md bg-black/50">
+                {callStatus === "notInCall" && (
+                  <Tooltip
+                    tooltip={localMicEnabled ? "Mute" : "Unmute"}
+                    position="bottom"
+                  >
+                    <button
+                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                      onClick={() => {
+                        if (localMicEnabled) {
+                          muteHostForGuest();
+                        } else {
+                          unmuteHostForGuest();
+                        }
+                      }}
+                    >
+                      {localMicEnabled ? (
+                        <Mic className="w-4 h-4" />
+                      ) : (
+                        <MicOff className="w-4 h-4" />
+                      )}
+                    </button>
+                  </Tooltip>
+                )}
+                {callStatus === "inCall" && (
+                  <>
+                    <Tooltip
+                      tooltip={localMicEnabled ? "Mute" : "Unmute"}
+                      position="bottom"
+                    >
+                      <button
+                        className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                        onClick={toggleLocalMute}
+                      >
+                        {localMicEnabled ? (
+                          <Mic className="w-4 h-4" />
+                        ) : (
+                          <MicOff className="w-4 h-4" />
+                        )}
+                      </button>
+                    </Tooltip>
+                    <Tooltip
+                      tooltip={
+                        room.localParticipant.isCameraEnabled ? "Off" : "On"
+                      }
+                      position="bottom"
+                    >
+                      <button
+                        className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                        onClick={toggleLocalCamera}
+                      >
+                        {room.localParticipant.isCameraEnabled ? (
+                          <Video className="w-4 h-4" />
+                        ) : (
+                          <VideoOff className="w-4 h-4" />
+                        )}
+                      </button>
+                    </Tooltip>
+                    <Tooltip
+                      tooltip={
+                        isRecording ? "Stop Recording" : "Start Recording"
+                      }
+                      position="bottom"
+                    >
+                      <button
+                        className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
+                          isRecording && "bg-orange/500"
+                        } duration-300`}
+                        onClick={toggleRecording}
+                      >
+                        <Disc className="w-4 h-4" />
+                      </button>
+                    </Tooltip>
+
+                    <Tooltip tooltip={"Hold Call"} position="bottom">
+                      <button
+                        className="px-2 py-1 rounded-md cursor-pointer hover:bg-cyan-500/30 duration-300"
+                        onClick={holdCall}
+                      >
+                        <Pause className="text-cyan-500 w-4 h-4" />
+                      </button>
+                    </Tooltip>
+                  </>
+                )}
+                {callStatus === "onHold" && (
+                  <Tooltip tooltip={"Resume Call"} position="bottom">
+                    <button
+                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-blue-500/30 duration-300"
+                      onClick={resumeCall}
+                    >
+                      <Play className="text-blue-500 w-4 h-4" />
+                    </button>
+                  </Tooltip>
+                )}
+                <Tooltip
+                  tooltip={callStatus === "notInCall" ? "Call" : "End Call"}
+                  position="bottom"
+                >
+                  {callStatus === "notInCall" || callStatus === "missed" ? (
+                    <button
+                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-green-500/30 duration-300"
+                      onClick={callGuest}
+                    >
+                      <Phone className="text-green-500 w-4 h-4" />
+                    </button>
+                  ) : (
+                    <button
+                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-red-500/30 duration-300"
+                      onClick={endGuestCall}
+                    >
+                      <PhoneOff className="text-red-500 w-4 h-4" />
+                    </button>
+                  )}
+                </Tooltip>
+                <Tooltip tooltip="Fullscreen" position="bottom">
+                  <button
+                    className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                    onClick={() => {
+                      setIsFullScreen(false);
+                    }}
+                  >
+                    <Minimize className="w-4 h-4" />
+                  </button>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
