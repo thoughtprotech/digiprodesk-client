@@ -998,13 +998,19 @@ function ParticipantActions({
         </div>
       )}
       <div className="absolute bottom-[2px] right-[2px] bg-black/50 rounded-md flex items-center justify-center">
-        {remoteTracks.map((trackRef: any) => (
-          <ConnectionQualityIndicator
-            participant={trackRef.participant}
-            key={trackRef.participant}
-            className="scale-75"
-          />
-        ))}
+        {remoteTracks
+          .filter(
+            (t) =>
+              t.participant.identity.toString() ===
+              locationDetails?.LocationID?.toString()
+          )
+          .map((trackRef: any) => (
+            <ConnectionQualityIndicator
+              participant={trackRef.participant}
+              key={trackRef.participant}
+              className="scale-75"
+            />
+          ))}
       </div>
       {showModal &&
         pendingCall?.CallPlacedByLocationID?.toString() ===
