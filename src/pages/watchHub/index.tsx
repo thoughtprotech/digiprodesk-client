@@ -478,8 +478,8 @@ function ParticipantActions({
 
   useEffect(() => {
     filteredUserLocationData.map((loc) => {
-      if (loc.LocationID?.toString() === participant.identity) {
-        setLocationDetails;
+      if (loc.LocationID?.toString() === participant.identity.toString()) {
+        setLocationDetails(loc);
       }
     });
   }, [filteredUserLocationData]);
