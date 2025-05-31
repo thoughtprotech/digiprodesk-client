@@ -53,6 +53,8 @@ export default function Index() {
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [guestCount, setGuestCount] = useState<string[]>([]);
   const [locationsOnline, setLocationsOnline] = useState<string[]>([]);
+  const [onHoldCount, setOnHoldCount] = useState<string[]>([]);
+  const [missedCallCount, setMissedCallCount] = useState<string[]>([]);
   const [filters] = useState<{
     onHold: string[];
     missed: string[];
@@ -69,6 +71,10 @@ export default function Index() {
     status: false,
     type: "none",
   });
+
+  useEffect(() => {
+    console.log({ onHoldCount });
+  }, [onHoldCount]);
 
   const [localStatus, setLocalStatus] = useState<"notInCall" | "inCall">(
     "notInCall"
@@ -302,9 +308,7 @@ export default function Index() {
                     <PhoneIncoming className="w-5 h-5 text-indigo-500" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <h1 className="font-bold text-xl">
-                      {filters.onHold.length}
-                    </h1>
+                    <h1 className="font-bold text-xl">{onHoldCount.length}</h1>
                     <h1 className="w-fit text-[0.65rem] font-bold text-indigo-500">
                       Calls On Hold
                     </h1>
@@ -331,7 +335,7 @@ export default function Index() {
                   </div>
                   <div className="flex items-center gap-2">
                     <h1 className="font-bold text-xl">
-                      {filters.missed.length}
+                      {missedCallCount?.length}
                     </h1>
                     <h1 className="w-fit text-[0.65rem] font-bold text-red-500">
                       Missed Calls
@@ -367,6 +371,8 @@ export default function Index() {
                 setLocalStatus={setLocalStatus}
                 setGuestCount={setGuestCount}
                 setLocationsOnline={setLocationsOnline}
+                setOnHoldCount={setOnHoldCount}
+                setMissedCallCount={setMissedCallCount}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -387,6 +393,8 @@ function MyVideoConference({
   setLocalStatus,
   setGuestCount,
   setLocationsOnline,
+  setOnHoldCount,
+  setMissedCallCount,
 }: {
   name: string;
   roomInstance: any;
@@ -396,6 +404,8 @@ function MyVideoConference({
   setLocalStatus: any;
   setGuestCount: any;
   setLocationsOnline: any;
+  setOnHoldCount: any;
+  setMissedCallCount: any;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -428,11 +438,33 @@ function MyVideoConference({
   }, [filteredUserLocationData, remoteTracks]);
 
   useEffect(() => {
-    const identities = remoteTracks
-      .map((t) => t?.participant?.identity?.toString())
-      .filter(Boolean); // removes undefined/null
+    // 1) Build a Set of all LocationID strings from filteredUserLocationData
+    const validIDs = new Set(
+      filteredUserLocationData.map((loc) => loc?.LocationID?.toString())
+    );
 
-    setLocationsOnline(identities);
+    // 2) From remoteTracks, pick only those identities whose .identity is in validIDs
+    const identities = remoteTracks
+      .map((t) => t.participant.identity.toString())
+      .filter((id) => validIDs.has(id));
+
+    // 3) Only update state if identities is different from locationsOnline
+    setLocationsOnline((prev: string[]) => {
+      // If length differs, we definitely changed
+      if (prev.length !== identities.length) {
+        return identities;
+      }
+      // If same length, check each element (in this example we assume sorted order or
+      // that order must match. If you don’t care about order, you could sort both arrays
+      // or compare by Set membership instead.)
+      for (let i = 0; i < prev.length; i++) {
+        if (prev[i] !== identities[i]) {
+          return identities;
+        }
+      }
+      // no difference → return prev so React skips an update
+      return prev;
+    });
   }, [remoteTracks]);
 
   return (
@@ -455,6 +487,8 @@ function MyVideoConference({
             setLocalStatus={setLocalStatus}
             filteredUserLocationData={filteredUserLocationData}
             setGuestCount={setGuestCount}
+            setOnHoldCount={setOnHoldCount}
+            setMissedCallCount={setMissedCallCount}
           />
         </div>
       ))}
@@ -473,6 +507,8 @@ function ParticipantActions({
   setLocalStatus,
   filteredUserLocationData,
   setGuestCount,
+  setOnHoldCount,
+  setMissedCallCount,
 }: {
   track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
@@ -484,6 +520,8 @@ function ParticipantActions({
   setLocalStatus: any;
   filteredUserLocationData: Location[];
   setGuestCount: any;
+  setOnHoldCount: any;
+  setMissedCallCount: any;
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -576,6 +614,9 @@ function ParticipantActions({
       setLocalStatus("inCall");
       setCurrentCallID(pendingCall.CallID);
       setLocalMicEnabled(true);
+      setMissedCallCount((prev: string[]) =>
+        prev.filter((p) => p.toString() !== participant?.identity?.toString())
+      );
       setTimeout(() => {
         socketRef.current?.emit(
           "join-call",
@@ -600,6 +641,9 @@ function ParticipantActions({
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
       setLocalStatus("inCall");
+      setMissedCallCount((prev: string[]) =>
+        prev.filter((p) => p.toString() !== participant?.identity?.toString())
+      );
       const callId = generateUUID();
       setCurrentCallID(callId);
       setLocalMicEnabled(true);
@@ -628,6 +672,12 @@ function ParticipantActions({
       setCallStatus("onHold");
       setLocalStatus("notInCall");
       setLocalMicEnabled(false);
+      setOnHoldCount((prev: string[]) => {
+        if (!prev.includes(participant?.identity?.toString())) {
+          return [...prev, participant?.identity?.toString()];
+        }
+        return prev;
+      });
       setTimeout(() => {
         socketRef.current?.emit(
           "hold-call",
@@ -648,6 +698,15 @@ function ParticipantActions({
       setCallStatus("onHold");
       setLocalStatus("notInCall");
       setLocalMicEnabled(false);
+      setMissedCallCount((prev: string[]) =>
+        prev.filter((p) => p.toString() !== participant?.identity?.toString())
+      );
+      setOnHoldCount((prev: string[]) => {
+        if (!prev.includes(pendingCall?.CallPlacedByLocationID?.toString())) {
+          return [...prev, pendingCall?.CallPlacedByLocationID?.toString()];
+        }
+        return prev;
+      });
       setTimeout(() => {
         socketRef.current?.emit(
           "hold-call",
@@ -675,6 +734,12 @@ function ParticipantActions({
       setLocalMicEnabled(true);
       const callId =
         currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+      setOnHoldCount((prev: string[]) => {
+        if (prev.includes(participant?.identity?.toString())) {
+          return prev.filter((p) => p !== participant?.identity?.toString());
+        }
+        return prev;
+      });
       if (currentCallID.length === 0) {
         setCurrentCallID(pendingCall.CallID);
         setPendingCall(null);
@@ -706,6 +771,12 @@ function ParticipantActions({
       setLocalMicEnabled(false);
       const callId =
         currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+      setOnHoldCount((prev: string[]) => {
+        if (prev.includes(participant?.identity?.toString())) {
+          return prev.filter((p) => p !== participant?.identity?.toString());
+        }
+        return prev;
+      });
       if (currentCallID.length === 0) {
         setPendingCall(null);
       }
@@ -785,9 +856,15 @@ function ParticipantActions({
         console.log("CALL MISSED", { data });
         if (
           data?.CallAssignedTo === name &&
-          data?.CallPlacedByLocationID.toString() === participant.identity &&
+          data?.CallPlacedByLocationID?.toString() === participant?.identity &&
           data?.CallStatus === "Missed"
         ) {
+          setMissedCallCount((prev: string[]) => {
+            if (!prev.includes(data?.CallPlacedByLocationID?.toString())) {
+              return [...prev, data?.CallPlacedByLocationID?.toString()];
+            }
+            return prev;
+          });
           setPendingCall(null);
           setShowModal(false);
           setCallStatus("missed");
@@ -1032,7 +1109,6 @@ function ParticipantActions({
             <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
               <div>
                 <h1 className="text-orange-500 font-bold">Incoming Call</h1>
-                <h1>{locationDetails?.LocationName} Modal</h1>
               </div>
               <div className="flex gap-2 items-center">
                 <div>
