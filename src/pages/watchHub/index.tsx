@@ -1105,7 +1105,7 @@ function ParticipantActions({
       {showModal &&
         pendingCall?.CallPlacedByLocationID?.toString() ===
           participant?.identity?.toString() && (
-          <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center">
+          <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center z-50">
             <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
               <div>
                 <h1 className="text-orange-500 font-bold">Incoming Call</h1>
