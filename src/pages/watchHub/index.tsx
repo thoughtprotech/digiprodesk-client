@@ -502,6 +502,7 @@ function ParticipantActions({
       setCallStatus("inCall");
       setLocalStatus("inCall");
       setCurrentCallID(pendingCall.CallID);
+      setLocalMicEnabled(true);
       setTimeout(() => {
         socketRef.current?.emit(
           "join-call",
@@ -530,6 +531,7 @@ function ParticipantActions({
       setLocalStatus("inCall");
       const callId = generateUUID();
       setCurrentCallID(callId);
+      setLocalMicEnabled(true);
       setTimeout(() => {
         socketRef.current?.emit(
           "start-call",
@@ -553,6 +555,7 @@ function ParticipantActions({
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("onHold");
       setLocalStatus("notInCall");
+      setLocalMicEnabled(false);
       setTimeout(() => {
         socketRef.current?.emit(
           "hold-call",
@@ -574,6 +577,7 @@ function ParticipantActions({
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("onHold");
       setLocalStatus("notInCall");
+      setLocalMicEnabled(false);
       setTimeout(() => {
         socketRef.current?.emit(
           "hold-call",
@@ -600,6 +604,7 @@ function ParticipantActions({
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
       setLocalStatus("inCall");
+      setLocalMicEnabled(true);
       const callId =
         currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
       if (currentCallID.length === 0) {
@@ -629,6 +634,7 @@ function ParticipantActions({
       setCallStatus("notInCall");
       setLocalStatus("notInCall");
       setCurrentCallID("");
+      setLocalMicEnabled(false);
       const callId =
         currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
       if (currentCallID.length === 0) {
@@ -697,8 +703,9 @@ function ParticipantActions({
         data.map((call: any) => {
           console.log({ call });
           if (
-            call?.AssignedToUserName.toString() === name &&
-            call?.CallStatus === "New"
+            call?.AssignedToUserName?.toString() === name &&
+            call?.CallStatus === "New" && call?.CallPlacedByLocationID?.toString() ===
+            participant?.identity?.toString()
           ) {
             setPendingCall(call);
             setShowModal(true);
