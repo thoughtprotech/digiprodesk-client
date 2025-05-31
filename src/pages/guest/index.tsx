@@ -347,7 +347,6 @@ export default function Index() {
   // const receptionistVideoActive = useRef(false);
   const room = "quickstart-room";
 
-
   const [, setMicEnabled] = useState<boolean>(false);
   const [, setCameraEnabled] = useState<boolean>(true);
 
@@ -379,7 +378,10 @@ export default function Index() {
         if (data.token) {
           await roomInstance.connect(
             process.env.NEXT_PUBLIC_LIVEKIT_URL!,
-            data.token
+            data.token,
+            {
+              autoSubscribe: false,
+            }
           );
           await roomInstance.localParticipant.setCameraEnabled(true);
           await roomInstance.localParticipant.setMicrophoneEnabled(false);
@@ -453,6 +455,7 @@ export default function Index() {
               participant.audioTrackPublications.forEach((publication) => {
                 console.log("HOST UNMUTUED", hostId);
                 publication.setSubscribed(true);
+                roomInstance.localParticipant.setMicrophoneEnabled(true);
               });
             }
           });
@@ -468,6 +471,7 @@ export default function Index() {
               participant.audioTrackPublications.forEach((publication) => {
                 console.log("HOST MUTED", hostId);
                 publication.setSubscribed(false);
+                roomInstance.localParticipant.setMicrophoneEnabled(false);
               });
             }
           });
@@ -740,9 +744,15 @@ function MyVideoConference() {
     { onlySubscribed: true }
   );
 
+  console.log({ allTracks });
+
   // filter out any track from the local participant
   const remoteTracks: TrackReferenceOrPlaceholder[] = allTracks.filter(
     (t) => t.participant.sid !== localSid && t.publication?.isSubscribed
+  );
+
+  remoteTracks.map((track) =>
+    console.log("IS SUBSCRIBED?", track.publication?.isSubscribed)
   );
 
   const localTrack: TrackReferenceOrPlaceholder[] = allTracks.filter(

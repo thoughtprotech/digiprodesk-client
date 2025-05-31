@@ -487,6 +487,7 @@ function ParticipantActions({
   const [pendingCall, setPendingCall] = useState<any>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [localMicEnabled, setLocalMicEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     socketRef.current = socket;
@@ -668,6 +669,7 @@ function ParticipantActions({
   const unmuteHostForGuest = async () => {
     if (socketRef.current) {
       roomInstance.localParticipant.setMicrophoneEnabled(true);
+      setLocalMicEnabled(true);
       setTimeout(() => {
         socketRef.current?.emit(
           "unmute-host",
@@ -684,6 +686,7 @@ function ParticipantActions({
   const muteHostForGuest = async () => {
     if (socketRef.current) {
       roomInstance.localParticipant.setMicrophoneEnabled(false);
+      setLocalMicEnabled(false);
       setTimeout(() => {
         socketRef.current?.emit(
           "mute-host",
@@ -782,22 +785,20 @@ function ParticipantActions({
       <div className="absolute top-[2px] right-[2px] rounded-md bg-black/50">
         {callStatus === "notInCall" && (
           <Tooltip
-            tooltip={
-              room.localParticipant.isMicrophoneEnabled ? "Mute" : "Unmute"
-            }
+            tooltip={localMicEnabled ? "Mute" : "Unmute"}
             position="bottom"
           >
             <button
               className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
               onClick={() => {
-                if (room.localParticipant.isMicrophoneEnabled) {
+                if (localMicEnabled) {
                   muteHostForGuest();
                 } else {
                   unmuteHostForGuest();
                 }
               }}
             >
-              {room.localParticipant.isMicrophoneEnabled ? (
+              {localMicEnabled ? (
                 <Mic className="w-4 h-4" />
               ) : (
                 <MicOff className="w-4 h-4" />
