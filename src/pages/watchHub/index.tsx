@@ -891,54 +891,56 @@ function ParticipantActions({
           <h1 className="text-xs font-bold">Missed</h1>
         </div>
       )}
-      {showModal && (
-        <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center">
-          <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
-            <div>
-              <h1 className="text-orange-500 font-bold">Incoming Call</h1>
-              <h1>{locationDetails?.LocationName} Modal</h1>
-            </div>
-            <div className="flex gap-2 items-center">
+      {showModal &&
+        pendingCall?.LocationID.toString() ===
+          participant.identity.toString() && (
+          <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center">
+            <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
               <div>
-                <img
-                  src={`/images/incomingCall.gif`}
-                  alt="User Profile"
-                  // onError={() => setImgError(true)}
-                  className="w-28 h-28 object-cover rounded-full"
-                />
+                <h1 className="text-orange-500 font-bold">Incoming Call</h1>
+                <h1>{locationDetails?.LocationName} Modal</h1>
               </div>
-              <div>
-                <h1 className="font-bold text-2xl whitespace-nowrap">
-                  {pendingCall?.CallPlacedByLocationName}
-                </h1>
+              <div className="flex gap-2 items-center">
+                <div>
+                  <img
+                    src={`/images/incomingCall.gif`}
+                    alt="User Profile"
+                    // onError={() => setImgError(true)}
+                    className="w-28 h-28 object-cover rounded-full"
+                  />
+                </div>
+                <div>
+                  <h1 className="font-bold text-2xl whitespace-nowrap">
+                    {pendingCall?.CallPlacedByLocationName}
+                  </h1>
+                </div>
               </div>
-            </div>
-            <div className="w-full flex items-center gap-2 whitespace-nowrap">
-              <button
-                className="w-full px-2 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2"
-                onClick={() => {
-                  setPendingCall(null);
-                  setShowModal(false);
-                  attendCall();
-                }}
-              >
-                <PhoneCallIcon className="text-green-500" />
-                <h1 className="font-bold">Attend Call</h1>
-              </button>
-              <button
-                className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2"
-                onClick={() => {
-                  holdIncomingCall();
-                  setShowModal(false);
-                }}
-              >
-                <Pause className="text-indigo-500" />
-                <h1 className="font-bold">Hold Call</h1>
-              </button>
+              <div className="w-full flex items-center gap-2 whitespace-nowrap">
+                <button
+                  className="w-full px-2 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2"
+                  onClick={() => {
+                    setPendingCall(null);
+                    setShowModal(false);
+                    attendCall();
+                  }}
+                >
+                  <PhoneCallIcon className="text-green-500" />
+                  <h1 className="font-bold">Attend Call</h1>
+                </button>
+                <button
+                  className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2"
+                  onClick={() => {
+                    holdIncomingCall();
+                    setShowModal(false);
+                  }}
+                >
+                  <Pause className="text-indigo-500" />
+                  <h1 className="font-bold">Hold Call</h1>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }
