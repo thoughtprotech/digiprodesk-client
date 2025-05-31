@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-asserted-optional-chain */
 import Layout from "@/components/Layout";
 import {
+  Disc,
   MapPin,
   Mic,
   MicOff,
@@ -10,6 +11,7 @@ import {
   PhoneIncoming,
   PhoneOff,
   Play,
+  UserIcon,
   Video,
   VideoOff,
   XCircle,
@@ -463,6 +465,48 @@ function ParticipantActions({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [localMicEnabled, setLocalMicEnabled] = useState<boolean>(false);
   const [locationDetails, setLocationDetails] = useState<Location>();
+  const [isRecording, setIsRecording] = useState<boolean>(false);
+  const [egressId, setEgressId] = useState(false);
+  const [showPersonIcon, setShowPersonIcon] = useState(false);
+  const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const toggleRecording = async (callId: any) => {
+    if (!isRecording) {
+      try {
+        const fileName = `${callId}`;
+        const response = await fetch(
+          process.env.NEXT_PUBLIC_STARTRECORDING_API!,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              room: "quickstart-room",
+              fileName: fileName,
+            }),
+          }
+        );
+        const data = await response.json();
+        if (response.ok) {
+          setIsRecording(true);
+          setEgressId(data.egressId);
+        } else {
+          console.error("Failed to start recording:", data.error);
+        }
+      } catch (error) {
+        console.error("Error starting recording:", error);
+      }
+    } else {
+      await fetch(process.env.NEXT_PUBLIC_STOPRECORDING_API!, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ egressId }),
+      });
+
+      setIsRecording(false);
+    }
+  };
 
   useEffect(() => {
     filteredUserLocationData.map((loc) => {
@@ -550,6 +594,9 @@ function ParticipantActions({
   const holdCall = async () => {
     console.log("Toggling Mic");
     if (socketRef.current) {
+      if (isRecording) {
+        toggleRecording(currentCallID);
+      }
       console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
@@ -628,6 +675,9 @@ function ParticipantActions({
   const endGuestCall = async () => {
     console.log("Toggling Mic");
     if (socketRef.current) {
+      if (isRecording) {
+        toggleRecording(currentCallID);
+      }
       console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(false);
       roomInstance.localParticipant.setMicrophoneEnabled(false);
@@ -704,14 +754,16 @@ function ParticipantActions({
           console.log({ call });
           if (
             call?.AssignedToUserName?.toString() === name &&
-            call?.CallStatus === "New" && call?.CallPlacedByLocationID?.toString() ===
-            participant?.identity?.toString()
+            call?.CallStatus === "New" &&
+            call?.CallPlacedByLocationID?.toString() ===
+              participant?.identity?.toString()
           ) {
             setPendingCall(call);
             setShowModal(true);
           }
         });
       });
+
       socketRef.current.on("call-missed", (data) => {
         console.log("CALL MISSED", { data });
         if (
@@ -722,6 +774,29 @@ function ParticipantActions({
           setPendingCall(null);
           setShowModal(false);
           setCallStatus("missed");
+        }
+      });
+
+      socketRef.current?.on("person-detected-request", (data) => {
+        if (data.locationID.toString() === participant.identity.toString()) {
+          if (data.detected) {
+            setShowPersonIcon(true);
+
+            // Clear old timer and restart 30s timer
+            if (personIconTimerRef.current) {
+              clearTimeout(personIconTimerRef.current);
+            }
+
+            personIconTimerRef.current = setTimeout(() => {
+              setShowPersonIcon(false);
+            }, 30000);
+          } else {
+            setShowPersonIcon(false); // Optional: hide icon early if person left
+            if (personIconTimerRef.current) {
+              clearTimeout(personIconTimerRef.current);
+              personIconTimerRef.current = null;
+            }
+          }
         }
       });
     }
@@ -835,6 +910,20 @@ function ParticipantActions({
                 )}
               </button>
             </Tooltip>
+            <Tooltip
+              tooltip={isRecording ? "Stop Recording" : "Start Recording"}
+              position="bottom"
+            >
+              <button
+                className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
+                  isRecording && "bg-orange/500"
+                } duration-300`}
+                onClick={toggleRecording}
+              >
+                <Disc className="w-4 h-4" />
+              </button>
+            </Tooltip>
+
             <Tooltip tooltip={"Hold Call"} position="bottom">
               <button
                 className="px-2 py-1 rounded-md cursor-pointer hover:bg-indigo-500/30 duration-300"
@@ -891,9 +980,15 @@ function ParticipantActions({
           <h1 className="text-xs font-bold">Missed</h1>
         </div>
       )}
+      {showPersonIcon && (
+        <div className="absolute bottom-[2px] right-[2px] flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
+          <UserIcon className="w-4 h-4 text-orange-400" />
+          <span className="text-xs font-semibold">Guest</span>
+        </div>
+      )}
       {showModal &&
         pendingCall?.CallPlacedByLocationID?.toString() ===
-        participant?.identity?.toString() && (
+          participant?.identity?.toString() && (
           <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center">
             <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
               <div>
