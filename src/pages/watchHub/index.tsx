@@ -222,12 +222,6 @@ export default function Index() {
     socketRef.current?.emit("get-calls");
   };
 
-  const toggleLocalMute = () => {
-    roomInstance.localParticipant.setMicrophoneEnabled(
-      !roomInstance.localParticipant.isMicrophoneEnabled
-    );
-  };
-
   const toggleLocalCamera = () => {
     roomInstance.localParticipant.setCameraEnabled(
       !roomInstance.localParticipant.isCameraEnabled
@@ -366,7 +360,6 @@ export default function Index() {
                 name={userId}
                 roomInstance={roomInstance}
                 filteredUserLocationData={filteredUserLocationData}
-                toggleLocalMute={toggleLocalMute}
                 toggleLocalCamera={toggleLocalCamera}
                 localStatus={localStatus}
                 setLocalStatus={setLocalStatus}
@@ -385,7 +378,6 @@ function MyVideoConference({
   name,
   roomInstance,
   filteredUserLocationData,
-  toggleLocalMute,
   toggleLocalCamera,
   localStatus,
   setLocalStatus,
@@ -393,7 +385,6 @@ function MyVideoConference({
   name: string;
   roomInstance: any;
   filteredUserLocationData: Location[];
-  toggleLocalMute: () => void;
   toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
@@ -432,7 +423,6 @@ function MyVideoConference({
             participant={track.participant}
             name={name}
             roomInstance={roomInstance}
-            toggleLocalMute={toggleLocalMute}
             toggleLocalCamera={toggleLocalCamera}
             localStatus={localStatus}
             setLocalStatus={setLocalStatus}
@@ -448,7 +438,6 @@ function ParticipantActions({
   participant,
   name,
   roomInstance,
-  toggleLocalMute,
   toggleLocalCamera,
   localStatus,
   setLocalStatus,
@@ -457,7 +446,6 @@ function ParticipantActions({
   participant: Participant;
   name: string;
   roomInstance: any;
-  toggleLocalMute: () => void;
   toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
@@ -695,6 +683,13 @@ function ParticipantActions({
     }
   };
 
+  const toggleLocalMute = () => {
+    roomInstance.localParticipant.setMicrophoneEnabled(
+      !roomInstance.localParticipant.isMicrophoneEnabled
+    );
+    setLocalMicEnabled(!roomInstance.localParticipant.isMicrophoneEnabled);
+  };
+
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("call-list-update", (data) => {
@@ -804,16 +799,14 @@ function ParticipantActions({
         {callStatus === "inCall" && (
           <>
             <Tooltip
-              tooltip={
-                room.localParticipant.isMicrophoneEnabled ? "Mute" : "Unmute"
-              }
+              tooltip={localMicEnabled ? "Mute" : "Unmute"}
               position="bottom"
             >
               <button
                 className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                 onClick={toggleLocalMute}
               >
-                {room.localParticipant.isMicrophoneEnabled ? (
+                {localMicEnabled ? (
                   <Mic className="w-4 h-4" />
                 ) : (
                   <MicOff className="w-4 h-4" />
