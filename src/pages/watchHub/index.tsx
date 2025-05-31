@@ -48,7 +48,7 @@ export default function Index() {
 
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const [guestCount] = useState<number>(0);
+  const [guestCount, setGuestCount] = useState<string[]>([]);
   const [locationsOnline] = useState<number>(0);
   const [filters] = useState<{
     onHold: string[];
@@ -276,7 +276,7 @@ export default function Index() {
                     <Phone className="w-5 h-5 text-orange-500" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <h1 className="font-bold text-xl">{guestCount}</h1>
+                    <h1 className="font-bold text-xl">{guestCount.length}</h1>
                     <h1 className="w-fit text-[0.65rem] font-bold text-orange-500">
                       Guest(s) Detected
                     </h1>
@@ -365,6 +365,7 @@ export default function Index() {
                 toggleLocalCamera={toggleLocalCamera}
                 localStatus={localStatus}
                 setLocalStatus={setLocalStatus}
+                setGuestCount={setGuestCount}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -383,6 +384,7 @@ function MyVideoConference({
   toggleLocalCamera,
   localStatus,
   setLocalStatus,
+  setGuestCount,
 }: {
   name: string;
   roomInstance: any;
@@ -390,6 +392,7 @@ function MyVideoConference({
   toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
+  setGuestCount: any;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -429,6 +432,7 @@ function MyVideoConference({
             localStatus={localStatus}
             setLocalStatus={setLocalStatus}
             filteredUserLocationData={filteredUserLocationData}
+            setGuestCount={setGuestCount}
           />
         </div>
       ))}
@@ -444,6 +448,7 @@ function ParticipantActions({
   localStatus,
   setLocalStatus,
   filteredUserLocationData,
+  setGuestCount,
 }: {
   participant: Participant;
   name: string;
@@ -452,6 +457,7 @@ function ParticipantActions({
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
   filteredUserLocationData: Location[];
+  setGuestCount: any;
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -778,18 +784,25 @@ function ParticipantActions({
 
       socketRef.current?.on("guest-detected-request", (data) => {
         console.log("GUEST DETECTED", { data });
-        if (
-          data?.locationID?.toString() === participant?.identity?.toString()
-        ) {
+        const id = data?.locationID?.toString();
+        if (id === participant?.identity?.toString()) {
+          setGuestCount((prev: string[]) => {
+            // If it's already in the array, return prev unchanged.
+            if (prev.includes(id)) {
+              return prev;
+            }
+            // Otherwise, append it
+            return [...prev, id];
+          });
           setShowPersonIcon(true);
         }
       });
 
       socketRef.current?.on("guest-not-detected-request", (data) => {
-        console.log("GUEST DETECTED", { data });
-        if (
-          data?.locationID?.toString() === participant?.identity?.toString()
-        ) {
+        console.log("GUEST NOT DETECTED", { data });
+        const id = data?.locationID?.toString();
+        if (id === participant?.identity?.toString()) {
+          setGuestCount((prev: string[]) => prev.filter((item) => item !== id));
           setShowPersonIcon(false);
         }
       });
@@ -825,7 +838,7 @@ function ParticipantActions({
     <div>
       <div className="absolute top-[2px] left-[2px] rounded-md bg-black/50">
         <div className="flex items-center">
-          <div className="px-2 py-1">
+          <div className="pl-2 py-1">
             <h1 className="font-bold text-xs">
               {locationDetails?.LocationName}
             </h1>
