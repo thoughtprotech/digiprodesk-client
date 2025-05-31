@@ -468,7 +468,6 @@ function ParticipantActions({
   const [isRecording, setIsRecording] = useState<boolean>(false);
   const [egressId, setEgressId] = useState(false);
   const [showPersonIcon, setShowPersonIcon] = useState(false);
-  const personIconTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
