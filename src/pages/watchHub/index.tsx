@@ -98,7 +98,6 @@ export default function Index() {
       try {
         const resp = await fetch(`/api/token?room=${room}&username=${userId}`);
         const data = await resp.json();
-        console.log({ data });
         if (!mounted) return;
         if (data.token) {
           await roomInstance.connect(
@@ -215,10 +214,6 @@ export default function Index() {
       socketRef.current = socket;
     }
   }, [socket]);
-
-  useEffect(() => {
-    console.log({ filters });
-  }, [filters]);
 
   const getCallList = () => {
     socketRef.current?.emit("get-calls");
@@ -415,6 +410,15 @@ function MyVideoConference({
     return isNotLocal && hasLocation;
   });
 
+  useEffect(() => {
+    filteredUserLocationData.map((loc) => {
+      remoteTracks.filter(
+        (t) =>
+          t?.participant?.identity?.toString() === loc?.LocationID?.toString()
+      );
+    });
+  }, [filteredUserLocationData, remoteTracks]);
+
   return (
     <div className="w-full h-full grid grid-cols-4 gap-2">
       {remoteTracks.map((track, index) => (
@@ -425,6 +429,7 @@ function MyVideoConference({
           {/* Render each participant tile manually */}
           <GuestTile trackRef={track} />
           <ParticipantActions
+            remoteTracks={remoteTracks}
             participant={track.participant}
             name={name}
             roomInstance={roomInstance}
@@ -441,6 +446,7 @@ function MyVideoConference({
 }
 
 function ParticipantActions({
+  remoteTracks,
   participant,
   name,
   roomInstance,
@@ -450,6 +456,7 @@ function ParticipantActions({
   filteredUserLocationData,
   setGuestCount,
 }: {
+  remoteTracks: TrackReferenceOrPlaceholder[];
   participant: Participant;
   name: string;
   roomInstance: any;
@@ -519,16 +526,14 @@ function ParticipantActions({
         setLocationDetails(loc);
       }
     });
-  }, [filteredUserLocationData]);
+  }, [filteredUserLocationData, remoteTracks]);
 
   useEffect(() => {
     socketRef.current = socket;
   }, [socket]);
 
   const toggleMic = async () => {
-    console.log("Toggling Mic");
     if (socketRef.current) {
-      console.log("Socket There", socketRef.current);
       socketRef.current?.emit(
         "toggle-guest-mic",
         JSON.stringify({ guestId: participant.identity })
@@ -545,7 +550,6 @@ function ParticipantActions({
       });
     }
     if (socketRef.current) {
-      console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
@@ -571,9 +575,7 @@ function ParticipantActions({
         return <Toast t={t} content="End Current Call" type="warning" />;
       });
     }
-    console.log("Toggling Mic");
     if (socketRef.current) {
-      console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
@@ -597,12 +599,10 @@ function ParticipantActions({
   };
 
   const holdCall = async () => {
-    console.log("Toggling Mic");
     if (socketRef.current) {
       if (isRecording) {
         toggleRecording(currentCallID);
       }
-      console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("onHold");
@@ -622,9 +622,7 @@ function ParticipantActions({
   };
 
   const holdIncomingCall = async () => {
-    console.log("Toggling Mic");
     if (socketRef.current) {
-      console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("onHold");
@@ -649,9 +647,7 @@ function ParticipantActions({
         return <Toast t={t} content="End Current Call" type="warning" />;
       });
     }
-    console.log("Toggling Mic");
     if (socketRef.current) {
-      console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
       setCallStatus("inCall");
@@ -678,12 +674,10 @@ function ParticipantActions({
   };
 
   const endGuestCall = async () => {
-    console.log("Toggling Mic");
     if (socketRef.current) {
       if (isRecording) {
         toggleRecording(currentCallID);
       }
-      console.log("Socket There", socketRef.current);
       roomInstance.localParticipant.setCameraEnabled(false);
       roomInstance.localParticipant.setMicrophoneEnabled(false);
       setCallStatus("notInCall");
@@ -754,9 +748,7 @@ function ParticipantActions({
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("call-list-update", (data) => {
-        console.log({ data });
         data.map((call: any) => {
-          console.log({ call });
           if (
             call?.AssignedToUserName?.toString() === name &&
             call?.CallStatus === "New" &&
@@ -783,7 +775,6 @@ function ParticipantActions({
       });
 
       socketRef.current?.on("guest-detected-request", (data) => {
-        console.log("GUEST DETECTED", { data });
         const id = data?.locationID?.toString();
         if (id === participant?.identity?.toString()) {
           setGuestCount((prev: string[]) => {
@@ -799,7 +790,6 @@ function ParticipantActions({
       });
 
       socketRef.current?.on("guest-not-detected-request", (data) => {
-        console.log("GUEST NOT DETECTED", { data });
         const id = data?.locationID?.toString();
         if (id === participant?.identity?.toString()) {
           setGuestCount((prev: string[]) => prev.filter((item) => item !== id));
@@ -808,10 +798,6 @@ function ParticipantActions({
       });
     }
   }, [socket]);
-
-  useEffect(() => {
-    console.log({ showModal });
-  }, [showModal]);
 
   useEffect(() => {
     const audio = new Audio("/sounds/call-ringtone.mp3");
