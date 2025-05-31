@@ -52,7 +52,7 @@ export default function Index() {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
   const [guestCount, setGuestCount] = useState<string[]>([]);
-  const [locationsOnline] = useState<number>(0);
+  const [locationsOnline, setLocationsOnline] = useState<string[]>([]);
   const [filters] = useState<{
     onHold: string[];
     missed: string[];
@@ -255,7 +255,9 @@ export default function Index() {
                   <MapPin className="w-5 h-5 text-purple-500" />
                 </div>
                 <div className="flex items-center gap-2">
-                  <h1 className="font-bold text-xl">{locationsOnline}</h1>
+                  <h1 className="font-bold text-xl">
+                    {locationsOnline.length}
+                  </h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-purple-500">
                     Location(s) Online
                   </h1>
@@ -364,6 +366,7 @@ export default function Index() {
                 localStatus={localStatus}
                 setLocalStatus={setLocalStatus}
                 setGuestCount={setGuestCount}
+                setLocationsOnline={setLocationsOnline}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -383,6 +386,7 @@ function MyVideoConference({
   localStatus,
   setLocalStatus,
   setGuestCount,
+  setLocationsOnline,
 }: {
   name: string;
   roomInstance: any;
@@ -391,6 +395,7 @@ function MyVideoConference({
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
   setGuestCount: any;
+  setLocationsOnline: any;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -421,6 +426,14 @@ function MyVideoConference({
       );
     });
   }, [filteredUserLocationData, remoteTracks]);
+
+  useEffect(() => {
+    const identities = remoteTracks
+      .map((t) => t?.participant?.identity?.toString())
+      .filter(Boolean); // removes undefined/null
+
+    setLocationsOnline(identities);
+  }, [remoteTracks]);
 
   return (
     <div className="w-full h-full grid grid-cols-4 gap-2">
