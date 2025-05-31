@@ -777,26 +777,21 @@ function ParticipantActions({
         }
       });
 
-      socketRef.current?.on("person-detected-request", (data) => {
-        if (data.locationID.toString() === participant.identity.toString()) {
-          if (data.detected) {
-            setShowPersonIcon(true);
+      socketRef.current?.on("guest-detected-request", (data) => {
+        console.log("GUEST DETECTED", { data });
+        if (
+          data?.locationID?.toString() === participant?.identity?.toString()
+        ) {
+          setShowPersonIcon(true);
+        }
+      });
 
-            // Clear old timer and restart 30s timer
-            if (personIconTimerRef.current) {
-              clearTimeout(personIconTimerRef.current);
-            }
-
-            personIconTimerRef.current = setTimeout(() => {
-              setShowPersonIcon(false);
-            }, 30000);
-          } else {
-            setShowPersonIcon(false); // Optional: hide icon early if person left
-            if (personIconTimerRef.current) {
-              clearTimeout(personIconTimerRef.current);
-              personIconTimerRef.current = null;
-            }
-          }
+      socketRef.current?.on("guest-not-detected-request", (data) => {
+        console.log("GUEST DETECTED", { data });
+        if (
+          data?.locationID?.toString() === participant?.identity?.toString()
+        ) {
+          setShowPersonIcon(false);
         }
       });
     }

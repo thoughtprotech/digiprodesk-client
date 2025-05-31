@@ -14,7 +14,7 @@ import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
 import logOut from "@/utils/logOut";
-import { Room, Track } from "livekit-client";
+import { LocalVideoTrack, Room, Track } from "livekit-client";
 import { useSocket } from "@/context/SocketContext";
 import { io } from "socket.io-client";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
@@ -350,9 +350,9 @@ export default function Index() {
   const [, setMicEnabled] = useState<boolean>(false);
   const [, setCameraEnabled] = useState<boolean>(true);
 
-  // const [, setStatus] = useState<"idle" | "connecting" | "connected" | "error">(
-  //   "idle"
-  // );
+  const hiddenVideoRef = useRef<HTMLVideoElement>(null);
+  // “detected” flag so we don’t flood the console with repeated logs
+  const [detected, setDetected] = useState(false);
 
   const [roomInstance] = useState(
     () =>
@@ -367,6 +367,14 @@ export default function Index() {
   useEffect(() => {
     if (!location) return;
     let mounted = true;
+    let detectionInterval: number | undefined;
+    let model: cocoSsd.ObjectDetection;
+
+    // 1) Load coco-ssd ONCE on mount
+    const loadModel = async () => {
+      model = await cocoSsd.load();
+    };
+    loadModel();
     (async () => {
       try {
         const resp = await fetch(
@@ -386,6 +394,78 @@ export default function Index() {
           await roomInstance.localParticipant.setCameraEnabled(true);
           await roomInstance.localParticipant.setMicrophoneEnabled(false);
         }
+        setTimeout(() => {
+          attachLocalVideoTrackIfReady(model);
+        }, 1000);
+
+        function attachLocalVideoTrackIfReady(
+          modelInstance: cocoSsd.ObjectDetection
+        ) {
+          if (
+            !mounted ||
+            !roomInstance.localParticipant ||
+            !hiddenVideoRef.current
+          ) {
+            return;
+          }
+
+          // LiveKit v2: use getTrackPublications() to find our LocalVideoTrack
+          const publications =
+            roomInstance.localParticipant.getTrackPublications();
+
+          let localVidTrack: LocalVideoTrack | undefined = undefined;
+          for (const pub of publications.values()) {
+            const track = pub.track;
+            if (
+              track &&
+              track.kind === Track.Kind.Video &&
+              track.source === Track.Source.Camera
+            ) {
+              localVidTrack = track as LocalVideoTrack;
+              break;
+            }
+          }
+          if (!localVidTrack) {
+            console.warn("No local camera track found yet.");
+            return;
+          }
+
+          // Build a MediaStream from the LocalVideoTrack
+          const mediaStream = new MediaStream([localVidTrack.mediaStreamTrack]);
+          const videoEl = hiddenVideoRef.current;
+          videoEl.srcObject = mediaStream;
+          videoEl.play().catch(() => {
+            // play() might be blocked until user interaction; we can ignore.
+          });
+
+          // 4) Start a 1-second polling loop to run model.detect(...)
+          detectionInterval = window.setInterval(async () => {
+            if (!modelInstance || !hiddenVideoRef.current) return;
+            const predictions = await modelInstance.detect(
+              hiddenVideoRef.current
+            );
+
+            const foundPerson = predictions.some((p) => p.class === "person");
+            if (foundPerson && !detected) {
+              console.log("Person detected", location?.LocationID);
+              setDetected(true);
+              socketRef.current?.emit(
+                "guest-detected",
+                JSON.stringify({ locationID: location?.LocationID?.toString() })
+              );
+              // After 5 seconds, clear the flag so we can log again
+              setTimeout(() => {
+                setDetected(false);
+              }, 5000);
+            } else {
+              socketRef.current?.emit(
+                "guest-not-detected",
+                JSON.stringify({ locationID: location?.LocationID?.toString() })
+              );
+              console.log("No Person Detected");
+            }
+          }, 3000);
+        }
       } catch (e) {
         console.error(e);
       }
@@ -394,6 +474,9 @@ export default function Index() {
     return () => {
       mounted = false;
       roomInstance.disconnect();
+      if (detectionInterval) {
+        clearInterval(detectionInterval);
+      }
     };
   }, [location]);
 
@@ -509,6 +592,13 @@ export default function Index() {
 
   return (
     <WithRole>
+      {/* Hidden video for COCO-SSD */}
+      <video
+        ref={hiddenVideoRef}
+        style={{ display: "none" }}
+        muted
+        playsInline
+      />
       <RoomContext.Provider value={roomInstance}>
         <div className="w-full h-screen bg-background flex flex-col text-white">
           <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
