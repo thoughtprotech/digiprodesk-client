@@ -946,7 +946,7 @@ function ParticipantActions({
       </div>
       {/* Controls */}
       <div className="absolute top-[2px] right-[2px] rounded-md bg-black/50">
-        {callStatus === "notInCall" && (
+        {(callStatus === "notInCall" || callStatus === "onHold") && (
           <Tooltip
             tooltip={localMicEnabled ? "Mute" : "Unmute"}
             position="bottom"
@@ -1135,7 +1135,7 @@ function ParticipantActions({
                   }}
                 >
                   <PhoneCallIcon className="text-green-500" />
-                  <h1 className="font-bold">Attend Call</h1>
+                  <h1 className="font-bold">Accept Call</h1>
                 </button>
                 <button
                   className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2"
@@ -1185,7 +1185,7 @@ function ParticipantActions({
               </div>
               {/* Controls */}
               <div className="absolute top-2 right-2 rounded-md bg-black/50">
-                {callStatus === "notInCall" && (
+                {(callStatus === "notInCall" || callStatus === "onHold") && (
                   <Tooltip
                     tooltip={localMicEnabled ? "Mute" : "Unmute"}
                     position="bottom"

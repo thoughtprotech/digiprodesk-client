@@ -120,7 +120,6 @@ export default function Index() {
               });
               roomInstance.localParticipant.setMicrophoneEnabled(false);
               setInCall(false);
-              setCallStatus("notInCall");
             }
           });
           setCallStatus("onHold");

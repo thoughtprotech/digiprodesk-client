@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useRef, useState } from 'react';
-import toast from 'react-hot-toast';
-import Toast from './Toast';
+import React, { useRef, useState } from "react";
+import toast from "react-hot-toast";
+import Toast from "./Toast";
 
 interface InputProps {
   placeholder?: string;
@@ -9,21 +9,22 @@ interface InputProps {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   type?:
-    | 'text'
-    | 'email'
-    | 'password'
-    | 'number'
-    | 'tel'
-    | 'date'
-    | 'textArea'
-    | 'file'
-    | 'video'
-    | 'checkBox'; // Default type is text
+    | "text"
+    | "email"
+    | "password"
+    | "number"
+    | "tel"
+    | "date"
+    | "textArea"
+    | "file"
+    | "video"
+    | "checkBox"; // Default type is text
   value?: string | number;
   className?: string;
   required?: boolean;
   name?: string;
   ref?: React.RefObject<HTMLInputElement | null>;
+  readOnly?: boolean;
 }
 
 // Define maximum file sizes (in bytes)
@@ -31,14 +32,15 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB for images
 const MAX_VIDEO_SIZE = 50 * 1024 * 1024; // 50MB for videos
 
 const Input: React.FC<InputProps> = ({
-  placeholder = '',
+  placeholder = "",
   onChange,
-  type = 'text',
+  type = "text",
   value,
-  className = '',
+  className = "",
   required = false,
   name,
-  ref
+  ref,
+  readOnly = false,
 }) => {
   const [dragging, setDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -56,38 +58,41 @@ const Input: React.FC<InputProps> = ({
   /**
    * Generic file handler which distinguishes between image and video.
    */
-  const handleFileChange = (uploadedFile: File | null, fileType: 'image' | 'video') => {
+  const handleFileChange = (
+    uploadedFile: File | null,
+    fileType: "image" | "video"
+  ) => {
     if (uploadedFile) {
-      if (fileType === 'image') {
-        const validImageTypes = ['image/jpeg', 'image/png'];
+      if (fileType === "image") {
+        const validImageTypes = ["image/jpeg", "image/png"];
         if (!validImageTypes.includes(uploadedFile.type)) {
           return toast.custom((t: any) => (
             <Toast
               t={t}
-              content='Please upload a valid image file (JPG or PNG only).'
-              type='warning'
+              content="Please upload a valid image file (JPG or PNG only)."
+              type="warning"
             />
           ));
         }
         if (uploadedFile.size > MAX_IMAGE_SIZE) {
           return toast.custom((t: any) => (
-            <Toast t={t} content='Image size exceeds 5MB.' type='warning' />
+            <Toast t={t} content="Image size exceeds 5MB." type="warning" />
           ));
         }
-      } else if (fileType === 'video') {
-        const validVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+      } else if (fileType === "video") {
+        const validVideoTypes = ["video/mp4", "video/webm", "video/ogg"];
         if (!validVideoTypes.includes(uploadedFile.type)) {
           return toast.custom((t: any) => (
             <Toast
               t={t}
-              content='Please upload a valid video file (MP4, WebM, Ogg).'
-              type='warning'
+              content="Please upload a valid video file (MP4, WebM, Ogg)."
+              type="warning"
             />
           ));
         }
         if (uploadedFile.size > MAX_VIDEO_SIZE) {
           return toast.custom((t: any) => (
-            <Toast t={t} content='Video size exceeds 50MB.' type='warning' />
+            <Toast t={t} content="Video size exceeds 50MB." type="warning" />
           ));
         }
       }
@@ -96,25 +101,27 @@ const Input: React.FC<InputProps> = ({
       reader.readAsDataURL(uploadedFile);
       if (onChange) {
         const syntheticEvent = {
-          target: { name, value: uploadedFile }
+          target: { name, value: uploadedFile },
         };
-        onChange(syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>);
+        onChange(
+          syntheticEvent as unknown as React.ChangeEvent<HTMLInputElement>
+        );
       }
     }
   };
 
   // IMAGE UPLOAD INPUT
-  if (type === 'file') {
+  if (type === "file") {
     const fileName = file
       ? file.name
-      : typeof value === 'string'
-      ? value.split('/').pop()
-      : '';
+      : typeof value === "string"
+      ? value.split("/").pop()
+      : "";
 
     return (
       <div
         className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm ${
-          dragging ? 'border-indigo-500' : 'border-border'
+          dragging ? "border-indigo-500" : "border-border"
         } ${className}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -122,7 +129,7 @@ const Input: React.FC<InputProps> = ({
           event.preventDefault();
           setDragging(false);
           const uploadedFile = event.dataTransfer?.files[0];
-          handleFileChange(uploadedFile, 'image');
+          handleFileChange(uploadedFile, "image");
         }}
       >
         <label className="cursor-pointer w-full h-full flex items-center rounded-md relative">
@@ -130,7 +137,7 @@ const Input: React.FC<InputProps> = ({
             type="file"
             name={name}
             onChange={(event) =>
-              handleFileChange(event.target.files?.[0] ?? null, 'image')
+              handleFileChange(event.target.files?.[0] ?? null, "image")
             }
             className="hidden"
             accept=".jpg,.jpeg,.png"
@@ -145,7 +152,11 @@ const Input: React.FC<InputProps> = ({
             </div>
           ) : (
             <div className="text-center text-zinc-600 text-sm">
-              {dragging ? <p>Drop the file here</p> : <p>{placeholder || 'Click To Upload Image'}</p>}
+              {dragging ? (
+                <p>Drop the file here</p>
+              ) : (
+                <p>{placeholder || "Click To Upload Image"}</p>
+              )}
             </div>
           )}
         </label>
@@ -154,17 +165,17 @@ const Input: React.FC<InputProps> = ({
   }
 
   // VIDEO UPLOAD INPUT
-  if (type === 'video') {
+  if (type === "video") {
     const fileName = file
       ? file.name
-      : typeof value === 'string'
-      ? value.split('/').pop()
-      : '';
+      : typeof value === "string"
+      ? value.split("/").pop()
+      : "";
 
     return (
       <div
         className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm ${
-          dragging ? 'border-indigo-500' : 'border-border'
+          dragging ? "border-indigo-500" : "border-border"
         } ${className}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -172,7 +183,7 @@ const Input: React.FC<InputProps> = ({
           event.preventDefault();
           setDragging(false);
           const uploadedFile = event.dataTransfer?.files[0];
-          handleFileChange(uploadedFile, 'video');
+          handleFileChange(uploadedFile, "video");
         }}
       >
         <label className="cursor-pointer w-full h-full flex items-center rounded-md relative">
@@ -180,7 +191,7 @@ const Input: React.FC<InputProps> = ({
             type="file"
             name={name}
             onChange={(event) =>
-              handleFileChange(event.target.files?.[0] ?? null, 'video')
+              handleFileChange(event.target.files?.[0] ?? null, "video")
             }
             className="hidden"
             accept="video/mp4,video/webm,video/ogg"
@@ -195,7 +206,11 @@ const Input: React.FC<InputProps> = ({
             </div>
           ) : (
             <div className="text-center text-zinc-600 text-sm">
-              {dragging ? <p>Drop the file here</p> : <p>{placeholder || 'Click To Upload Video'}</p>}
+              {dragging ? (
+                <p>Drop the file here</p>
+              ) : (
+                <p>{placeholder || "Click To Upload Video"}</p>
+              )}
             </div>
           )}
         </label>
@@ -204,7 +219,7 @@ const Input: React.FC<InputProps> = ({
   }
 
   // TEXTAREA INPUT
-  if (type === 'textArea') {
+  if (type === "textArea") {
     return (
       <textarea
         placeholder={placeholder}
@@ -217,22 +232,27 @@ const Input: React.FC<InputProps> = ({
   }
 
   // CHECKBOX INPUT
-  if (type === 'checkBox') {
+  if (type === "checkBox") {
     return (
       <label className="inline-flex items-center cursor-pointer">
         <div className="relative">
           <input
             type="checkbox"
             onChange={onChange}
-            checked={value === 'true' || value === 1}
+            checked={value === "true" || value === 1}
             name={name}
             className="hidden sr-only"
             ref={ref}
+            readOnly={readOnly}
           />
-          <div className={`w-8 h-fit ${value === "true" ? "bg-green-600" : "bg-red-600"} rounded-full transition duration-300 ease-in-out`}>
+          <div
+            className={`w-8 h-fit ${
+              value === "true" ? "bg-green-600" : "bg-red-600"
+            } rounded-full transition duration-300 ease-in-out`}
+          >
             <div
               className={`toggle-dot w-4 h-4 rounded-full shadow-md transform transition-all duration-300 ease-in-out bg-white ${
-                value === 'true' ? 'translate-x-4' : 'bg-highlight'
+                value === "true" ? "translate-x-4" : "bg-highlight"
               }`}
             />
           </div>
@@ -245,7 +265,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <input
       type={type}
-      placeholder={placeholder || ''}
+      placeholder={placeholder || ""}
       onChange={onChange}
       value={value}
       className={`w-full min-w-44 bg-background text-text placeholder:text-textAlt font-bold border-2 border-border rounded-md p-2 text-sm focus:outline-none ${className}`}

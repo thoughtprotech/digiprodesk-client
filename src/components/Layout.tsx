@@ -740,6 +740,7 @@ export default function Index({
                             type="checkBox"
                             name="Status"
                             value={userOnline.toString()}
+                            readOnly={true}
                           />
                         </div>
                         <h1 className="text-xs font-bold">
