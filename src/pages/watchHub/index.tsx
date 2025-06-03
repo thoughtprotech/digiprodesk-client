@@ -390,7 +390,6 @@ export default function Index() {
                 setOnHoldCount={setOnHoldCount}
                 setMissedCallCount={setMissedCallCount}
                 setCurrentLocalCallID={setCurrentLocalCallID}
-                currentLocalCallID={currentLocalCallID}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -414,7 +413,6 @@ function MyVideoConference({
   setOnHoldCount,
   setMissedCallCount,
   setCurrentLocalCallID,
-  currentLocalCallID,
 }: {
   name: string;
   roomInstance: any;
@@ -427,7 +425,6 @@ function MyVideoConference({
   setOnHoldCount: any;
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
-  currentLocalCallID: string;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
