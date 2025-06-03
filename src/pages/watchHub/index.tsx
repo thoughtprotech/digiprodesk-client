@@ -228,7 +228,12 @@ export default function Index() {
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("call-ended", (data) => {
+        console.log("CALL END", { data });
         const { callId } = data;
+        console.log(
+          `MY CALL? ${{ callId, currentLocalCallID }}`,
+          callId === currentLocalCallID
+        );
         if (callId === currentLocalCallID) {
           console.log("ENDING CALL", { callId });
           roomInstance.localParticipant.setCameraEnabled(false);
@@ -238,7 +243,7 @@ export default function Index() {
         }
       });
     }
-  }, [socket]);
+  }, [socket, currentLocalCallID]);
 
   const getCallList = () => {
     socketRef.current?.emit("get-calls");
@@ -945,7 +950,12 @@ function ParticipantActions({
       });
 
       socketRef.current.on("call-ended", (data) => {
+        console.log("CALL END", { data });
         const { callId } = data;
+        console.log(
+          `MY CALL? ${{ callId, currentCallID }}`,
+          callId === currentCallID
+        );
         if (callId === currentCallID) {
           if (isRecording) {
             toggleRecording();
@@ -960,7 +970,7 @@ function ParticipantActions({
         }
       });
     }
-  }, [socket]);
+  }, [socket, currentCallID]);
 
   useEffect(() => {
     const audio = new Audio("/sounds/call-ringtone.mp3");

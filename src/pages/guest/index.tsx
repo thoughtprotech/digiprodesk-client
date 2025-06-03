@@ -447,7 +447,6 @@ export default function Index() {
 
             const foundPerson = predictions.some((p) => p.class === "person");
             if (foundPerson && !detected) {
-              console.log("Person detected", location?.LocationID);
               setDetected(true);
               socketRef.current?.emit(
                 "guest-detected",
@@ -462,7 +461,6 @@ export default function Index() {
                 "guest-not-detected",
                 JSON.stringify({ locationID: location?.LocationID?.toString() })
               );
-              console.log("No Person Detected");
             }
           }, 3000);
         }
@@ -499,7 +497,7 @@ export default function Index() {
 
   const callHeartBeat = async () => {
     if (socketRef.current) {
-      console.log("SENDING CALL HEARTBEAT");
+      console.log("SENDING CALL HEARTBEAT", { currentCallID });
       socketRef.current?.emit(
         "call-heartbeat",
         JSON.stringify({
@@ -511,6 +509,10 @@ export default function Index() {
       console.log("Socket Not There", socketRef.current);
     }
   };
+
+  useEffect(() => {
+    console.log({ currentCallID });
+  }, [currentCallID]);
 
   useEffect(() => {
     if (socketRef.current && location) {
@@ -596,7 +598,13 @@ export default function Index() {
       });
 
       socketRef.current.on("call-ended", (data) => {
+        console.log("CALL END", { data });
         const { callId } = data;
+        console.log({ currentCallID });
+        console.log(
+          `MY CALL? INCOMING ID: ${callId}`,
+          callId === currentCallID
+        );
         if (callId === currentCallID) {
           roomInstance.remoteParticipants.forEach((participant) => {
             participant.trackPublications.forEach((publication) => {
@@ -610,7 +618,7 @@ export default function Index() {
         }
       });
     }
-  }, [socket, location]);
+  }, [socket, location, currentCallID]);
 
   const heartbeatIntervalRef = useRef<number | null>(null);
 
@@ -894,15 +902,9 @@ function MyVideoConference() {
     { onlySubscribed: true }
   );
 
-  console.log({ allTracks });
-
   // filter out any track from the local participant
   const remoteTracks: TrackReferenceOrPlaceholder[] = allTracks.filter(
     (t) => t.participant.sid !== localSid && t.publication?.isSubscribed
-  );
-
-  remoteTracks.map((track) =>
-    console.log("IS SUBSCRIBED?", track.publication?.isSubscribed)
   );
 
   const localTrack: TrackReferenceOrPlaceholder[] = allTracks.filter(
