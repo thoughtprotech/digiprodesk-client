@@ -1098,7 +1098,7 @@ function ParticipantActions({
             >
               <button
                 className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
-                  isRecording && "bg-orange-500"
+                  isRecording && "bg-orange-500/50"
                 } duration-300`}
                 onClick={() => toggleRecording()}
               >
