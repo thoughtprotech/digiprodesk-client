@@ -543,7 +543,7 @@ function ParticipantActions({
   const toggleRecording = async (callId: any) => {
     if (!isRecording) {
       try {
-        const fileName = `${callId}`;
+        const fileName = `${currentCallID}`;
         const response = await fetch(
           process.env.NEXT_PUBLIC_STARTRECORDING_API!,
           {
@@ -554,6 +554,7 @@ function ParticipantActions({
             body: JSON.stringify({
               room: "quickstart-room",
               fileName: fileName,
+              callId: currentCallID
             }),
           }
         );
@@ -571,7 +572,7 @@ function ParticipantActions({
       await fetch(process.env.NEXT_PUBLIC_STOPRECORDING_API!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ egressId }),
+        body: JSON.stringify({ egressId, callId : currentCallID }),
       });
 
       setIsRecording(false);
