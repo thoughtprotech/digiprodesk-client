@@ -50,7 +50,6 @@ export default function Login() {
         } else {
           router.push('/watchHub');
         }
-        // router.push('/checkInHub');
         return toast.custom((t: any) => <Toast content="Logged In Successfully" type="success" t={t} />);
       })
     } else {
@@ -76,7 +75,7 @@ export default function Login() {
           if (decoded?.role === "Guest") {
             router.push('/guest');
           } else {
-            router.push('/checkInHub');
+            router.push('/watchHub');
           }
         }
       }

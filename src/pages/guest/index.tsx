@@ -93,6 +93,7 @@ export default function Index() {
           setCallStatus("missed");
           setTimeout(() => {
             setCallStatus("notInCall");
+            setCurrentCallID("");
           }, 10000);
         }
       });
@@ -496,6 +497,21 @@ export default function Index() {
     }
   };
 
+  const callHeartBeat = async () => {
+    if (socketRef.current) {
+      console.log("SENDING CALL HEARTBEAT");
+      socketRef.current?.emit(
+        "call-heartbeat",
+        JSON.stringify({
+          callId: currentCallID,
+          userId: "guest",
+        })
+      );
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
   useEffect(() => {
     if (socketRef.current && location) {
       socketRef.current.on("toggle-mic", (data) => {
@@ -510,7 +526,7 @@ export default function Index() {
       });
 
       socketRef.current.on("call-started", (data) => {
-        const { guestId, hostId } = data;
+        const { guestId, hostId, callId } = data;
         console.log({ guestId, hostId });
 
         if (guestId?.toString() === location?.LocationID?.toString()) {
@@ -520,11 +536,12 @@ export default function Index() {
                 publication.setSubscribed(true);
               });
               roomInstance.localParticipant.setMicrophoneEnabled(true);
-              setInCall(true);
-              setCallStatus("inProgress");
-              console.log("CALL STARTED");
             }
           });
+          setInCall(true);
+          setCallStatus("inProgress");
+          console.log("CALL STARTED");
+          setCurrentCallID(callId);
         }
       });
 
@@ -570,14 +587,58 @@ export default function Index() {
                 publication.setSubscribed(false);
               });
               roomInstance.localParticipant.setMicrophoneEnabled(false);
-              setInCall(false);
-              setCallStatus("notInCall");
             }
           });
+          setInCall(false);
+          setCallStatus("notInCall");
+          setCurrentCallID("");
+        }
+      });
+
+      socketRef.current.on("call-ended", (data) => {
+        const { callId } = data;
+        if (callId === currentCallID) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            participant.trackPublications.forEach((publication) => {
+              publication.setSubscribed(false);
+            });
+          });
+          roomInstance.localParticipant.setMicrophoneEnabled(false);
+          setInCall(false);
+          setCallStatus("notInCall");
+          setCurrentCallID("");
         }
       });
     }
   }, [socket, location]);
+
+  const heartbeatIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Clear any existing interval whenever currentCallID changes
+    if (heartbeatIntervalRef.current !== null) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+
+    if (
+      currentCallID.length > 0 &&
+      (callStatus === "inProgress" || callStatus === "onHold")
+    ) {
+      // Use window.setInterval so TS knows it’s the browser version (returns number)
+      heartbeatIntervalRef.current = window.setInterval(() => {
+        callHeartBeat();
+      }, 3000);
+    }
+
+    // Cleanup on unmount or before next effect run
+    return () => {
+      if (heartbeatIntervalRef.current !== null) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+    };
+  }, [currentCallID, callStatus]);
 
   const { saveAudioInputEnabled } = usePersistentUserChoices({
     preventSave: false,

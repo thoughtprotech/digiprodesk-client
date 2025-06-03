@@ -536,7 +536,7 @@ function ParticipantActions({
   const [localMicEnabled, setLocalMicEnabled] = useState<boolean>(false);
   const [locationDetails, setLocationDetails] = useState<Location>();
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [egressId, setEgressId] = useState(false);
+  const [egressId, setEgressId] = useState("");
   const [showPersonIcon, setShowPersonIcon] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
@@ -559,7 +559,8 @@ function ParticipantActions({
           }
         );
         const data = await response.json();
-        if (response.ok) {
+        console.log({ data });
+        if (data.ok) {
           setIsRecording(true);
           setEgressId(data.egressId);
         } else {
@@ -576,6 +577,7 @@ function ParticipantActions({
       });
 
       setIsRecording(false);
+      setEgressId("");
     }
   };
 
@@ -596,6 +598,21 @@ function ParticipantActions({
       socketRef.current?.emit(
         "toggle-guest-mic",
         JSON.stringify({ guestId: participant.identity })
+      );
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
+  const callHeartBeat = async () => {
+    if (socketRef.current) {
+      console.log("SENDING CALL HEARTBEAT");
+      socketRef.current?.emit(
+        "call-heartbeat",
+        JSON.stringify({
+          callId: currentCallID,
+          userId: "receptionist",
+        })
       );
     } else {
       console.log("Socket Not There", socketRef.current);
@@ -894,6 +911,21 @@ function ParticipantActions({
           setShowPersonIcon(false);
         }
       });
+
+      socketRef.current.on("call-ended", (data) => {
+        const { callId } = data;
+        if (callId === currentCallID) {
+          if (isRecording) {
+            toggleRecording(currentCallID);
+          }
+          roomInstance.localParticipant.setCameraEnabled(false);
+          roomInstance.localParticipant.setMicrophoneEnabled(false);
+          setCallStatus("notInCall");
+          setLocalStatus("notInCall");
+          setCurrentCallID("");
+          setLocalMicEnabled(false);
+        }
+      });
     }
   }, [socket]);
 
@@ -917,6 +949,31 @@ function ParticipantActions({
       audioRef.current?.pause();
     }
   }, [showModal]);
+
+  const heartbeatIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Clear any existing interval whenever currentCallID changes
+    if (heartbeatIntervalRef.current !== null) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+
+    if (currentCallID.length > 0) {
+      // Use window.setInterval so TS knows it’s the browser version (returns number)
+      heartbeatIntervalRef.current = window.setInterval(() => {
+        callHeartBeat();
+      }, 3000);
+    }
+
+    // Cleanup on unmount or before next effect run
+    return () => {
+      if (heartbeatIntervalRef.current !== null) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+    };
+  }, [currentCallID]);
 
   return (
     <div>
@@ -1010,7 +1067,7 @@ function ParticipantActions({
                 className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
                   isRecording && "bg-orange/500"
                 } duration-300`}
-                onClick={toggleRecording}
+                onClick={() => toggleRecording(currentCallID)}
               >
                 <Disc className="w-4 h-4" />
               </button>
@@ -1056,7 +1113,7 @@ function ParticipantActions({
             </button>
           )}
         </Tooltip>
-        <Tooltip tooltip="Fullscreen" position="bottom">
+        <Tooltip tooltip="Full Screen" position="bottom">
           <button
             className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
             onClick={() => {
@@ -1253,7 +1310,7 @@ function ParticipantActions({
                         className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
                           isRecording && "bg-orange/500"
                         } duration-300`}
-                        onClick={toggleRecording}
+                        onClick={() => toggleRecording(currentCallID)}
                       >
                         <Disc className="w-4 h-4" />
                       </button>
@@ -1299,7 +1356,7 @@ function ParticipantActions({
                     </button>
                   )}
                 </Tooltip>
-                <Tooltip tooltip="Fullscreen" position="bottom">
+                <Tooltip tooltip="Minimize" position="bottom">
                   <button
                     className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                     onClick={() => {
