@@ -636,7 +636,7 @@ export default function Index() {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
-      }, 3000);
+      }, 30000);
     }
 
     // Cleanup on unmount or before next effect run
