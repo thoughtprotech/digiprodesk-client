@@ -540,7 +540,7 @@ function ParticipantActions({
   const [showPersonIcon, setShowPersonIcon] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  const toggleRecording = async (callId: any) => {
+  const toggleRecording = async () => {
     if (!isRecording) {
       try {
         const fileName = `${currentCallID}`;
@@ -683,7 +683,7 @@ function ParticipantActions({
   const holdCall = async () => {
     if (socketRef.current) {
       if (isRecording) {
-        toggleRecording(currentCallID);
+        toggleRecording();
       }
       roomInstance.localParticipant.setCameraEnabled(true);
       roomInstance.localParticipant.setMicrophoneEnabled(true);
@@ -779,7 +779,7 @@ function ParticipantActions({
   const endGuestCall = async () => {
     if (socketRef.current) {
       if (isRecording) {
-        toggleRecording(currentCallID);
+        toggleRecording();
       }
       roomInstance.localParticipant.setCameraEnabled(false);
       roomInstance.localParticipant.setMicrophoneEnabled(false);
@@ -916,7 +916,7 @@ function ParticipantActions({
         const { callId } = data;
         if (callId === currentCallID) {
           if (isRecording) {
-            toggleRecording(currentCallID);
+            toggleRecording();
           }
           roomInstance.localParticipant.setCameraEnabled(false);
           roomInstance.localParticipant.setMicrophoneEnabled(false);
@@ -1067,7 +1067,7 @@ function ParticipantActions({
                 className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
                   isRecording && "bg-orange/500"
                 } duration-300`}
-                onClick={() => toggleRecording(currentCallID)}
+                onClick={() => toggleRecording()}
               >
                 <Disc className="w-4 h-4" />
               </button>
@@ -1310,7 +1310,7 @@ function ParticipantActions({
                         className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
                           isRecording && "bg-orange/500"
                         } duration-300`}
-                        onClick={() => toggleRecording(currentCallID)}
+                        onClick={() => toggleRecording()}
                       >
                         <Disc className="w-4 h-4" />
                       </button>
