@@ -80,6 +80,7 @@ export default function Index() {
     "notInCall"
   );
   const [userId, setUserId] = useState<string>("");
+  const [currentLocalCallID, setCurrentLocalCallID] = useState<string>("");
   const room = "quickstart-room";
 
   const [roomInstance] = useState(
@@ -221,6 +222,21 @@ export default function Index() {
   useEffect(() => {
     if (socket) {
       socketRef.current = socket;
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.on("call-ended", (data) => {
+        const { callId } = data;
+        if (callId === currentLocalCallID) {
+          console.log("ENDING CALL", { callId });
+          roomInstance.localParticipant.setCameraEnabled(false);
+          roomInstance.localParticipant.setMicrophoneEnabled(false);
+          setLocalStatus("notInCall");
+          setCurrentLocalCallID("");
+        }
+      });
     }
   }, [socket]);
 
@@ -373,6 +389,8 @@ export default function Index() {
                 setLocationsOnline={setLocationsOnline}
                 setOnHoldCount={setOnHoldCount}
                 setMissedCallCount={setMissedCallCount}
+                setCurrentLocalCallID={setCurrentLocalCallID}
+                currentLocalCallID={currentLocalCallID}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -395,6 +413,8 @@ function MyVideoConference({
   setLocationsOnline,
   setOnHoldCount,
   setMissedCallCount,
+  setCurrentLocalCallID,
+  currentLocalCallID,
 }: {
   name: string;
   roomInstance: any;
@@ -406,6 +426,8 @@ function MyVideoConference({
   setLocationsOnline: any;
   setOnHoldCount: any;
   setMissedCallCount: any;
+  setCurrentLocalCallID: any;
+  currentLocalCallID: string;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -489,6 +511,7 @@ function MyVideoConference({
             setGuestCount={setGuestCount}
             setOnHoldCount={setOnHoldCount}
             setMissedCallCount={setMissedCallCount}
+            setCurrentLocalCallID={setCurrentLocalCallID}
           />
         </div>
       ))}
@@ -509,6 +532,7 @@ function ParticipantActions({
   setGuestCount,
   setOnHoldCount,
   setMissedCallCount,
+  setCurrentLocalCallID,
 }: {
   track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
@@ -522,6 +546,7 @@ function ParticipantActions({
   setGuestCount: any;
   setOnHoldCount: any;
   setMissedCallCount: any;
+  setCurrentLocalCallID: any;
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -554,7 +579,7 @@ function ParticipantActions({
             body: JSON.stringify({
               room: "quickstart-room",
               fileName: fileName,
-              callId: currentCallID
+              callId: currentCallID,
             }),
           }
         );
@@ -565,15 +590,21 @@ function ParticipantActions({
           setEgressId(data.egressId);
         } else {
           console.error("Failed to start recording:", data.error);
+          toast.custom((t: any) => {
+            return <Toast t={t} content="Error Recording Call" type="error" />;
+          });
         }
       } catch (error) {
         console.error("Error starting recording:", error);
+        toast.custom((t: any) => {
+          return <Toast t={t} content="Error Recording Call" type="error" />;
+        });
       }
     } else {
       await fetch(process.env.NEXT_PUBLIC_STOPRECORDING_API!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ egressId, callId : currentCallID }),
+        body: JSON.stringify({ egressId, callId: currentCallID }),
       });
 
       setIsRecording(false);
@@ -631,6 +662,7 @@ function ParticipantActions({
       setCallStatus("inCall");
       setLocalStatus("inCall");
       setCurrentCallID(pendingCall.CallID);
+      setCurrentLocalCallID(pendingCall.CallID);
       setLocalMicEnabled(true);
       setMissedCallCount((prev: string[]) =>
         prev.filter((p) => p.toString() !== participant?.identity?.toString())
@@ -664,6 +696,7 @@ function ParticipantActions({
       );
       const callId = generateUUID();
       setCurrentCallID(callId);
+      setCurrentLocalCallID(callId);
       setLocalMicEnabled(true);
       setTimeout(() => {
         socketRef.current?.emit(
@@ -760,6 +793,7 @@ function ParticipantActions({
       });
       if (currentCallID.length === 0) {
         setCurrentCallID(pendingCall.CallID);
+        setCurrentLocalCallID(pendingCall.CallID);
         setPendingCall(null);
       }
       setTimeout(() => {
@@ -786,6 +820,7 @@ function ParticipantActions({
       setCallStatus("notInCall");
       setLocalStatus("notInCall");
       setCurrentCallID("");
+      setCurrentLocalCallID("");
       setLocalMicEnabled(false);
       const callId =
         currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
@@ -923,6 +958,7 @@ function ParticipantActions({
           setCallStatus("notInCall");
           setLocalStatus("notInCall");
           setCurrentCallID("");
+          setCurrentLocalCallID("");
           setLocalMicEnabled(false);
         }
       });
