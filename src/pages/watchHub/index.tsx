@@ -582,7 +582,7 @@ function ParticipantActions({
         );
         const data = await response.json();
         console.log({ data });
-        if (data.ok) {
+        if (data.egressId.length > 0) {
           setIsRecording(true);
           setEgressId(data.egressId);
         } else {
