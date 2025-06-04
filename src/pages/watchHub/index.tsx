@@ -129,20 +129,21 @@ export default function Index() {
   const filterLocations = async (type: "missed" | "onHold" | "guestCount") => {
     switch (type) {
       case "missed":
-        setFilteredUserLocationData((prev) =>
-          prev.filter((loc) =>
-            filters.missed.includes(loc.LocationID?.toString()!)
+        setFilteredUserLocationData(
+          userLocationListData.filter((loc) =>
+            missedCallCount.includes(loc?.LocationID?.toString()!)
           )
         );
+        setMissedCallCount([]);
         setFilter({
           status: true,
           type: "missed",
         });
         break;
       case "onHold":
-        setFilteredUserLocationData((prev) =>
-          prev.filter((loc) =>
-            filters.onHold.includes(loc.LocationID?.toString()!)
+        setFilteredUserLocationData(
+          userLocationListData.filter((loc) =>
+            onHoldCount.includes(loc?.LocationID?.toString()!)
           )
         );
         setFilter({
@@ -151,9 +152,9 @@ export default function Index() {
         });
         break;
       case "guestCount":
-        setFilteredUserLocationData((prev) =>
-          prev.filter((loc) =>
-            filters.guests.includes(loc.LocationID?.toString()!)
+        setFilteredUserLocationData(
+          userLocationListData.filter((loc) =>
+            guestCount.includes(loc?.LocationID?.toString()!)
           )
         );
         setFilter({

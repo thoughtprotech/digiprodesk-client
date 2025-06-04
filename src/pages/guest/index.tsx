@@ -922,14 +922,14 @@ function MyVideoConference() {
 
   return (
     <div className="w-full h-fit relative rounded-md flex items-end justify-center gap-5 p-4">
-      <div className="w-3/4 h-fit bg-blue-500">
+      <div className="w-3/4 h-fit aspect-video bg-black">
         {remoteTracks.map((track, idx) => (
           <div key={track.track?.sid ?? idx} className="aspect-video w-full">
             <GuestTile trackRef={track} />
           </div>
         ))}
       </div>
-      <div className="aspect-video max-w-96 w-full h-fit bg-orange-500">
+      <div className="aspect-video max-w-96 w-full h-fit">
         {localTrack[0] && <GuestTile trackRef={localTrack[0]} />}
       </div>
     </div>
