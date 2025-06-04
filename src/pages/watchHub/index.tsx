@@ -1018,6 +1018,20 @@ function ParticipantActions({
     };
   }, [currentCallID]);
 
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (participant.isMicrophoneEnabled) {
+        toggleMic();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
   return (
     <div>
       {/* Info */}

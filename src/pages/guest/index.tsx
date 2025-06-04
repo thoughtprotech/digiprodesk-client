@@ -520,7 +520,6 @@ export default function Index() {
     if (socketRef.current && location) {
       socketRef.current.on("toggle-mic", (data) => {
         const { guestId } = data;
-        console.log({ guestId });
         if (guestId === location?.LocationID?.toString()) {
           toggleLocalMute({
             source: "mic",
@@ -752,9 +751,7 @@ export default function Index() {
             </div>
           )}
           {inCall && callStatus === "inProgress" && (
-            <div
-              className="relative w-full h-screen overflow-hidden flex flex-col justify-between gap-10 items-center pt-20 pb-14"
-            >
+            <div className="relative w-full h-screen overflow-hidden flex flex-col justify-between gap-10 items-center pt-20 pb-14">
               {/* Your custom component with basic video conferencing functionality. */}
               <MyVideoConference />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
