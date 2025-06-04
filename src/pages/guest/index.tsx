@@ -350,6 +350,8 @@ export default function Index() {
   const [, setMicEnabled] = useState<boolean>(false);
   const [, setCameraEnabled] = useState<boolean>(true);
 
+  const [volume, setVolume] = useState<number>(100);
+
   const hiddenVideoRef = useRef<HTMLVideoElement>(null);
   // “detected” flag so we don’t flood the console with repeated logs
   const [detected, setDetected] = useState(false);
@@ -751,22 +753,32 @@ export default function Index() {
           )}
           {inCall && callStatus === "inProgress" && (
             <div
-              className="relative w-full h-screen overflow-hidden flex justify-center items-center"
-              data-lk-theme="default"
-              style={{ height: "100dvh" }}
+              className="relative w-full h-screen overflow-hidden flex flex-col justify-between gap-10 items-center pt-20 pb-14"
             >
               {/* Your custom component with basic video conferencing functionality. */}
               <MyVideoConference />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
-              <RoomAudioRenderer />
+              <RoomAudioRenderer volume={volume / 100} />
               {/* Controls for the user to start/stop audio, video, and screen share tracks */}
-              <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+              <div className="w-full flex justify-center items-center gap-10 rounded-md">
                 <div className="scale-150">
                   <TrackToggle
                     source={Track.Source.Microphone}
                     showIcon={true}
                     onChange={microphoneOnChange}
                   ></TrackToggle>
+                </div>
+                <div>
+                  <input
+                    id="incomingVolume"
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    className="w-full"
+                  />
                 </div>
               </div>
             </div>
@@ -912,7 +924,7 @@ function MyVideoConference() {
   );
 
   return (
-    <div className="w-3/4 h-fit aspect-video relative">
+    <div className="w-3/4 h-fit aspect-video relative rounded-md">
       {remoteTracks.map((track, idx) => (
         <div key={track.track?.sid ?? idx} className="aspect-video w-full">
           <GuestTile trackRef={track} />
