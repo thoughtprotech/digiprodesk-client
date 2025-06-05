@@ -654,6 +654,29 @@ export default function Index() {
     };
   }, [currentCallID]);
 
+  useEffect(() => {
+    // Wrap in an async function so we can await getUserMedia
+    async function requestMediaPermissions() {
+      try {
+        // This will prompt the user for camera + mic if not already granted
+        await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        // If we reach here, permission was granted (or already granted)
+        console.log("🎉 Camera and mic permissions granted!");
+      } catch (err) {
+        // If the user denies, or there’s no device, you end up here
+        console.error(
+          "Camera/mic permission was denied or not available:",
+          err
+        );
+      }
+    }
+
+    // Only attempt if navigator.mediaDevices is available
+    if (typeof window !== "undefined" && navigator.mediaDevices) {
+      requestMediaPermissions();
+    }
+  }, []);
+
   const { saveAudioInputEnabled } = usePersistentUserChoices({
     preventSave: false,
   });

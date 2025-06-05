@@ -929,12 +929,15 @@ function ParticipantActions({
         const id = data?.locationID?.toString();
         if (id === participant?.identity?.toString()) {
           setGuestCount((prev: string[]) => {
-            // If it's already in the array, return prev unchanged.
-            if (prev.includes(id)) {
-              return prev;
+            if (callStatus === "notInCall") {
+              // If it's already in the array, return prev unchanged.
+              if (prev.includes(id)) {
+                return prev;
+              }
+              // Otherwise, append it
+              return [...prev, id];
             }
-            // Otherwise, append it
-            return [...prev, id];
+            return prev;
           });
           setShowPersonIcon(true);
         }
@@ -1199,7 +1202,7 @@ function ParticipantActions({
           <h1 className="text-xs font-bold">Missed</h1>
         </div>
       )}
-      {showPersonIcon && (
+      {callStatus === "notInCall" && showPersonIcon && (
         <div className="absolute bottom-[2px] right-8 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-1">
           <UserIcon className="w-4 h-4 text-orange-400" />
           <span className="text-xs font-semibold">Guest</span>
