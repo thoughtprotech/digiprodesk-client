@@ -799,7 +799,7 @@ function ParticipantActions({
       setLocalStatus("inCall");
       setLocalMicEnabled(true);
       const callId =
-        currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+        currentCallID.length > 0 ? currentCallID : pendingCall?.CallID;
       setOnHoldCount((prev: string[]) => {
         if (prev.includes(participant?.identity?.toString())) {
           return prev.filter((p) => p !== participant?.identity?.toString());
@@ -807,8 +807,8 @@ function ParticipantActions({
         return prev;
       });
       if (currentCallID.length === 0) {
-        setCurrentCallID(pendingCall.CallID);
-        setCurrentLocalCallID(pendingCall.CallID);
+        setCurrentCallID(pendingCall?.CallID);
+        setCurrentLocalCallID(pendingCall?.CallID);
         setPendingCall(null);
       }
       setTimeout(() => {
@@ -838,7 +838,7 @@ function ParticipantActions({
       setCurrentLocalCallID("");
       setLocalMicEnabled(false);
       const callId =
-        currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+        currentCallID.length > 0 ? currentCallID : pendingCall?.CallID;
       setOnHoldCount((prev: string[]) => {
         if (prev.includes(participant?.identity?.toString())) {
           return prev.filter((p) => p !== participant?.identity?.toString());
@@ -1015,7 +1015,7 @@ function ParticipantActions({
       heartbeatIntervalRef.current = null;
     }
 
-    if (currentCallID.length > 0) {
+    if (currentCallID?.length > 0) {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
