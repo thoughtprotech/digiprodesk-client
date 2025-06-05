@@ -630,14 +630,11 @@ export default function Index() {
       heartbeatIntervalRef.current = null;
     }
 
-    if (
-      currentCallID.length > 0 &&
-      (callStatus === "inProgress" || callStatus === "onHold")
-    ) {
+    if (currentCallID.length > 0) {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
-      }, 5000);
+      }, 4000);
     }
 
     // Cleanup on unmount or before next effect run
@@ -647,7 +644,7 @@ export default function Index() {
         heartbeatIntervalRef.current = null;
       }
     };
-  }, [currentCallID, callStatus]);
+  }, [currentCallID]);
 
   const { saveAudioInputEnabled } = usePersistentUserChoices({
     preventSave: false,

@@ -987,11 +987,11 @@ function ParticipantActions({
       heartbeatIntervalRef.current = null;
     }
 
-    if (currentCallID?.length > 0 && callStatus === "inCall") {
+    if (currentCallID?.length > 0) {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
-      }, 5000);
+      }, 4000);
     }
 
     // Cleanup on unmount or before next effect run
@@ -1001,7 +1001,7 @@ function ParticipantActions({
         heartbeatIntervalRef.current = null;
       }
     };
-  }, [currentCallID, callStatus]);
+  }, [currentCallID]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
