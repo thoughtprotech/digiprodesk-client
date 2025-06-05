@@ -13,6 +13,7 @@ import {
   PhoneIncoming,
   PhoneOff,
   Play,
+  RefreshCcw,
   UserIcon,
   Video,
   VideoOff,
@@ -881,6 +882,15 @@ function ParticipantActions({
     setLocalMicEnabled(!roomInstance.localParticipant.isMicrophoneEnabled);
   };
 
+  const refreshGuest = () => {
+    socketRef.current?.emit(
+      "refresh-guest",
+      JSON.stringify({
+        guestId: participant.identity,
+      })
+    );
+  };
+
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("call-list-update", (data) => {
@@ -1022,17 +1032,25 @@ function ParticipantActions({
       {/* Info */}
       <div className="absolute top-[2px] left-[2px] rounded-md bg-black/50">
         <div className="flex items-center">
-          <div className="pl-2 py-1">
+          <div className="pl-2 pr-1 py-1">
             <h1 className="font-bold text-xs">
               {locationDetails?.LocationName}
             </h1>
           </div>
+          <Tooltip tooltip="Refresh" position="bottom">
+            <button
+              className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+              onClick={refreshGuest}
+            >
+              <RefreshCcw className="w-4 h-4 text-blue-500" />
+            </button>
+          </Tooltip>
           <Tooltip
             tooltip={participant.isMicrophoneEnabled ? "Mute" : "Unmute"}
             position="bottom"
           >
             <button
-              className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+              className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
               onClick={toggleMic}
             >
               {participant.isMicrophoneEnabled ? (
@@ -1052,7 +1070,7 @@ function ParticipantActions({
             position="bottom"
           >
             <button
-              className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+              className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
               onClick={() => {
                 if (localMicEnabled) {
                   muteHostForGuest();
@@ -1076,7 +1094,7 @@ function ParticipantActions({
               position="bottom"
             >
               <button
-                className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                 onClick={toggleLocalMute}
               >
                 {localMicEnabled ? (
@@ -1091,7 +1109,7 @@ function ParticipantActions({
               position="bottom"
             >
               <button
-                className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                 onClick={toggleLocalCamera}
               >
                 {room.localParticipant.isCameraEnabled ? (
@@ -1106,7 +1124,7 @@ function ParticipantActions({
               position="bottom"
             >
               <button
-                className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
+                className={`px-1 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
                   isRecording && "bg-orange-500/50"
                 } duration-300`}
                 onClick={() => toggleRecording()}
@@ -1117,7 +1135,7 @@ function ParticipantActions({
 
             <Tooltip tooltip={"Hold Call"} position="bottom">
               <button
-                className="px-2 py-1 rounded-md cursor-pointer hover:bg-cyan-500/30 duration-300"
+                className="px-1 py-1 rounded-md cursor-pointer hover:bg-cyan-500/30 duration-300"
                 onClick={holdCall}
               >
                 <Pause className="text-cyan-500 w-4 h-4" />
@@ -1128,7 +1146,7 @@ function ParticipantActions({
         {callStatus === "onHold" && (
           <Tooltip tooltip={"Resume Call"} position="bottom">
             <button
-              className="px-2 py-1 rounded-md cursor-pointer hover:bg-blue-500/30 duration-300"
+              className="px-1 py-1 rounded-md cursor-pointer hover:bg-blue-500/30 duration-300"
               onClick={resumeCall}
             >
               <Play className="text-blue-500 w-4 h-4" />
@@ -1141,14 +1159,14 @@ function ParticipantActions({
         >
           {callStatus === "notInCall" || callStatus === "missed" ? (
             <button
-              className="px-2 py-1 rounded-md cursor-pointer hover:bg-green-500/30 duration-300"
+              className="px-1 py-1 rounded-md cursor-pointer hover:bg-green-500/30 duration-300"
               onClick={callGuest}
             >
               <Phone className="text-green-500 w-4 h-4" />
             </button>
           ) : (
             <button
-              className="px-2 py-1 rounded-md cursor-pointer hover:bg-red-500/30 duration-300"
+              className="px-1 py-1 rounded-md cursor-pointer hover:bg-red-500/30 duration-300"
               onClick={endGuestCall}
             >
               <PhoneOff className="text-red-500 w-4 h-4" />
@@ -1157,7 +1175,7 @@ function ParticipantActions({
         </Tooltip>
         <Tooltip tooltip="Full Screen" position="bottom">
           <button
-            className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+            className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
             onClick={() => {
               setIsFullScreen(true);
             }}
@@ -1167,22 +1185,22 @@ function ParticipantActions({
         </Tooltip>
       </div>
       {callStatus === "inCall" && (
-        <div className="absolute bottom-[2px] left-[2px] rounded-md bg-black/60 px-2 py-1">
+        <div className="absolute bottom-[2px] left-[2px] rounded-md bg-black/60 px-1 py-1">
           <h1 className="text-xs font-bold">In Progress</h1>
         </div>
       )}
       {callStatus === "onHold" && (
-        <div className="absolute bottom-[2px] left-[2px] rounded-md bg-indigo-500/60 px-2 py-1">
+        <div className="absolute bottom-[2px] left-[2px] rounded-md bg-indigo-500/60 px-1 py-1">
           <h1 className="text-xs font-bold">On Hold</h1>
         </div>
       )}
       {callStatus === "missed" && (
-        <div className="absolute bottom-[2px] left-[2px] rounded-md bg-red-500/60 px-2 py-1">
+        <div className="absolute bottom-[2px] left-[2px] rounded-md bg-red-500/60 px-1 py-1">
           <h1 className="text-xs font-bold">Missed</h1>
         </div>
       )}
       {showPersonIcon && (
-        <div className="absolute bottom-[2px] right-8 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-2">
+        <div className="absolute bottom-[2px] right-8 flex items-center gap-1 text-white bg-black bg-opacity-50 rounded-md z-10 p-1 px-1">
           <UserIcon className="w-4 h-4 text-orange-400" />
           <span className="text-xs font-semibold">Guest</span>
         </div>
@@ -1227,7 +1245,7 @@ function ParticipantActions({
               </div>
               <div className="w-full flex items-center gap-2 whitespace-nowrap">
                 <button
-                  className="w-full px-2 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2"
+                  className="w-full px-1 py-1 bg-green-500/50 border border-green-500 rounded-md flex items-center justify-center gap-2"
                   onClick={() => {
                     setPendingCall(null);
                     setShowModal(false);
@@ -1238,7 +1256,7 @@ function ParticipantActions({
                   <h1 className="font-bold">Accept Call</h1>
                 </button>
                 <button
-                  className="w-full px-2 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2"
+                  className="w-full px-1 py-1 bg-indigo-500/50 border border-indigo-500 rounded-md flex items-center justify-center gap-2"
                   onClick={() => {
                     holdIncomingCall();
                     setShowModal(false);
@@ -1259,11 +1277,19 @@ function ParticipantActions({
               {/* Info */}
               <div className="absolute top-2 left-2 rounded-md bg-black/50">
                 <div className="flex items-center">
-                  <div className="pl-2 py-1">
+                  <div className="pl-2 pr-1 py-1">
                     <h1 className="font-bold text-xs">
                       {locationDetails?.LocationName}
                     </h1>
                   </div>
+                  <Tooltip tooltip="Refresh" position="bottom">
+                    <button
+                      className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                      onClick={refreshGuest}
+                    >
+                      <RefreshCcw className="w-4 h-4 text-blue-500" />
+                    </button>
+                  </Tooltip>
                   <Tooltip
                     tooltip={
                       participant.isMicrophoneEnabled ? "Mute" : "Unmute"
@@ -1271,7 +1297,7 @@ function ParticipantActions({
                     position="bottom"
                   >
                     <button
-                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                      className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                       onClick={toggleMic}
                     >
                       {participant.isMicrophoneEnabled ? (
@@ -1291,7 +1317,7 @@ function ParticipantActions({
                     position="bottom"
                   >
                     <button
-                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                      className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                       onClick={() => {
                         if (localMicEnabled) {
                           muteHostForGuest();
@@ -1315,7 +1341,7 @@ function ParticipantActions({
                       position="bottom"
                     >
                       <button
-                        className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                        className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                         onClick={toggleLocalMute}
                       >
                         {localMicEnabled ? (
@@ -1332,7 +1358,7 @@ function ParticipantActions({
                       position="bottom"
                     >
                       <button
-                        className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                        className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                         onClick={toggleLocalCamera}
                       >
                         {room.localParticipant.isCameraEnabled ? (
@@ -1349,7 +1375,7 @@ function ParticipantActions({
                       position="bottom"
                     >
                       <button
-                        className={`px-2 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
+                        className={`px-1 py-1 rounded-md cursor-pointer hover:bg-orange-500/50 ${
                           isRecording && "bg-orange/500"
                         } duration-300`}
                         onClick={() => toggleRecording()}
@@ -1360,7 +1386,7 @@ function ParticipantActions({
 
                     <Tooltip tooltip={"Hold Call"} position="bottom">
                       <button
-                        className="px-2 py-1 rounded-md cursor-pointer hover:bg-cyan-500/30 duration-300"
+                        className="px-1 py-1 rounded-md cursor-pointer hover:bg-cyan-500/30 duration-300"
                         onClick={holdCall}
                       >
                         <Pause className="text-cyan-500 w-4 h-4" />
@@ -1371,7 +1397,7 @@ function ParticipantActions({
                 {callStatus === "onHold" && (
                   <Tooltip tooltip={"Resume Call"} position="bottom">
                     <button
-                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-blue-500/30 duration-300"
+                      className="px-1 py-1 rounded-md cursor-pointer hover:bg-blue-500/30 duration-300"
                       onClick={resumeCall}
                     >
                       <Play className="text-blue-500 w-4 h-4" />
@@ -1384,14 +1410,14 @@ function ParticipantActions({
                 >
                   {callStatus === "notInCall" || callStatus === "missed" ? (
                     <button
-                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-green-500/30 duration-300"
+                      className="px-1 py-1 rounded-md cursor-pointer hover:bg-green-500/30 duration-300"
                       onClick={callGuest}
                     >
                       <Phone className="text-green-500 w-4 h-4" />
                     </button>
                   ) : (
                     <button
-                      className="px-2 py-1 rounded-md cursor-pointer hover:bg-red-500/30 duration-300"
+                      className="px-1 py-1 rounded-md cursor-pointer hover:bg-red-500/30 duration-300"
                       onClick={endGuestCall}
                     >
                       <PhoneOff className="text-red-500 w-4 h-4" />
@@ -1400,7 +1426,7 @@ function ParticipantActions({
                 </Tooltip>
                 <Tooltip tooltip="Minimize" position="bottom">
                   <button
-                    className="px-2 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
+                    className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
                     onClick={() => {
                       setIsFullScreen(false);
                     }}

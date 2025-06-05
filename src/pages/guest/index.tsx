@@ -618,6 +618,14 @@ export default function Index() {
           setCurrentCallID("");
         }
       });
+
+      socketRef.current.on("refresh", (data) => {
+        const { guestId } = data;
+        console.log(guestId, location.LocationID?.toString);
+        if (guestId === location.LocationID?.toString()) {
+          router.reload();
+        }
+      });
     }
   }, [socket, location, currentCallID]);
 
