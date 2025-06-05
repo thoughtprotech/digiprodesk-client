@@ -1011,7 +1011,7 @@ function ParticipantActions({
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
-      }, 30000);
+      }, 5000);
     }
 
     // Cleanup on unmount or before next effect run
