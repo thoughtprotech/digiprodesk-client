@@ -756,33 +756,15 @@ export default function Index() {
             </div>
           )}
           {inCall && callStatus === "inProgress" && (
-            <div className="relative w-full h-full overflow-hidden flex flex-col justify-between gap-10 items-center pt-20 pb-14">
+            <div className="relative w-full h-full overflow-hidden flex flex-col justify-center gap-10 items-center pt-20 pb-14">
               {/* Your custom component with basic video conferencing functionality. */}
-              <MyVideoConference />
+              <MyVideoConference
+                volume={volume}
+                setVolume={setVolume}
+                microphoneOnChange={microphoneOnChange}
+              />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer volume={volume / 100} />
-              {/* Controls for the user to start/stop audio, video, and screen share tracks */}
-              <div className="w-full flex justify-center items-center gap-10 rounded-md">
-                <div className="scale-150">
-                  <TrackToggle
-                    source={Track.Source.Microphone}
-                    showIcon={true}
-                    onChange={microphoneOnChange}
-                  ></TrackToggle>
-                </div>
-                <div>
-                  <input
-                    id="incomingVolume"
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={volume}
-                    onChange={(e) => setVolume(Number(e.target.value))}
-                    className="w-full"
-                  />
-                </div>
-              </div>
             </div>
           )}
           {callStatus === "calling" && (
@@ -903,7 +885,15 @@ export default function Index() {
   );
 }
 
-function MyVideoConference() {
+function MyVideoConference({
+  volume,
+  setVolume,
+  microphoneOnChange,
+}: {
+  volume: number;
+  setVolume: any;
+  microphoneOnChange: any;
+}) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
 
@@ -934,7 +924,28 @@ function MyVideoConference() {
           </div>
         ))}
       </div>
-      <div className="aspect-video max-w-96 w-full h-fit">
+      <div className="aspect-video max-w-96 w-full h-fit flex flex-col gap-2">
+        <div className="flex items-center gap-2 rounded-md bg-foreground pr-4">
+          <div className="scale-150">
+            <TrackToggle
+              source={Track.Source.Microphone}
+              showIcon={true}
+              onChange={microphoneOnChange}
+            ></TrackToggle>
+          </div>
+          <div className="w-full">
+            <input
+              id="incomingVolume"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </div>
         {localTrack[0] && <GuestTile trackRef={localTrack[0]} />}
       </div>
     </div>
