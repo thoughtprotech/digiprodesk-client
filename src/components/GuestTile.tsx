@@ -13,7 +13,6 @@ import {
   AudioTrack,
   FocusToggle,
   ParticipantContext,
-  ParticipantName,
   ParticipantPlaceholder,
   TrackRefContext,
   useEnsureTrackRef,
@@ -24,7 +23,6 @@ import {
   useParticipantTile,
   VideoTrack,
 } from "@livekit/components-react";
-import { ScreenShareIcon } from "lucide-react";
 
 /**
  * The `ParticipantContextIfNeeded` component only creates a `ParticipantContext`
@@ -164,16 +162,6 @@ const GuestTile: (
               )}
               <div className="lk-participant-placeholder">
                 <ParticipantPlaceholder />
-              </div>
-              <div className="lk-participant-metadata">
-                <div className="lk-participant-metadata-item">
-                  {trackReference.source !== Track.Source.Camera && (
-                    <>
-                      <ScreenShareIcon style={{ marginRight: "0.25rem" }} />
-                      <ParticipantName>&apos;s screen</ParticipantName>
-                    </>
-                  )}
-                </div>
               </div>
             </>
           )}
