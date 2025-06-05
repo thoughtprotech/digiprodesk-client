@@ -388,6 +388,7 @@ export default function Index() {
                 setOnHoldCount={setOnHoldCount}
                 setMissedCallCount={setMissedCallCount}
                 setCurrentLocalCallID={setCurrentLocalCallID}
+                onHoldCount={onHoldCount}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -411,6 +412,7 @@ function MyVideoConference({
   setOnHoldCount,
   setMissedCallCount,
   setCurrentLocalCallID,
+  onHoldCount,
 }: {
   name: string;
   roomInstance: any;
@@ -423,6 +425,7 @@ function MyVideoConference({
   setOnHoldCount: any;
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
+  onHoldCount: string[];
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -507,6 +510,7 @@ function MyVideoConference({
             setOnHoldCount={setOnHoldCount}
             setMissedCallCount={setMissedCallCount}
             setCurrentLocalCallID={setCurrentLocalCallID}
+            onHoldCount={onHoldCount}
           />
         </div>
       ))}
@@ -528,6 +532,7 @@ function ParticipantActions({
   setOnHoldCount,
   setMissedCallCount,
   setCurrentLocalCallID,
+  onHoldCount,
 }: {
   track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
@@ -542,6 +547,7 @@ function ParticipantActions({
   setOnHoldCount: any;
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
+  onHoldCount: string[];
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -606,6 +612,12 @@ function ParticipantActions({
       setEgressId("");
     }
   };
+
+  useEffect(() => {
+    if (onHoldCount.includes(participant.identity.toString())) {
+      setCallStatus("onHold");
+    }
+  }, [onHoldCount]);
 
   useEffect(() => {
     filteredUserLocationData.map((loc) => {
@@ -779,7 +791,7 @@ function ParticipantActions({
       setLocalStatus("inCall");
       setLocalMicEnabled(true);
       const callId =
-        currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+        currentCallID.length > 0 ? currentCallID : pendingCall?.CallID;
       setOnHoldCount((prev: string[]) => {
         if (prev.includes(participant?.identity?.toString())) {
           return prev.filter((p) => p !== participant?.identity?.toString());
@@ -787,8 +799,8 @@ function ParticipantActions({
         return prev;
       });
       if (currentCallID.length === 0) {
-        setCurrentCallID(pendingCall.CallID);
-        setCurrentLocalCallID(pendingCall.CallID);
+        setCurrentCallID(pendingCall?.CallID);
+        setCurrentLocalCallID(pendingCall?.CallID);
         setPendingCall(null);
       }
       setTimeout(() => {
@@ -818,7 +830,7 @@ function ParticipantActions({
       setCurrentLocalCallID("");
       setLocalMicEnabled(false);
       const callId =
-        currentCallID.length > 0 ? currentCallID : pendingCall.CallID;
+        currentCallID.length > 0 ? currentCallID : pendingCall?.CallID;
       setOnHoldCount((prev: string[]) => {
         if (prev.includes(participant?.identity?.toString())) {
           return prev.filter((p) => p !== participant?.identity?.toString());
@@ -995,7 +1007,7 @@ function ParticipantActions({
       heartbeatIntervalRef.current = null;
     }
 
-    if (currentCallID.length > 0) {
+    if (currentCallID?.length > 0) {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
