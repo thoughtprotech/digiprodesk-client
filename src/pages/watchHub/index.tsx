@@ -17,6 +17,7 @@ import {
   UserIcon,
   Video,
   VideoOff,
+  X,
   XCircle,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -883,12 +884,18 @@ function ParticipantActions({
   };
 
   const refreshGuest = () => {
-    socketRef.current?.emit(
-      "refresh-guest",
-      JSON.stringify({
-        guestId: participant.identity,
-      })
-    );
+    if (callStatus === "notInCall") {
+      socketRef.current?.emit(
+        "refresh-guest",
+        JSON.stringify({
+          guestId: participant.identity,
+        })
+      );
+    } else {
+      toast.custom((t: any) => {
+        return <Toast t={t} content="End Current Call" type="warning" />;
+      });
+    }
   };
 
   useEffect(() => {
@@ -1227,7 +1234,13 @@ function ParticipantActions({
         pendingCall?.CallPlacedByLocationID?.toString() ===
           participant?.identity?.toString() && (
           <div className="fixed inset-0 top-0 bottom-0 right-0 left-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="rounded-md bg-foreground p-4 flex flex-col gap-5">
+            <div className="rounded-md bg-foreground p-4 flex flex-col gap-5 relative">
+              <div
+                className="absolute top-4 right-4 cursor-pointer"
+                onClick={() => setShowModal(false)}
+              >
+                <X />
+              </div>
               <div>
                 <h1 className="text-orange-500 font-bold">Incoming Call</h1>
               </div>
