@@ -55,15 +55,7 @@ export default function Index() {
   const [locationsOnline, setLocationsOnline] = useState<string[]>([]);
   const [onHoldCount, setOnHoldCount] = useState<string[]>([]);
   const [missedCallCount, setMissedCallCount] = useState<string[]>([]);
-  const [filters] = useState<{
-    onHold: string[];
-    missed: string[];
-    guests: string[];
-  }>({
-    onHold: [],
-    missed: [],
-    guests: [],
-  });
+
   const [filter, setFilter] = useState<{
     status: boolean;
     type: "missed" | "onHold" | "guestCount" | "none";
@@ -1020,7 +1012,7 @@ function ParticipantActions({
   }, [currentCallID]);
 
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = () => {
       if (participant.isMicrophoneEnabled) {
         toggleMic();
       }
