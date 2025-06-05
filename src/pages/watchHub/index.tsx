@@ -64,10 +64,6 @@ export default function Index() {
     type: "none",
   });
 
-  useEffect(() => {
-    console.log({ onHoldCount });
-  }, [onHoldCount]);
-
   const [localStatus, setLocalStatus] = useState<"notInCall" | "inCall">(
     "notInCall"
   );
@@ -205,10 +201,6 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    console.log({ filteredUserLocationData });
-  }, [filteredUserLocationData]);
-
-  useEffect(() => {
     getCallList();
   }, [socket, socketRef.current]);
 
@@ -221,14 +213,8 @@ export default function Index() {
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on("call-ended", (data) => {
-        console.log("CALL END", { data });
         const { callId } = data;
-        console.log(
-          `MY CALL? ${{ callId, currentLocalCallID }}`,
-          callId === currentLocalCallID
-        );
         if (callId === currentLocalCallID) {
-          console.log("ENDING CALL", { callId });
           roomInstance.localParticipant.setCameraEnabled(false);
           roomInstance.localParticipant.setMicrophoneEnabled(false);
           setLocalStatus("notInCall");
@@ -585,7 +571,6 @@ function ParticipantActions({
           }
         );
         const data = await response.json();
-        console.log({ data });
         if (data.egressId.length > 0) {
           setIsRecording(true);
           setEgressId(data.egressId);
@@ -644,7 +629,7 @@ function ParticipantActions({
 
   const callHeartBeat = async () => {
     if (socketRef.current) {
-      console.log("SENDING CALL HEARTBEAT");
+      console.log("SENDING CALL HEARTBEAT", { currentCallID });
       socketRef.current?.emit(
         "call-heartbeat",
         JSON.stringify({
@@ -913,7 +898,6 @@ function ParticipantActions({
       });
 
       socketRef.current.on("call-missed", (data) => {
-        console.log("CALL MISSED", { data });
         if (
           data?.CallAssignedTo === name &&
           data?.CallPlacedByLocationID?.toString() === participant?.identity &&
@@ -955,12 +939,8 @@ function ParticipantActions({
       });
 
       socketRef.current.on("call-ended", (data) => {
-        console.log("CALL END", { data });
         const { callId } = data;
-        console.log(
-          `MY CALL? ${{ callId, currentCallID }}`,
-          callId === currentCallID
-        );
+
         if (callId === currentCallID) {
           if (isRecording) {
             toggleRecording();
@@ -1007,7 +987,7 @@ function ParticipantActions({
       heartbeatIntervalRef.current = null;
     }
 
-    if (currentCallID?.length > 0) {
+    if (currentCallID?.length > 0 && callStatus === "inCall") {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
@@ -1021,7 +1001,7 @@ function ParticipantActions({
         heartbeatIntervalRef.current = null;
       }
     };
-  }, [currentCallID]);
+  }, [currentCallID, callStatus]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
