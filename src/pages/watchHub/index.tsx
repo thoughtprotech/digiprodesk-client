@@ -396,6 +396,7 @@ export default function Index() {
                 setOnHoldCount={setOnHoldCount}
                 setMissedCallCount={setMissedCallCount}
                 setCurrentLocalCallID={setCurrentLocalCallID}
+                onHoldCount={onHoldCount}
               />
               {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
               <RoomAudioRenderer />
@@ -419,6 +420,7 @@ function MyVideoConference({
   setOnHoldCount,
   setMissedCallCount,
   setCurrentLocalCallID,
+  onHoldCount,
 }: {
   name: string;
   roomInstance: any;
@@ -431,6 +433,7 @@ function MyVideoConference({
   setOnHoldCount: any;
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
+  onHoldCount: string[];
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -515,6 +518,7 @@ function MyVideoConference({
             setOnHoldCount={setOnHoldCount}
             setMissedCallCount={setMissedCallCount}
             setCurrentLocalCallID={setCurrentLocalCallID}
+            onHoldCount={onHoldCount}
           />
         </div>
       ))}
@@ -536,6 +540,7 @@ function ParticipantActions({
   setOnHoldCount,
   setMissedCallCount,
   setCurrentLocalCallID,
+  onHoldCount,
 }: {
   track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
@@ -550,6 +555,7 @@ function ParticipantActions({
   setOnHoldCount: any;
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
+  onHoldCount: string[];
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
@@ -614,6 +620,12 @@ function ParticipantActions({
       setEgressId("");
     }
   };
+
+  useEffect(() => {
+    if (onHoldCount.includes(participant.identity.toString())) {
+      setCallStatus("onHold");
+    }
+  }, [onHoldCount]);
 
   useEffect(() => {
     filteredUserLocationData.map((loc) => {
