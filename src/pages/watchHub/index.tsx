@@ -566,7 +566,7 @@ function ParticipantActions({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              room: "quickstart-room",
+              room: participant.identity.toString(),
               fileName: fileName,
               callId: currentCallID,
             }),
