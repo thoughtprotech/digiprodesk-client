@@ -451,6 +451,7 @@ function RoomConnector({
       <div className="w-full h-fit aspect-video p-2" data-lk-theme="default">
         {/* Your custom component with basic video conferencing functionality. */}
         <MyVideoConference
+          location={location}
           name={userId}
           roomInstance={roomInstance}
           filteredUserLocationData={filteredUserLocationData}
@@ -472,6 +473,7 @@ function RoomConnector({
 }
 
 function MyVideoConference({
+  location,
   name,
   roomInstance,
   filteredUserLocationData,
@@ -485,6 +487,7 @@ function MyVideoConference({
   setCurrentLocalCallID,
   onHoldCount,
 }: {
+  location: Location;
   name: string;
   roomInstance: any;
   filteredUserLocationData: Location[];
@@ -560,13 +563,14 @@ function MyVideoConference({
 
   return (
     <div className="w-full h-full aspect-video bg-black rounded-md">
-      {remoteTracks.map((track, index) => (
-        <div
-          className="rounded-md aspect-video w-full h-fit relative"
-          key={index}
-        >
-          {track ? (
-            <>
+      {remoteTracks[0]?.participant?.identity ===
+      location.LocationID?.toString() ? (
+        <div>
+          {remoteTracks.map((track, index) => (
+            <div
+              className="rounded-md aspect-video w-full h-fit relative"
+              key={index}
+            >
               {/* Render each participant tile manually */}
               <GuestTile trackRef={track} />
               <ParticipantActions
@@ -585,14 +589,19 @@ function MyVideoConference({
                 setCurrentLocalCallID={setCurrentLocalCallID}
                 onHoldCount={onHoldCount}
               />
-            </>
-          ) : (
-            <div>
-              <h1 className="text-white font-bold">Location Not Online</h1>
             </div>
-          )}
+          ))}
         </div>
-      ))}
+      ) : (
+        <div className="w-full h-full flex items-center justify-center relative">
+          <div className="absolute top-2 left-2">
+            <h1 className="text-xs font-bold">{location.LocationName}</h1>
+          </div>
+          <h1 className="font-bold text-sm text-gray-500">
+            Location Not Online
+          </h1>
+        </div>
+      )}
     </div>
   );
 }
