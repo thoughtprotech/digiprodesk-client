@@ -356,17 +356,12 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div className="w-full pb-4 gap-2">
-          <RoomContext.Provider value={roomInstance}>
-            <div
-              className="p-2"
-              data-lk-theme="default"
-              style={{ height: "100dvh" }}
-            >
-              {/* Your custom component with basic video conferencing functionality. */}
-              <MyVideoConference
-                name={userId}
-                roomInstance={roomInstance}
+        <div className="w-full h-full grid grid-cols-4 gap-2">
+          {filteredUserLocationData.map((loc) => {
+            return (
+              <RoomConnector
+                location={loc}
+                userId={userId}
                 filteredUserLocationData={filteredUserLocationData}
                 toggleLocalCamera={toggleLocalCamera}
                 localStatus={localStatus}
@@ -378,13 +373,100 @@ export default function Index() {
                 setCurrentLocalCallID={setCurrentLocalCallID}
                 onHoldCount={onHoldCount}
               />
-              {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
-              <RoomAudioRenderer />
-            </div>
-          </RoomContext.Provider>
+            );
+          })}
         </div>
       </div>
     </Layout>
+  );
+}
+
+function RoomConnector({
+  location,
+  userId,
+  filteredUserLocationData,
+  toggleLocalCamera,
+  localStatus,
+  setLocalStatus,
+  setGuestCount,
+  setLocationsOnline,
+  setOnHoldCount,
+  setMissedCallCount,
+  setCurrentLocalCallID,
+  onHoldCount,
+}: {
+  location: Location;
+  userId: string;
+  filteredUserLocationData: Location[];
+  toggleLocalCamera: () => void;
+  localStatus: "notInCall" | "inCall";
+  setLocalStatus: any;
+  setGuestCount: any;
+  setLocationsOnline: any;
+  setOnHoldCount: any;
+  setMissedCallCount: any;
+  setCurrentLocalCallID: any;
+  onHoldCount: string[];
+}) {
+  const [roomInstance] = useState(
+    () =>
+      new Room({
+        // Optimize video quality for each participant's screen
+        adaptiveStream: true,
+        // Enable automatic audio/video quality optimization
+        dynacast: true,
+      })
+  );
+
+  useEffect(() => {
+    if (userId.length === 0) return;
+    let mounted = true;
+    (async () => {
+      try {
+        const resp = await fetch(
+          `/api/token?room=${location.LocationID?.toLocaleString()}&username=${userId}`
+        );
+        const data = await resp.json();
+        if (!mounted) return;
+        if (data.token) {
+          await roomInstance.connect(
+            process.env.NEXT_PUBLIC_LIVEKIT_URL!,
+            data.token
+          );
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      roomInstance.disconnect();
+    };
+  }, [roomInstance, userId]);
+
+  return (
+    <RoomContext.Provider value={roomInstance}>
+      <div className="w-full h-fit aspect-video p-2" data-lk-theme="default">
+        {/* Your custom component with basic video conferencing functionality. */}
+        <MyVideoConference
+          name={userId}
+          roomInstance={roomInstance}
+          filteredUserLocationData={filteredUserLocationData}
+          toggleLocalCamera={toggleLocalCamera}
+          localStatus={localStatus}
+          setLocalStatus={setLocalStatus}
+          setGuestCount={setGuestCount}
+          setLocationsOnline={setLocationsOnline}
+          setOnHoldCount={setOnHoldCount}
+          setMissedCallCount={setMissedCallCount}
+          setCurrentLocalCallID={setCurrentLocalCallID}
+          onHoldCount={onHoldCount}
+        />
+        {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
+        <RoomAudioRenderer />
+      </div>
+    </RoomContext.Provider>
   );
 }
 
@@ -476,30 +558,38 @@ function MyVideoConference({
   }, [remoteTracks]);
 
   return (
-    <div className="w-full h-full grid grid-cols-4 gap-2">
+    <div className="w-full h-full aspect-video bg-black rounded-md">
       {remoteTracks.map((track, index) => (
         <div
           className="rounded-md aspect-video w-full h-fit relative"
           key={index}
         >
-          {/* Render each participant tile manually */}
-          <GuestTile trackRef={track} />
-          <ParticipantActions
-            track={track}
-            remoteTracks={remoteTracks}
-            participant={track.participant}
-            name={name}
-            roomInstance={roomInstance}
-            toggleLocalCamera={toggleLocalCamera}
-            localStatus={localStatus}
-            setLocalStatus={setLocalStatus}
-            filteredUserLocationData={filteredUserLocationData}
-            setGuestCount={setGuestCount}
-            setOnHoldCount={setOnHoldCount}
-            setMissedCallCount={setMissedCallCount}
-            setCurrentLocalCallID={setCurrentLocalCallID}
-            onHoldCount={onHoldCount}
-          />
+          {track ? (
+            <>
+              {/* Render each participant tile manually */}
+              <GuestTile trackRef={track} />
+              <ParticipantActions
+                track={track}
+                remoteTracks={remoteTracks}
+                participant={track.participant}
+                name={name}
+                roomInstance={roomInstance}
+                toggleLocalCamera={toggleLocalCamera}
+                localStatus={localStatus}
+                setLocalStatus={setLocalStatus}
+                filteredUserLocationData={filteredUserLocationData}
+                setGuestCount={setGuestCount}
+                setOnHoldCount={setOnHoldCount}
+                setMissedCallCount={setMissedCallCount}
+                setCurrentLocalCallID={setCurrentLocalCallID}
+                onHoldCount={onHoldCount}
+              />
+            </>
+          ) : (
+            <div>
+              <h1 className="text-white font-bold">Location Not Online</h1>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -566,7 +656,7 @@ function ParticipantActions({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              room: "quickstart-room",
+              room: participant.identity.toString(),
               fileName: fileName,
               callId: currentCallID,
             }),

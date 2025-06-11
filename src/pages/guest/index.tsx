@@ -380,7 +380,7 @@ export default function Index() {
     (async () => {
       try {
         const resp = await fetch(
-          `/api/token?room=${room}&username=${location.LocationID}`
+          `/api/token?room=${location.LocationID?.toLocaleString()}&username=${location.LocationID}`
         );
         const data = await resp.json();
         console.log({ data });
