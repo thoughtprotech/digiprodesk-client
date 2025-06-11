@@ -345,7 +345,7 @@ export default function Index() {
   const guestVideoRef = useRef<HTMLDivElement>(null);
   // const receptionistVideoRef = useRef<HTMLDivElement>(null);
   // const receptionistVideoActive = useRef(false);
-  const room = "quickstart-room";
+  // const room = "quickstart-room";
 
   const [, setMicEnabled] = useState<boolean>(false);
   const [, setCameraEnabled] = useState<boolean>(true);

@@ -360,6 +360,7 @@ export default function Index() {
           {filteredUserLocationData.map((loc) => {
             return (
               <RoomConnector
+                key={loc.LocationID}
                 location={loc}
                 userId={userId}
                 filteredUserLocationData={filteredUserLocationData}
