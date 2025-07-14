@@ -267,7 +267,7 @@ export default function Index() {
                     {locationsOnline.length}
                   </h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-purple-500">
-                    Location(s) Online
+                    Location(s) OnLine
                   </h1>
                 </div>
               </div>
@@ -598,7 +598,7 @@ function MyVideoConference({
             <h1 className="text-xs font-bold">{location.LocationName}</h1>
           </div>
           <h1 className="font-bold text-sm text-gray-500">
-            Location Not Online
+            Location Offline
           </h1>
         </div>
       )}

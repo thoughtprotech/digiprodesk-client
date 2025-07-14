@@ -205,6 +205,9 @@ export default function Index() {
                 Call ID
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
+                Status
+              </th>
+              <th className="py-2 px-4 text-left border-b border-b-border">
                 Assigned To
               </th>
               <th className="py-2 px-4 text-left border-b border-b-border">
@@ -213,12 +216,10 @@ export default function Index() {
               <th className="py-2 px-4 text-left border-b border-b-border">
                 End
               </th>
-              <th className="py-2 px-4 text-left border-b border-b-border">
-                Status
-              </th>
-              <th className="py-2 px-4 text-left border-b border-b-border">
+
+              {/* <th className="py-2 px-4 text-left border-b border-b-border">
                 Manager Missed
-              </th>
+              </th> */}
             </tr>
           </thead>
           {filteredCallList.filter((call) => call.CallStatus !== "Completed")
@@ -230,17 +231,6 @@ export default function Index() {
                   <tr key={row.callid} className="">
                     <td className="w-1/5 py-2 px-4 border-b border-b-border text-sm">
                       {row.callid}
-                    </td>
-                    <td className="w-1/6 py-2 px-4 border-b border-b-border">
-                      {row.displayname}
-                    </td>
-                    <td className="w-1/6 py-2 px-4 border-b border-b-border">
-                      {new Date(row?.callstartdatetime).toDateString()}{" "}
-                      {new Date(row?.callstartdatetime).toLocaleTimeString()}
-                    </td>
-                    <td className="w-1/6 py-2 px-4 border-b border-b-border">
-                      {new Date(row?.CallEndDateTime).toDateString()}{" "}
-                      {new Date(row?.CallEndDateTime).toLocaleTimeString()}
                     </td>
                     <td className={`w-1/6 py-2 px-4 border-b border-b-border`}>
                       <div
@@ -260,9 +250,21 @@ export default function Index() {
                         {row.callstatus}
                       </div>
                     </td>
-                    <td className="w-1/5 py-2 px-4 border-b border-b-border">
-                      {row.ManagerMissed}
+                    <td className="w-1/6 py-2 px-4 border-b border-b-border">
+                      {row.displayname}
                     </td>
+                    <td className="w-1/6 py-2 px-4 border-b border-b-border">
+                      {new Date(row?.callstartdatetime).toDateString()}{" "}
+                      {new Date(row?.callstartdatetime).toLocaleTimeString()}
+                    </td>
+                    <td className="w-1/6 py-2 px-4 border-b border-b-border">
+                      {new Date(row?.CallEndDateTime).toDateString()}{" "}
+                      {new Date(row?.CallEndDateTime).toLocaleTimeString()}
+                    </td>
+
+                    {/* <td className="w-1/5 py-2 px-4 border-b border-b-border">
+                      {row.ManagerMissed}
+                    </td> */}
                   </tr>
                 ))}
             </tbody>

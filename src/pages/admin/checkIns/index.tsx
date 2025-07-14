@@ -225,14 +225,14 @@ export default function Index() {
                         Missed
                       </h1>
                     </div>
-                    <div className="flex flex-col items-center">
+                    {/* <div className="flex flex-col items-center">
                       <h1 className="font-bold text-2xl">
                         {loc.ManagerMissedCheckIns}
                       </h1>
                       <h1 className="text-sm font-bold text-amber-500 text-center text-nowrap">
                         Manager Missed
                       </h1>
-                    </div>
+                    </div> */}
                     <div className="flex flex-col items-center">
                       <h1 className="font-bold text-2xl">
                         {loc.AnalyticsNegativeCheckIns}
