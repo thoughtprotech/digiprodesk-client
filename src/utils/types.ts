@@ -3,6 +3,7 @@
 
 export interface User {
   UserName: string;
+  email: string;
   Password: string;
   DisplayName: string;
   UserPhoto?: any;
@@ -97,7 +98,7 @@ export interface Location {
   LocationID?: number;
   LocationName: string;
   LocationCode: string;
-  LocationParentID?: number;
+  LocationParentID?: string;
   LocationType: string;
   LocationManager: string | null;
   LocationTheme?: string;
@@ -159,7 +160,7 @@ export interface Call {
     | "Error";
   CallPlacedByUserName?: string | null;
   CallPlacedByLocationID?: number;
-  CallAssignedTo?: string | null;
+  AssignedToUserName?: string | null;
   CallTransferredTo?: string | null;
   CallBookingID?: string;
   CallDocumentUploadStatus?: "Success" | "Error" | null;
@@ -180,6 +181,8 @@ export interface Call {
   ModifiedBy?: string;
   ModifiedOn?: string;
   CallPlacedByLocation: Location | null;
+  CallPlacedByLocationName?: string;
+  CallAssignedTo?: string;
 }
 
 export interface CallLog {

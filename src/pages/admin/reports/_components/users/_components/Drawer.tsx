@@ -2,6 +2,7 @@
 import Button from "@/components/ui/Button";
 import DateRangeSelect from "@/components/ui/DateRangeSelect";
 import exportToExcel from "@/utils/exportToExcel";
+import formatDuration from "@/utils/formatSeconds";
 import { FileDown, X } from "lucide-react";
 import { parseCookies } from "nookies";
 import React, { useEffect, useState } from "react";
@@ -10,37 +11,21 @@ import toast from "react-hot-toast";
 type DrawerProps = {
   isOpen: boolean;
   onClose: () => void;
-  user?: any;
+  user?: {
+    username: string;
+    displayname: string;
+  };
 };
 
-interface LocationInfo {
-  LocationID: number;
-  LocationName: string;
-  LocationCode: string;
-  LocationParentID: number;
-  LocationType: string;
-  LocationManager: string | null;
-  LocationLogo: string | null;
-  LocationImage: string | null;
-  LocationBanner: string | null;
-  LocationVideoFeed: string;
-  LocationReceptionistPhoto: string | null;
-  LocationAdvertisementVideo: string | null;
-  IsActive: boolean;
-  CreatedBy: string;
-  CreatedOn: string; // ISO date string
-  ModifiedBy: string | null;
-  ModifiedOn: string; // ISO date string
-}
-
 interface CallData {
-  CallStartDateTime: string; // ISO date string
-  CallEndDateTime: string;
-  CallPlacedByUserName: string;
+  displayname: string; // ISO date string
+  locationname: string;
+  callstartdatetime: string;
+  callenddatetime: string;
+  CallDuration: number;
   CallTransferredTo: string;
-  CallStatus: string;
-  CallAnalytics: string;
-  LocationInfo: LocationInfo;
+  callstatus: string;
+  callanalytics: string;
 }
 
 const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
@@ -57,7 +42,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
       endDate = new Date().toISOString();
     }
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users/${user}?startDate=${startDate}&endDate=${endDate}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/report/users/${user?.username}?startDate=${startDate}&endDate=${endDate}`,
       {
         method: "GET",
         headers: {
@@ -69,7 +54,6 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log({ data });
       setCallData(data);
     } else {
       toast.error("Failed to fetch call data");
@@ -82,7 +66,6 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
 
   useEffect(() => {
     fetchCallData();
-    console.log(user);
   }, [user]);
 
   return (
@@ -105,7 +88,7 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
       >
         <div className="w-full flex items-center justify-between px-4 border-b border-b-border">
           <div>
-            <h1 className="text-3xl font-bold">{user}</h1>
+            <h1 className="text-3xl font-bold">{user?.displayname}</h1>
           </div>
           <div className="p-4">
             <button onClick={onClose} className="text-text focus:outline-none">
@@ -139,16 +122,13 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
                       Location
                     </th>
                     <th className="py-2 px-4 border-b border-b-border text-left">
-                      Date
-                    </th>
-                    <th className="py-2 px-4 border-b border-b-border text-left">
                       Start Time
                     </th>
                     <th className="py-2 px-4 border-b border-b-border text-left">
                       End Time
                     </th>
                     <th className="py-2 px-4 border-b border-b-border text-left">
-                      Duration
+                      Duration (HH:MM:SS)
                     </th>
                     <th className="py-2 px-4 border-b border-b-border text-left">
                       Transferred To
@@ -163,52 +143,34 @@ const Drawer: React.FC<DrawerProps> = ({ isOpen, onClose, user }) => {
                 </thead>
                 <tbody className="text-sm">
                   {callData?.map((call, index) => {
-                    const callStart = new Date(call?.CallStartDateTime);
-                    const callEnd = call?.CallEndDateTime
-                      ? new Date(call?.CallEndDateTime)
-                      : null;
-                    const dateString = callStart.toLocaleDateString();
-                    // Calculate duration in minutes and seconds
-                    let duration = "N/A";
-                    if (callEnd) {
-                      const minutes =
-                        callEnd.getMinutes() - callStart.getMinutes();
-                      const seconds =
-                        callEnd.getSeconds() - callStart.getSeconds();
-                      duration = `${minutes}:${seconds}`;
-                    }
-
                     return (
                       <tr key={index} className="hover:bg-muted">
                         <td className="py-2 px-4 border-b border-b-border">
-                          {call?.LocationInfo?.LocationName}
-                        </td>
-                        <td className="py-2 px-4 border-b border-b-border">
-                          {dateString}
+                          {call?.locationname}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
                           {new Date(
-                            call.CallStartDateTime
+                            call.callstartdatetime
+                          ).toDateString()}{" "}
+                          {new Date(
+                            call.callstartdatetime
                           ).toLocaleTimeString()}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {new Date(
-                            call.CallEndDateTime
-                          ).toLocaleTimeString() || "--"}
+                          {new Date(call.callenddatetime).toDateString()}{" "}
+                          {new Date(call.callenddatetime).toLocaleTimeString()}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {duration}
+                          {formatDuration(call?.CallDuration)}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {call?.CallTransferredTo
-                            ? call?.CallTransferredTo
-                            : "--"}
+                          {call?.CallTransferredTo || ""}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {call.CallStatus}
+                          {call?.callstatus}
                         </td>
                         <td className="py-2 px-4 border-b border-b-border">
-                          {call?.CallAnalytics ? call?.CallAnalytics : "--"}
+                          {call?.callanalytics ? call?.callanalytics : ""}
                         </td>
                       </tr>
                     );

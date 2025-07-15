@@ -1,53 +1,137 @@
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Disc,
-  LogOut,
-  Mic,
-  MicOff,
-  Volume1,
-  Volume2,
-  VolumeX,
-} from "lucide-react";
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/ban-ts-comment */
+import { LogOut } from "lucide-react";
 import { useRouter } from "next/router";
-import { destroyCookie, parseCookies } from "nookies";
-import Peer, { MediaConnection } from "peerjs";
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import { parseCookies } from "nookies";
+import React, { useEffect, useRef, useState } from "react";
 import jwt from "jsonwebtoken";
 import toast from "react-hot-toast";
 import Toast from "@/components/ui/Toast";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
-import Tooltip from "@/components/ui/ToolTip";
 import { Location, User } from "@/utils/types";
 import generateUUID from "@/utils/uuidGenerator";
 import WithRole from "@/components/WithRole";
-import ElapsedTime from "@/components/ui/ElapsedTime";
+import logOut from "@/utils/logOut";
+import { LocalVideoTrack, Room, Track } from "livekit-client";
+import { useSocket } from "@/context/SocketContext";
+import { io } from "socket.io-client";
+import * as cocoSsd from "@tensorflow-models/coco-ssd";
+import "@tensorflow/tfjs";
+import {
+  RoomAudioRenderer,
+  RoomContext,
+  useRoomContext,
+  useTracks,
+  TrackReferenceOrPlaceholder,
+  TrackToggle,
+  usePersistentUserChoices,
+} from "@livekit/components-react";
+import "@livekit/components-styles";
+import GuestTile from "../../components/GuestTile";
 
 export default function Index() {
-  const [userId, setUserId] = useState<string>("");
-  const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
-  const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
-  const peerInstance = useRef<Peer | null>(null);
-  const mediaConnectionRef = useRef<MediaConnection | null>(null); // Ref to store the current call
-  const currentRoomId = useRef<string>("");
+  const [, setUserId] = useState<string>("");
+  // const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
+  // const currentUserVideoRef = useRef<HTMLVideoElement | null>(null);
   const [inCall, setInCall] = useState<boolean>(false);
   const [callStatus, setCallStatus] = useState<
-    "notInCall" | "calling" | "inProgress" | "onHold" | "transferred"
+    | "notInCall"
+    | "calling"
+    | "inProgress"
+    | "onHold"
+    | "transferred"
+    | "missed"
+    | "hostUnavailabe"
   >("notInCall");
-  const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const uploadedChunks = useRef<string[]>([]); // Store uploaded chunk paths
-  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [volume, setVolume] = useState<number>(1); // Volume range: 0 to 1
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  // const [, setVolume] = useState<number>(1); // Volume range: 0 to 1
   const [location, setLocation] = useState<Location>();
   const [user, setUser] = useState<User>();
   const passwordRef = useRef<HTMLInputElement>(null);
   const callRingTone = useRef<HTMLAudioElement | null>(null);
   const ringTone = useRef<HTMLAudioElement | null>(null);
+  const [advertisementStatus, setAdvertisementStatus] = useState<
+    "image" | "video"
+  >("image");
+  const callStatusRef = useRef(callStatus);
+  const socketRef = useRef<ReturnType<typeof io> | null>(null);
+  const { socket } = useSocket();
+
+  const modelRef = useRef<cocoSsd.ObjectDetection | null>(null); // loaded model
+  // const [detectionStarted, setDetectionStarted] = useState(false); // run once
+  // const hasNotifiedRef = useRef(false); // to track if notification has been sent
+  const [currentCallID, setCurrentCallID] = useState<string>("");
+
+  useEffect(() => {
+    socketRef.current = socket;
+    cocoSsd
+      .load()
+      .then((model: any) => {
+        modelRef.current = model;
+      })
+      .catch(console.error);
+  }, [socket]);
+
+  useEffect(() => {
+    if (socketRef.current && location) {
+      socketRef.current.on("host-unavailable", (data) => {
+        console.log("HOST NOT AVAILABLE", data);
+        if (data.CallID === currentCallID) {
+          setInCall(false);
+          setCallStatus("hostUnavailabe");
+          setTimeout(() => {
+            setCallStatus("notInCall");
+          }, 10000);
+        }
+      });
+
+      socketRef.current.on("call-missed", (data) => {
+        console.log("HOST NOT AVAILABLE", data);
+        if (data.CallID === currentCallID) {
+          setInCall(false);
+          setCallStatus("missed");
+          setTimeout(() => {
+            setCallStatus("notInCall");
+            setCurrentCallID("");
+          }, 10000);
+        }
+      });
+
+      socketRef.current.on("location-refresh-request", (data) => {
+        if (data.locationID === location?.LocationID?.toString()) {
+          console.log("Reloading page due to location refresh...");
+          window.location.reload();
+        }
+      });
+
+      socketRef.current.on("call-on-hold", (data) => {
+        console.log({ data });
+        console.log("INCOMING LOC ID", data.CallPlacedByLocationID);
+        console.log("LOC ID", location?.LocationID?.toString());
+        if (
+          data.CallPlacedByLocationID?.toString() ===
+          location?.LocationID?.toString()
+        ) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            console.log("Participant:", participant.identity);
+            if (participant.identity === data.CallAssignedTo) {
+              participant.trackPublications.forEach((publication) => {
+                publication.setSubscribed(false);
+              });
+              roomInstance.localParticipant.setMicrophoneEnabled(false);
+              setInCall(false);
+            }
+          });
+          setCallStatus("onHold");
+        }
+      });
+    }
+  }, [socketRef.current, location, currentCallID]);
+
+  useEffect(() => {
+    callStatusRef.current = callStatus;
+  }, [callStatus]);
 
   useEffect(() => {
     ringTone.current = new Audio("/sounds/guestRingTone.mp3");
@@ -70,120 +154,19 @@ export default function Index() {
     }
   }, [confirmLogoutModal]);
 
-  const call = (remotePeerId: string) => {
-    console.log("Calling peer with ID: ", remotePeerId);
-    // Use modern getUserMedia method
-    navigator?.mediaDevices
-      ?.getUserMedia({ video: true, audio: true })
-      .then((mediaStream: MediaStream) => {
-        if (currentUserVideoRef.current) {
-          currentUserVideoRef.current.srcObject = mediaStream;
-          currentUserVideoRef.current.play();
-        }
-
-        const peerCall = peerInstance.current?.call(remotePeerId, mediaStream);
-        if (peerCall) {
-          mediaConnectionRef.current = peerCall; // Store the current call in the ref
-          peerCall.on("stream", (remoteStream: MediaStream) => {
-            if (remoteVideoRef.current) {
-              remoteVideoRef.current.srcObject = remoteStream;
-              remoteVideoRef.current.play();
-            }
-          });
-        }
-
-        let mimeType;
-        if (MediaRecorder.isTypeSupported("video/mp4;codecs=avc1,mp4a.40.2")) {
-          mimeType = "video/mp4;codecs=avc1,mp4a.40.2";
-        } else if (
-          MediaRecorder.isTypeSupported("video/webm;codecs=vp9,opus")
-        ) {
-          mimeType = "video/webm;codecs=vp9,opus";
-        } else {
-          // Fallback – omit mimeType to let the browser choose.
-          mimeType = "";
-        }
-
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          console.warn(
-            "VP8 not supported, falling back to default WebM settings"
-          );
-        }
-
-        // Recording Start
-        const mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
-
-        // Queue for storing chunks to upload
-        const chunkQueue: Blob[] = [];
-        let isUploading = false;
-
-        const uploadChunk = async () => {
-          if (chunkQueue.length === 0 || isUploading) return;
-
-          isUploading = true;
-          const chunk = chunkQueue.shift(); // Remove the first chunk from the queue
-
-          const formData = new FormData();
-          formData.append("videoChunk", chunk!, "chunk.mp4");
-          formData.append("sessionId", currentRoomId.current);
-          formData.append("user", "guest");
-
-          try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_BACKEND_URL}/upload-chunk`,
-              {
-                method: "POST",
-                body: formData,
-              }
-            );
-            const result = await response.json();
-            uploadedChunks.current.push(result.chunkPath); // Store uploaded chunk path
-          } catch (error) {
-            console.error("Error uploading chunk:", error);
-          } finally {
-            isUploading = false;
-            uploadChunk(); // Check for the next chunk in the queue
-          }
-        };
-
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunkQueue.push(event.data); // Add the chunk to the queue
-            uploadChunk(); // Start the upload process
-          }
-        };
-
-        // Start recording, then stop every 2 seconds to prepare for the next chunk
-        mediaRecorder.start();
-
-        recordingIntervalRef.current = setInterval(() => {
-          if (mediaRecorder.state === "recording") {
-            mediaRecorder.requestData();
-            mediaRecorder.stop(); // Stop to trigger ondataavailable event
-            setTimeout(() => {
-              mediaRecorder.start(); // Start again for the next chunk
-            }, 100);
-          }
-        }, 2000); // Send video chunks every 2 seconds
-
-        mediaRecorderRef.current = mediaRecorder;
-      })
-      .catch((err) => {
-        console.error("Error accessing media devices.", err);
-      });
-  };
-
   const initiateCall = () => {
-    const roomId = generateUUID();
-    currentRoomId.current = roomId;
-    setInCall(true);
-    setCallStatus("calling");
-    if (socketRef.current) {
+    if (socketRef.current && location) {
+      const callId = generateUUID();
+      setCurrentCallID(callId);
       socketRef.current.emit(
         "initiate-call",
-        JSON.stringify({ roomId, LocationID: location?.LocationID })
+        JSON.stringify({
+          roomId: callId,
+          LocationID: location?.LocationID,
+        })
       );
-      ringTone?.current?.play();
+      setInCall(true);
+      setCallStatus("calling");
     }
   };
 
@@ -211,8 +194,7 @@ export default function Index() {
       );
 
       if (response.status === 200) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
         return toast.custom((t: any) => (
           <Toast content="Logged Out Successfully" type="success" t={t} />
         ));
@@ -228,26 +210,6 @@ export default function Index() {
     }
   };
 
-  const logOut = () => {
-    // Remove the cookie
-    destroyCookie(null, "userToken");
-
-    // Start polling every 100ms to see if the cookie is gone.
-    const intervalId = setInterval(() => {
-      const cookies = parseCookies();
-      if (!cookies.userToken) {
-        clearInterval(intervalId);
-        router.push("/");
-      }
-    }, 100);
-
-    // Fallback: if after 5 seconds the cookie still exists, clear the interval and redirect.
-    setTimeout(() => {
-      clearInterval(intervalId);
-      router.push("/");
-    }, 5000);
-  };
-
   const handleOpenConfirmLogoutModal = () => {
     setConfirmLogoutModal(true);
   };
@@ -256,28 +218,20 @@ export default function Index() {
     setConfirmLogoutModal(false);
   };
 
-  const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(event.target.value);
-    setVolume(newVolume);
+  // const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const newVolume = parseFloat(event.target.value);
+  //   setVolume(newVolume);
 
-    if (currentUserVideoRef.current) {
-      const currentVideo = currentUserVideoRef.current;
-      currentVideo.volume = newVolume; // Set local video volume
-    }
+  //   if (currentUserVideoRef.current) {
+  //     const currentVideo = currentUserVideoRef.current;
+  //     currentVideo.volume = newVolume; // Set local video volume
+  //   }
 
-    if (remoteVideoRef.current) {
-      const remoteVideo = remoteVideoRef.current;
-      remoteVideo.volume = newVolume; // Set remote video volume
-    }
-  };
-
-  const toggleMute = () => {
-    console.log(mediaConnectionRef.current?.localStream.getAudioTracks());
-    const audioTracks =
-      mediaConnectionRef.current?.localStream.getAudioTracks();
-    audioTracks![0].enabled = !audioTracks![0].enabled;
-    setIsMuted(!isMuted);
-  };
+  //   if (remoteVideoRef.current) {
+  //     const remoteVideo = remoteVideoRef.current;
+  //     remoteVideo.volume = newVolume; // Set remote video volume
+  //   }
+  // };
 
   const fetchLocationData = async () => {
     try {
@@ -334,8 +288,7 @@ export default function Index() {
           setUser(data);
         });
       } else if (response.status === 401) {
-        destroyCookie(null, "userToken");
-        router.push("/");
+        logOut(router);
       } else {
         return toast.custom((t: any) => (
           <Toast t={t} type="error" content="Error Fetching User Details" />
@@ -368,7 +321,7 @@ export default function Index() {
             <Toast t={t} type="error" content="Token has expired" />
           ));
           console.error("Token has expired");
-          logOut(); // Log out if token has expired
+          logOut(router); // Log out if token has expired
         } else {
           const { userName } = decoded;
           setUserId(userName); // Set userId from token if valid
@@ -383,382 +336,641 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    if (userId !== "") {
-      const peer = new Peer(userId, {
-        config: {
-          iceServers: [
+    setTimeout(() => {
+      setAdvertisementStatus("video");
+    }, 30000);
+  }, []);
+
+  // Livekit
+  const guestVideoRef = useRef<HTMLDivElement>(null);
+  // const receptionistVideoRef = useRef<HTMLDivElement>(null);
+  // const receptionistVideoActive = useRef(false);
+  // const room = "quickstart-room";
+
+  const [, setMicEnabled] = useState<boolean>(false);
+  const [, setCameraEnabled] = useState<boolean>(true);
+
+  const [volume, setVolume] = useState<number>(100);
+
+  const hiddenVideoRef = useRef<HTMLVideoElement>(null);
+  // “detected” flag so we don’t flood the console with repeated logs
+  const [detected, setDetected] = useState(false);
+
+  const [roomInstance] = useState(
+    () =>
+      new Room({
+        // Optimize video quality for each participant's screen
+        adaptiveStream: true,
+        // Enable automatic audio/video quality optimization
+        dynacast: true,
+      })
+  );
+
+  useEffect(() => {
+    if (!location) return;
+    let mounted = true;
+    let detectionInterval: number | undefined;
+    let model: cocoSsd.ObjectDetection;
+
+    // 1) Load coco-ssd ONCE on mount
+    const loadModel = async () => {
+      model = await cocoSsd.load();
+    };
+    loadModel();
+    (async () => {
+      try {
+        const resp = await fetch(
+          `/api/token?room=${location.LocationID?.toLocaleString()}&username=${location.LocationID}`
+        );
+        const data = await resp.json();
+        console.log({ data });
+        if (!mounted) return;
+        if (data.token) {
+          await roomInstance.connect(
+            process.env.NEXT_PUBLIC_LIVEKIT_URL!,
+            data.token,
             {
-              urls: process.env.NEXT_PUBLIC_TURN_SERVER_URL,
-              username: process.env.NEXT_PUBLIC_TURN_SERVER_USERNAME,
-              credential: process.env.NEXT_PUBLIC_TURN_SERVER_CREDENTIAL,
-            },
-          ],
-        },
-      });
-      peerInstance.current = peer;
-
-      const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
-        query: {
-          userId,
-        },
-        withCredentials: true,
-      });
-
-      socketRef.current = socket; // Store socket in ref
-
-      socket.on("call-joined", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          call(data.CallAssignedTo);
-          setCallStatus("inProgress");
-          ringTone?.current?.pause();
-          if (ringTone.current) {
-            ringTone.current.currentTime = 0;
-          }
+              autoSubscribe: false,
+            }
+          );
+          await roomInstance.localParticipant.setCameraEnabled(true);
+          await roomInstance.localParticipant.setMicrophoneEnabled(false);
         }
-      });
+        setTimeout(() => {
+          attachLocalVideoTrackIfReady(model);
+        }, 1000);
 
-      socket.on("call-on-hold", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          setCallStatus("onHold");
-        }
-      });
-
-      socket.on("call-transferred", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          setCallStatus("transferred");
-        }
-      });
-
-      socket.on("call-resumed", (data) => {
-        if (data.CallID === currentRoomId.current) {
-          call(data.CallAssignedTo);
-          setCallStatus("inProgress");
-        }
-      });
-
-      socket.on("call-ended", async (data) => {
-        if (data.CallID === currentRoomId.current) {
-          if (mediaConnectionRef.current) {
-            mediaConnectionRef.current.close();
-            mediaConnectionRef.current = null;
-          }
-          if (currentUserVideoRef.current) {
-            currentUserVideoRef.current.srcObject = null;
-          }
-          if (mediaRecorderRef.current) {
-            mediaRecorderRef.current.stop(); // Stop recording
-            mediaRecorderRef.current = null;
-          }
-          if (recordingIntervalRef.current) {
-            clearInterval(recordingIntervalRef.current); // Clear the interval
-            recordingIntervalRef.current = null;
-          }
+        function attachLocalVideoTrackIfReady(
+          modelInstance: cocoSsd.ObjectDetection
+        ) {
           if (
-            currentUserVideoRef.current &&
-            currentUserVideoRef.current.srcObject
+            !mounted ||
+            !roomInstance.localParticipant ||
+            !hiddenVideoRef.current
           ) {
-            const stream = currentUserVideoRef.current.srcObject as MediaStream;
-            stream.getTracks().forEach((track) => track.stop());
-            currentUserVideoRef.current.srcObject = null;
+            return;
           }
+
+          // LiveKit v2: use getTrackPublications() to find our LocalVideoTrack
+          const publications =
+            roomInstance.localParticipant.getTrackPublications();
+
+          let localVidTrack: LocalVideoTrack | undefined = undefined;
+          for (const pub of publications.values()) {
+            const track = pub.track;
+            if (
+              track &&
+              track.kind === Track.Kind.Video &&
+              track.source === Track.Source.Camera
+            ) {
+              localVidTrack = track as LocalVideoTrack;
+              break;
+            }
+          }
+          if (!localVidTrack) {
+            console.warn("No local camera track found yet.");
+            return;
+          }
+
+          // Build a MediaStream from the LocalVideoTrack
+          const mediaStream = new MediaStream([localVidTrack.mediaStreamTrack]);
+          const videoEl = hiddenVideoRef.current;
+          videoEl.srcObject = mediaStream;
+          videoEl.play().catch(() => {
+            // play() might be blocked until user interaction; we can ignore.
+          });
+
+          // 4) Start a 1-second polling loop to run model.detect(...)
+          detectionInterval = window.setInterval(async () => {
+            if (!modelInstance || !hiddenVideoRef.current) return;
+            const predictions = await modelInstance.detect(
+              hiddenVideoRef.current
+            );
+
+            const foundPerson = predictions.some((p) => p.class === "person");
+            if (foundPerson && !detected) {
+              setDetected(true);
+              socketRef.current?.emit(
+                "guest-detected",
+                JSON.stringify({ locationID: location?.LocationID?.toString() })
+              );
+              // After 5 seconds, clear the flag so we can log again
+              setTimeout(() => {
+                setDetected(false);
+              }, 5000);
+            } else {
+              socketRef.current?.emit(
+                "guest-not-detected",
+                JSON.stringify({ locationID: location?.LocationID?.toString() })
+              );
+            }
+          }, 3000);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+      roomInstance.disconnect();
+      if (detectionInterval) {
+        clearInterval(detectionInterval);
+      }
+    };
+  }, [location]);
+
+  const toggleLocalMute = async ({
+    source,
+    state,
+  }: {
+    source: "mic" | "camera";
+    state: boolean;
+  }) => {
+    if (source === "mic") {
+      console.log("Toggling Mic!", state);
+      setMicEnabled(state);
+      await roomInstance.localParticipant.setMicrophoneEnabled(state);
+    } else {
+      setCameraEnabled(state);
+      await roomInstance.localParticipant.setCameraEnabled(state);
+    }
+  };
+
+  const callHeartBeat = async () => {
+    if (socketRef.current) {
+      console.log("SENDING CALL HEARTBEAT", { currentCallID });
+      socketRef.current?.emit(
+        "call-heartbeat",
+        JSON.stringify({
+          callId: currentCallID,
+          userId: "guest",
+        })
+      );
+    } else {
+      console.log("Socket Not There", socketRef.current);
+    }
+  };
+
+  useEffect(() => {
+    console.log({ currentCallID });
+  }, [currentCallID]);
+
+  useEffect(() => {
+    if (socketRef.current && location) {
+      socketRef.current.on("toggle-mic", (data) => {
+        const { guestId } = data;
+        if (guestId === location?.LocationID?.toString()) {
+          toggleLocalMute({
+            source: "mic",
+            state: !roomInstance.localParticipant.isMicrophoneEnabled,
+          });
+        }
+      });
+
+      socketRef.current.on("call-started", (data) => {
+        const { guestId, hostId, callId } = data;
+        console.log({ guestId, hostId });
+
+        if (guestId?.toString() === location?.LocationID?.toString()) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            if (participant.identity === hostId) {
+              participant.trackPublications.forEach((publication) => {
+                publication.setSubscribed(true);
+              });
+              roomInstance.localParticipant.setMicrophoneEnabled(true);
+            }
+          });
+          setInCall(true);
+          setCallStatus("inProgress");
+          console.log("CALL STARTED");
+          setCurrentCallID(callId);
+        }
+      });
+
+      socketRef.current.on("host-unmute", (data) => {
+        const { guestId, hostId } = data;
+
+        if (guestId?.toString() === location?.LocationID?.toString()) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            if (participant.identity === hostId) {
+              participant.audioTrackPublications.forEach((publication) => {
+                console.log("HOST UNMUTUED", hostId);
+                publication.setSubscribed(true);
+                roomInstance.localParticipant.setMicrophoneEnabled(true);
+              });
+            }
+          });
+        }
+      });
+
+      socketRef.current.on("host-mute", (data) => {
+        const { guestId, hostId } = data;
+
+        if (guestId?.toString() === location?.LocationID?.toString()) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            if (participant.identity === hostId) {
+              participant.audioTrackPublications.forEach((publication) => {
+                console.log("HOST MUTED", hostId);
+                publication.setSubscribed(false);
+                roomInstance.localParticipant.setMicrophoneEnabled(false);
+              });
+            }
+          });
+        }
+      });
+
+      socketRef.current.on("call-end-guest", (data) => {
+        const { guestId, hostId } = data;
+        if (guestId === location?.LocationID?.toString()) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            console.log("Participant:", participant.identity);
+            if (participant.identity === hostId) {
+              participant.trackPublications.forEach((publication) => {
+                publication.setSubscribed(false);
+              });
+              roomInstance.localParticipant.setMicrophoneEnabled(false);
+            }
+          });
           setInCall(false);
           setCallStatus("notInCall");
+          setCurrentCallID("");
+        }
+      });
+
+      socketRef.current.on("call-ended", (data) => {
+        console.log("CALL END", { data });
+        const { callId } = data;
+        console.log({ currentCallID });
+        console.log(
+          `MY CALL? INCOMING ID: ${callId}`,
+          callId === currentCallID
+        );
+        if (callId === currentCallID) {
+          roomInstance.remoteParticipants.forEach((participant) => {
+            participant.trackPublications.forEach((publication) => {
+              publication.setSubscribed(false);
+            });
+          });
+          roomInstance.localParticipant.setMicrophoneEnabled(false);
+          setInCall(false);
+          setCallStatus("notInCall");
+          setCurrentCallID("");
+        }
+      });
+
+      socketRef.current.on("refresh", (data) => {
+        const { guestId } = data;
+        console.log(guestId, location.LocationID?.toString);
+        if (guestId === location.LocationID?.toString()) {
           router.reload();
         }
       });
-
-      socket.on("incoming-host-call", (data) => {
-        const { roomId, from, to } = data;
-        console.log({ hostCall: data });
-        if (to === userId) {
-          call(from);
-          currentRoomId.current = roomId;
-          setInCall(true);
-          setCallStatus("inProgress");
-          callRingTone?.current?.play();
-          setTimeout(() => {
-            callRingTone?.current?.pause();
-            if (callRingTone.current) {
-              callRingTone.current.currentTime = 0;
-            }
-          }, 4000);
-        }
-      });
-
-      peer.on("call", (call: MediaConnection) => {
-        navigator.mediaDevices
-          .getUserMedia({ video: true, audio: true })
-          .then((mediaStream: MediaStream) => {
-            if (currentUserVideoRef.current) {
-              currentUserVideoRef.current.srcObject = mediaStream;
-              currentUserVideoRef.current.play();
-            }
-
-            call.answer(mediaStream);
-            call.on("stream", (remoteStream: MediaStream) => {
-              if (remoteVideoRef.current) {
-                remoteVideoRef.current.srcObject = remoteStream;
-                remoteVideoRef.current.play();
-              }
-            });
-
-            mediaConnectionRef.current = call;
-          })
-          .catch((err) => {
-            console.error("Error accessing media devices.", err);
-          });
-      });
-
-      return () => {
-        socket.disconnect();
-        peerInstance.current?.destroy();
-      };
     }
-  }, [userId]);
+  }, [socket, location, currentCallID]);
+
+  const heartbeatIntervalRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Clear any existing interval whenever currentCallID changes
+    if (heartbeatIntervalRef.current !== null) {
+      clearInterval(heartbeatIntervalRef.current);
+      heartbeatIntervalRef.current = null;
+    }
+
+    if (currentCallID.length > 0) {
+      // Use window.setInterval so TS knows it’s the browser version (returns number)
+      heartbeatIntervalRef.current = window.setInterval(() => {
+        callHeartBeat();
+      }, 4000);
+    }
+
+    // Cleanup on unmount or before next effect run
+    return () => {
+      if (heartbeatIntervalRef.current !== null) {
+        clearInterval(heartbeatIntervalRef.current);
+        heartbeatIntervalRef.current = null;
+      }
+    };
+  }, [currentCallID]);
+
+  useEffect(() => {
+    // Wrap in an async function so we can await getUserMedia
+    async function requestMediaPermissions() {
+      try {
+        // This will prompt the user for camera + mic if not already granted
+        await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        // If we reach here, permission was granted (or already granted)
+        console.log("🎉 Camera and mic permissions granted!");
+      } catch (err) {
+        // If the user denies, or there’s no device, you end up here
+        console.error(
+          "Camera/mic permission was denied or not available:",
+          err
+        );
+      }
+    }
+
+    // Only attempt if navigator.mediaDevices is available
+    if (typeof window !== "undefined" && navigator.mediaDevices) {
+      requestMediaPermissions();
+    }
+  }, []);
+
+  const { saveAudioInputEnabled } = usePersistentUserChoices({
+    preventSave: false,
+  });
+
+  const microphoneOnChange = React.useCallback(
+    (enabled: boolean, isUserInitiated: boolean) =>
+      isUserInitiated ? saveAudioInputEnabled(enabled) : null,
+    [saveAudioInputEnabled]
+  );
 
   return (
     <WithRole>
-      <div className="w-full h-screen bg-background flex flex-col text-white">
-        <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
-          <div>
-            {location?.LocationLogo ? (
-              <img
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
-                alt="Logo"
-                width={1000}
-                height={1000}
-                className="w-28"
-              />
-            ) : (
-              <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
-                ORION.
-              </h1>
-            )}
-          </div>
-          <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="font-bold text-[36px]">
-              Welcome To {location?.LocationName}
-            </h1>
-          </div>
-        </div>
-        {!inCall && callStatus === "notInCall" && (
-          <div className="w-full h-full flex relative">
-            {/* Video Section (75% of the width) */}
-            <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-              {location?.LocationVideoFeed &&
-              location?.LocationVideoFeed?.length > 0 ? (
-                <video
-                  src={`${location?.LocationVideoFeed}`}
-                  autoPlay
-                  loop
-                  muted
-                  className="w-full h-full object-cover rounded-md border border-border"
+      {/* Hidden video for COCO-SSD */}
+      <video
+        ref={hiddenVideoRef}
+        style={{ display: "none" }}
+        muted
+        playsInline
+      />
+      <RoomContext.Provider value={roomInstance}>
+        <div className="w-full h-screen bg-background flex flex-col text-white">
+          <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
+            <div>
+              {location?.LocationLogo ? (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
+                  alt="Logo"
+                  width={1000}
+                  height={1000}
+                  className="w-28"
                 />
               ) : (
-                location?.LocationImage && (
+                <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                  ORION.
+                </h1>
+              )}
+            </div>
+            <div className="absolute left-1/2 transform -translate-x-1/2">
+              <h1 className="font-bold text-[36px]">
+                Welcome To {location?.LocationName}
+              </h1>
+            </div>
+          </div>
+          {!inCall && callStatus === "notInCall" && (
+            <div className="w-full h-full flex relative">
+              {/* Video Section (75% of the width) */}
+              <RoomAudioRenderer />
+              <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
+                {advertisementStatus === "video" ? (
+                  <video
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationAdvertisementVideo}`}
+                    autoPlay
+                    loop
+                    muted
+                    className="w-full h-full object-cover rounded-md border border-border"
+                  />
+                ) : (
+                  location?.LocationImage && (
+                    <img
+                      src={
+                        location?.LocationImage &&
+                        location?.LocationImage !== ""
+                          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
+                          : "/images/background.png"
+                      }
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )
+                )}
+              </div>
+
+              {/* Receptionist Section (25% of the width) */}
+              <div className="w-1/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
+                {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
+                <div
+                  className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 hover:bg-highlight duration-300 rounded-md p-4 cursor-pointer"
+                  onClick={initiateCall}
+                >
                   <img
                     src={
-                      location?.LocationImage && location?.LocationImage !== ""
-                        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationImage}`
-                        : "/images/background.png"
+                      location?.LocationReceptionistPhoto &&
+                      location?.LocationReceptionistPhoto !== ""
+                        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
+                        : "/images/receptionist.png"
                     }
-                    alt="Background"
-                    className="w-full h-full object-cover"
+                    alt="Receptionist"
+                    className="w-28 rounded-full"
                   />
-                )
-              )}
+                  <h1 className="text-xl font-bold text-white whitespace-nowrap">
+                    Meet Virtual Receptionist
+                  </h1>
+                  <div
+                    style={{ display: "none" }}
+                    className="absolute bottom-28 -right-10 w-full max-w-md aspect-video bg-black rounded-md overflow-hidden shadow-md scale-75"
+                    ref={guestVideoRef}
+                  />
+                </div>
+              </div>
             </div>
-
-            {/* Receptionist Section (25% of the width) */}
-            <div className="w-1/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-              {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
-              <div
-                className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 hover:bg-highlight duration-300 rounded-md p-4 cursor-pointer"
-                onClick={initiateCall}
-              >
-                <img
-                  src={
-                    location?.LocationReceptionistPhoto &&
-                    location?.LocationReceptionistPhoto !== ""
-                      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationReceptionistPhoto}`
-                      : "/images/receptionist.png"
-                  }
-                  alt="Receptionist"
-                  className="w-28 rounded-full"
-                />
-                <h1 className="text-xl font-bold text-white whitespace-nowrap">
-                  Meet Virtual Receptionist
+          )}
+          {inCall && callStatus === "inProgress" && (
+            <div className="relative w-full h-full overflow-hidden flex flex-col justify-center gap-10 items-center pt-20 pb-14">
+              {/* Your custom component with basic video conferencing functionality. */}
+              <MyVideoConference
+                volume={volume}
+                setVolume={setVolume}
+                microphoneOnChange={microphoneOnChange}
+              />
+              {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
+              <RoomAudioRenderer volume={volume / 100} />
+            </div>
+          )}
+          {callStatus === "calling" && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl">
+                Calling Virtual Receptionist...
+              </h1>
+            </div>
+          )}
+          {callStatus === "missed" && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl text-center">
+                Looks like the call wasn&apos;t picked up, please try again
+                after sometime
+              </h1>
+            </div>
+          )}
+          {callStatus === "onHold" && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl">
+                Call On Hold, Thank you for your patience. We&apos;ll be with
+                you shortly.
+              </h1>
+            </div>
+          )}
+          {callStatus === "transferred" && (
+            <div className="w-full h-full flex items-center justify-center">
+              <h1 className="font-bold text-xl">
+                Your Call Is Being Transferred, Thank you for your patience.
+                We&apos;ll be with you shortly.
+              </h1>
+            </div>
+          )}
+          {callStatus === "hostUnavailabe" && (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="flex flex-col items-center  justify-center space-y-5">
+                <h1 className="font-bold text-xl">
+                  Looks like our virtual assistant is taking a short break.
+                  Please check back in a little while!
                 </h1>
               </div>
             </div>
-          </div>
-        )}
-        {inCall && callStatus === "inProgress" && (
-          <div className="w-full h-full relative">
-            <div className="absolute top-20 right-4">
-              <Tooltip tooltip="Recording" position="bottom">
-                <div className="flex items-center gap-2">
-                  <ElapsedTime startTime={new Date()} />
-                  <Disc className="text-red-500 w-8 h-8" />
-                </div>
-              </Tooltip>
-            </div>
-            <div className="flex flex-col items-center absolute bottom-2 right-2">
-              <video
-                ref={currentUserVideoRef}
-                autoPlay
-                muted
-                className="rounded-lg shadow-lg w-64 h-48 object-cover"
-              />
+          )}
+          <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
+            <div className="flex items-center gap-1">
+              <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
+                {user?.UserPhoto === "" && (
+                  <h1 className="text-textAlt font-bold">
+                    {user?.DisplayName?.split(" ")
+                      .slice(0, 2)
+                      .map((word) => word[0])
+                      .join("")
+                      .toUpperCase()}
+                  </h1>
+                )}
+                {user?.UserPhoto !== "" && (
+                  <img
+                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
+                    alt={user?.DisplayName?.split(" ")
+                      .slice(0, 2)
+                      .map((word) => word[0])
+                      .join("")
+                      .toUpperCase()}
+                    className="w-full h-full object-cover rounded-full flex items-center justify-center"
+                  />
+                )}
+              </div>
+              <div>
+                <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
+              </div>
             </div>
             <div>
-              <video
-                ref={remoteVideoRef}
-                autoPlay
-                className="w-full h-screen rounded-lg shadow-lg object-cover"
+              <LogOut
+                className="cursor-pointer w-5 h-5"
+                color="red"
+                onClick={handleOpenConfirmLogoutModal}
               />
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 bg-foreground p-2 rounded-md">
-                {/* Volume Slider */}
-                <div className="w-44 flex items-center gap-2 border-r-2 border-r-border pr-3">
-                  {volume === 0 && <VolumeX className="w-9 h-9" />}
-                  {volume > 0 && volume < 0.5 && (
-                    <Volume1 className="w-9 h-9" />
-                  )}
-                  {volume >= 0.5 && <Volume2 className="w-9 h-9" />}
-                  <Tooltip className="mb-2 -translate-x-28" tooltip="Volume">
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.1"
-                      value={volume}
-                      onChange={handleVolumeChange}
-                      className="cursor-pointer appearance-none w-full h-2 bg-zinc-400 rounded-lg focus:outline-none focus:ring-offset-2 accent-indigo-600 transition-all"
+            </div>
+          </div>
+          {confirmLogoutModal && (
+            <Modal
+              onClose={handleCloseConfirmLogoutModal}
+              title="Confirm Log Out"
+            >
+              <div className="flex flex-col gap-2 p-2">
+                <div>
+                  <h1 className="font-bold">Password</h1>
+                </div>
+                <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
+                  <div>
+                    <Input
+                      ref={passwordRef}
+                      type="password"
+                      name="password"
+                      placeholder="Password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
                     />
-                  </Tooltip>
-                </div>
-                <div className="w-16">
-                  <Button
-                    className={
-                      isMuted
-                        ? "bg-orange-500/30 border border-orange-500 hover:bg-orange-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
-                        : "bg-zinc-500/30 border border-zinc-500 hover:bg-zinc-500 duration-300 w-full rounded-md px-4 py-2 flex items-center justify-center space-x-1 cursor-pointer"
-                    }
-                    color={!isMuted ? "zinc" : null}
-                    icon={
-                      <Tooltip
-                        className="mb-4"
-                        tooltip={isMuted ? "Unmute Mic" : "Mute Mic"}
-                      >
-                        {!isMuted ? (
-                          <Mic className="w-6 h-6" />
-                        ) : (
-                          <MicOff className="w-6 h-6" />
-                        )}
-                      </Tooltip>
-                    }
-                    onClick={toggleMute}
-                  />
-                </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button text="Log Out" color="foreground" type="submit" />
+                    <Button
+                      text="Cancel"
+                      color="foreground"
+                      type="button"
+                      onClick={handleCloseConfirmLogoutModal}
+                    />
+                  </div>
+                </form>
               </div>
-            </div>
+            </Modal>
+          )}
+        </div>
+      </RoomContext.Provider>
+    </WithRole>
+  );
+}
+
+function MyVideoConference({
+  volume,
+  setVolume,
+  microphoneOnChange,
+}: {
+  volume: number;
+  setVolume: any;
+  microphoneOnChange: any;
+}) {
+  const room = useRoomContext();
+  const localSid = room.localParticipant.sid;
+
+  // onlySubscribed: true so we only get what we're explicitly allowed to see
+  const allTracks = useTracks(
+    [
+      { source: Track.Source.Camera, withPlaceholder: true },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ],
+    { onlySubscribed: true }
+  );
+
+  // filter out any track from the local participant
+  const remoteTracks: TrackReferenceOrPlaceholder[] = allTracks.filter(
+    (t) => t.participant.sid !== localSid && t.publication?.isSubscribed
+  );
+
+  const localTrack: TrackReferenceOrPlaceholder[] = allTracks.filter(
+    (t) => t.participant.sid === localSid
+  );
+
+  return (
+    <div className="w-full h-fit relative rounded-md flex items-end justify-center gap-5 p-4">
+      <div className="w-3/4 h-fit aspect-video bg-black">
+        {remoteTracks.map((track, idx) => (
+          <div key={track.track?.sid ?? idx} className="aspect-video w-full">
+            <GuestTile trackRef={track} />
           </div>
-        )}
-        {callStatus === "calling" && (
-          <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">
-              Calling Virtual Receptionist...
-            </h1>
+        ))}
+      </div>
+      <div className="aspect-video max-w-96 w-full h-fit flex flex-col gap-2">
+        <div className="flex items-center gap-2 rounded-md bg-foreground pr-4">
+          <div className="scale-150">
+            <TrackToggle
+              source={Track.Source.Microphone}
+              showIcon={true}
+              onChange={microphoneOnChange}
+            ></TrackToggle>
           </div>
-        )}
-        {callStatus === "onHold" && (
-          <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">
-              Call On Hold, Thank you for your patience. We&apos;ll be with you
-              shortly.
-            </h1>
-          </div>
-        )}
-        {callStatus === "transferred" && (
-          <div className="w-full h-full flex items-center justify-center">
-            <h1 className="font-bold text-xl">
-              Your Call Is Being Transferred, Thank you for your patience.
-              We&apos;ll be with you shortly.
-            </h1>
-          </div>
-        )}
-        <div className="absolute top-4 right-2 z-50 flex gap-3 items-center">
-          <div className="flex items-center gap-1">
-            <div className="w-7 h-7 flex items-center justify-center bg-gray-300 rounded-full">
-              {user?.UserPhoto === "" && (
-                <h1 className="text-textAlt font-bold">
-                  {user?.DisplayName?.split(" ")
-                    .slice(0, 2)
-                    .map((word) => word[0])
-                    .join("")
-                    .toUpperCase()}
-                </h1>
-              )}
-              {user?.UserPhoto !== "" && (
-                <img
-                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${user?.UserPhoto}`}
-                  alt={user?.DisplayName?.split(" ")
-                    .slice(0, 2)
-                    .map((word) => word[0])
-                    .join("")
-                    .toUpperCase()}
-                  className="w-full h-full object-cover rounded-full flex items-center justify-center"
-                />
-              )}
-            </div>
-            <div>
-              <h1 className="font-bold text-xs">{user?.DisplayName}</h1>
-            </div>
-          </div>
-          <div>
-            <LogOut
-              className="cursor-pointer w-5 h-5"
-              color="red"
-              onClick={handleOpenConfirmLogoutModal}
+          <div className="w-full">
+            <input
+              id="incomingVolume"
+              type="range"
+              min={0}
+              max={100}
+              step={1}
+              value={volume}
+              onChange={(e) => setVolume(Number(e.target.value))}
+              className="w-full"
             />
           </div>
         </div>
-        {confirmLogoutModal && (
-          <Modal
-            onClose={handleCloseConfirmLogoutModal}
-            title="Confirm Log Out"
-          >
-            <div className="flex flex-col gap-2 p-2">
-              <div>
-                <h1 className="font-bold">Password</h1>
-              </div>
-              <form className="flex flex-col gap-2" onSubmit={handleLogOut}>
-                <div>
-                  <Input
-                    ref={passwordRef}
-                    type="password"
-                    name="password"
-                    placeholder="Password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button text="Log Out" color="foreground" type="submit" />
-                  <Button
-                    text="Cancel"
-                    color="foreground"
-                    type="button"
-                    onClick={handleCloseConfirmLogoutModal}
-                  />
-                </div>
-              </form>
-            </div>
-          </Modal>
-        )}
+        {localTrack[0] && <GuestTile trackRef={localTrack[0]} />}
       </div>
-    </WithRole>
+    </div>
   );
 }

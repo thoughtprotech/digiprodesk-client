@@ -87,7 +87,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
     let count = 0;
     createLocationGroupFormData.Locations?.forEach(location => {
       const loc = locationData.find(loc => loc.LocationID === location.LocationID);
-      if (loc!.LocationParentID === 0) {
+      if (loc!.LocationParentID?.length === 0) {
         count = count + 1;
       }
     })
@@ -165,7 +165,7 @@ export default function LocationGroups({ locationGroupData, locationData, fetchL
       let count = 0;
       selectedLocationGroup.Locations?.forEach(location => {
         const loc = locationData.find(loc => loc.LocationID === location.LocationID);
-        if (loc!.LocationParentID === 0) {
+        if (loc!.LocationParentID?.length === 0) {
           count = count + 1;
         }
       })

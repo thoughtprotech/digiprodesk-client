@@ -76,3 +76,7 @@ input[type="checkbox"]:checked::before {
   text-overflow: ellipsis; /* Adds "..." to indicate truncated text */
   white-space: nowrap;     /* Prevents the text from wrapping to a new line */
 }
+
+.custom-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

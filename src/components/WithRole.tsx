@@ -12,7 +12,6 @@ const userMenuRouteMapping: {
   menu: string;
   route: string;
 }[] = [
-  { menu: "check-in hub", route: "/checkInHub" },
   { menu: "check-in trails", route: "/admin/checkIns" },
   { menu: "locations", route: "/admin/locations" },
   { menu: "users", route: "/admin/users" },
@@ -128,7 +127,7 @@ export default function WithRole({ children }: { children: ReactNode }) {
         if (user.Role.toLowerCase() === "guest") {
           router.push("/guest");
         } else {
-          router.push("/checkInHub");
+          router.push("/watchHub");
         }
       } else {
         setShowPage(true);

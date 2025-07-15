@@ -4,7 +4,6 @@ export default function ElapsedTime({ startTime }: { startTime: string | Date })
   const [elapsed, setElapsed] = useState('');
 
   useEffect(() => {
-    console.log({ startTime });
     const updateElapsedTime = () => {
       const start = new Date(startTime).getTime();
       const now = Date.now();

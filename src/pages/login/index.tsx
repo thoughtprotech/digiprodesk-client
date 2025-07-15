@@ -48,13 +48,12 @@ export default function Login() {
         if (role === "Guest") {
           router.push('/guest');
         } else {
-          router.push('/checkInHub');
+          router.push('/watchHub');
         }
-        // router.push('/checkInHub');
         return toast.custom((t: any) => <Toast content="Logged In Successfully" type="success" t={t} />);
       })
     } else {
-      return toast.custom((t: any) => <Toast content="Invalid Credentials!" type="error" t={t} />);
+      return toast.custom((t: any) => <Toast content="Invalid Credentials Or Inactive User" type="error" t={t} />);
     }
   }
 
@@ -72,11 +71,11 @@ export default function Login() {
 
         const currentTime = Math.floor(Date.now() / 1000);  // Current time in seconds
 
-        if (decoded.exp > currentTime) {
-          if (decoded.role === "Guest") {
+        if (decoded?.exp > currentTime) {
+          if (decoded?.role === "Guest") {
             router.push('/guest');
           } else {
-            router.push('/checkInHub');
+            router.push('/watchHub');
           }
         }
       }

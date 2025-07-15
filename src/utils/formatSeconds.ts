@@ -1,20 +1,12 @@
 function formatDuration(seconds: number): string {
-  if (seconds <= 0) return "0s";
-
-  const days = Math.floor(seconds / 86400);
-  seconds = Math.round(seconds % 86400);
   const hours = Math.floor(seconds / 3600);
-  seconds = Math.round(seconds % 3600);
-  const minutes = Math.floor(seconds / 60);
-  seconds = Math.round(seconds % 60);
-
-  const parts = [];
-  if (days > 0) parts.push(`${days}d`);
-  if (hours > 0) parts.push(`${hours}h`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  if (seconds > 0) parts.push(`${seconds}s`);
-
-  return parts.join(" ");
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = seconds % 60;
+  // Format hours, minutes, and seconds to always show two digits
+  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedMinutes = minutes.toString().padStart(2, "0");
+  const formattedSeconds = remainingSeconds.toString().padStart(2, "0");
+  return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
 export default formatDuration;

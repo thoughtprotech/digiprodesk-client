@@ -5,16 +5,13 @@ import Users from './_components/users/Users';
 
 export default function Index() {
   const tabData = [
-    { label: "Check ins", content: <Calls /> },
+    { label: "Calls", content: <Calls /> },
     { label: "Users", content: <Users /> },
   ];
 
   return (
     <Layout headerTitle={
       <div className='flex items-center gap-2'>
-        <div className="border-r border-r-border pr-2">
-          <h1 className="font-bold text-xl">OLIVE HEAD OFFICE</h1>
-        </div>
         <div>
           <h1 className='font-bold text-lg'>REPORTS</h1>
         </div>

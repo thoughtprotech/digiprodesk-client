@@ -4,12 +4,12 @@ import {
   Backpack,
   Cctv,
   FileText,
+  LockKeyhole,
   LogOut,
   MapPinPlus,
-  SmartphoneNfc,
   Users,
 } from "lucide-react";
-import { ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Tooltip from "./ui/ToolTip";
 import { useRouter } from "next/router";
 import { parseCookies } from "nookies";
@@ -18,12 +18,10 @@ import Input from "./ui/Input";
 import toast from "react-hot-toast";
 import Toast from "./ui/Toast";
 import jwt from "jsonwebtoken";
-import { CallQueue, RoleDetail, User } from "@/utils/types";
+import { Location, RoleDetail, User } from "@/utils/types";
 import Modal from "./ui/Modal";
 import Button from "./ui/Button";
-import { io } from "socket.io-client";
 import { useCallRing } from "./ui/CallRing";
-import { CallListContext } from "@/context/CallListContext";
 import WithRole from "./WithRole";
 import logOut from "@/utils/logOut";
 
@@ -48,11 +46,20 @@ export default function Index({
   const [logOutPassword, setLogOutPassword] = useState("");
   const passwordRef = useRef<HTMLInputElement>(null);
   const logOutPasswordRef = useRef<HTMLInputElement>(null);
+  const changePasswordRef = useRef<HTMLInputElement>(null);
+  const [changePasswordModal, setChangePasswordModal] =
+    useState<boolean>(false);
+  const [changePasswordPayload, setChangePasswordPayload] = useState<{
+    oldPassword: string;
+    newPassword: string;
+  }>({
+    oldPassword: "",
+    newPassword: "",
+  });
 
-  const [userId, setUserId] = useState<string>();
-  const { CallRingComponent, showCallRing } = useCallRing();
-  const { callList, setCallList, setCallToPickUp } =
-    useContext(CallListContext);
+  const [, setUserId] = useState<string>();
+  const { CallRingComponent } = useCallRing();
+  const [userControl, setUserControl] = useState<Location>();
 
   useEffect(() => {
     if (confirmToggleModal) {
@@ -61,10 +68,80 @@ export default function Index({
     if (confirmLogoutModal) {
       logOutPasswordRef.current?.focus();
     }
-  }, [confirmToggleModal, confirmLogoutModal]);
+    if (changePasswordModal) {
+      changePasswordRef.current?.focus();
+    }
+  }, [confirmToggleModal, confirmLogoutModal, changePasswordModal]);
 
   const handleLogOutToggle = () => {
     setConfirmLogoutModal(true);
+  };
+
+  const handleChangePasswordToggle = () => {
+    setChangePasswordModal(true);
+  };
+
+  const handleCloseChangePasswordModal = () => {
+    setChangePasswordModal(false);
+    setChangePasswordPayload({
+      oldPassword: "",
+      newPassword: "",
+    });
+  };
+
+  const handlePasswordChange = async (event: React.FormEvent) => {
+    event.preventDefault();
+    console.log("Password Change");
+
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    if (changePasswordPayload.oldPassword === "") {
+      return toast.custom((t: any) => {
+        <Toast t={t} content="Old Password Is Required" type="error" />;
+      });
+    }
+    if (changePasswordPayload.newPassword === "") {
+      return toast.custom((t: any) => {
+        <Toast t={t} content="New Password Is Required" type="error" />;
+      });
+    }
+
+    try {
+      const response: any = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/authentication/changePassword`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+          body: JSON.stringify({
+            oldPassword: changePasswordPayload.oldPassword,
+            newPassword: changePasswordPayload.newPassword,
+          }),
+        }
+      );
+
+      if (response.status === 200) {
+        setChangePasswordModal(false);
+        setChangePasswordPayload({
+          oldPassword: "",
+          newPassword: "",
+        });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="success" content="Password changed successfully" />
+        ));
+      } else if (response.status === 401) {
+        return toast.custom((t: any) => (
+          <Toast content="Old Password Is Invalid" type="error" t={t} />
+        ));
+      }
+    } catch (error: any) {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content={error.error} />
+      ));
+    }
   };
 
   const toggleUserAway = () => {
@@ -246,11 +323,7 @@ export default function Index({
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching User Details"
-        />
+        <Toast t={t} type="error" content="Error Fetching User Details" />
       ));
     }
   };
@@ -277,20 +350,12 @@ export default function Index({
         logOut(router);
       } else {
         return toast.custom((t: any) => (
-          <Toast
-            t={t}
-            type="error"
-            content="Error Fetching Role Details"
-          />
+          <Toast t={t} type="error" content="Error Fetching Role Details" />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching Role Details"
-        />
+        <Toast t={t} type="error" content="Error Fetching Role Details" />
       ));
     }
   };
@@ -325,21 +390,85 @@ export default function Index({
       } else {
         console.log({ response });
         return toast.custom((t: any) => (
-          <Toast
-            t={t}
-            type="error"
-            content="Error Fetching User Status"
-          />
+          <Toast t={t} type="error" content="Error Fetching User Status" />
         ));
       }
     } catch {
       return toast.custom((t: any) => (
-        <Toast
-          t={t}
-          type="error"
-          content="Error Fetching User Status"
-        />
+        <Toast t={t} type="error" content="Error Fetching User Status" />
       ));
+    }
+  };
+
+  const fetchUserControl = async () => {
+    const cookies = parseCookies();
+    const { userToken } = cookies;
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/userLocationList/user`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        response.json().then((data) => {
+          setUserControl(data[0]);
+        });
+      } else if (response.status === 401) {
+        logOut(router);
+      } else {
+        console.log({ response });
+        return toast.custom((t: any) => (
+          <Toast t={t} type="error" content="Error Fetching User Status" />
+        ));
+      }
+    } catch {
+      return toast.custom((t: any) => (
+        <Toast t={t} type="error" content="Error Fetching User Status" />
+      ));
+    }
+  };
+
+  const heartBeat = async () => {
+    try {
+      const cookies = parseCookies();
+      const { userToken } = cookies;
+      const decoded = jwt.decode(userToken) as {
+        userName: string;
+        exp: number;
+        role: string;
+      };
+      const { role } = decoded;
+      console.log("Heart Beat");
+      if (role == "Host") {
+        console.log("Sending Heart Beat");
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/hostCheck`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
+            },
+            body: JSON.stringify({
+              status: userOnline ? "Available" : "Away",
+            }),
+          }
+        );
+
+        if (response.status === 200) {
+          console.log("Heart Beat Sent");
+        } else if (response.status === 401) {
+          logOut(router);
+        }
+      }
+    } catch {
+      console.error("Error Sending Heart Beat");
     }
   };
 
@@ -373,61 +502,16 @@ export default function Index({
     fetchUserDetails();
     fetchRoleDetails();
     fetchUserStatus();
+    fetchUserControl();
   }, []);
 
-  const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
-    query: {
-      userId,
-    },
-    withCredentials: true,
-  });
-
   useEffect(() => {
-    try {
-      if (userId && userId !== "") {
-        socket.emit("get-call-list");
-        socket.on("call-list-update", (data: CallQueue[]) => {
-          // Identify new "pending" calls
-          console.log({ "CALL QUEUE": data });
-          const newPendingCalls = data.filter(
-            (call) =>
-              call.CallStatus === "New" &&
-              call.CallPlacedByUserName !== userId &&
-              call.AssignedToUserName === userId &&
-              !callList.some(
-                (existingCall) => existingCall.CallID === call.CallID
-              )
-          );
-
-          // Log or handle the new pending calls if needed
-          console.log("ROUTER", router);
-          console.log({ "CALL LIST": data });
-
-          if (newPendingCalls.length > 0 && router.query.from !== "push") {
-            newPendingCalls.map((call) => {
-              showCallRing(call, () => {
-                setCallToPickUp(call);
-                router.push("/checkInHub");
-              });
-            });
-          }
-          console.log({"CALL LIST TO DISPLAY": data.filter((call) => call.AssignedToUserName === userId && call.CallPlacedByUserName !== userId)});
-          // Update the call list state
-          setCallList(
-            data.filter(
-              (call) =>
-                call.AssignedToUserName === userId &&
-                call.CallPlacedByUserName !== userId
-            )
-          );
-        });
-      }
-    } catch {
-      toast.custom((t: any) => (
-        <Toast t={t} type="error" content="Error Connecting to Socket" />
-      ));
-    }
-  }, [userId]);
+    heartBeat();
+    const interval = setInterval(() => {
+      heartBeat();
+    }, 120000);
+    return () => clearInterval(interval);
+  }, []);
 
   if (user) {
     return (
@@ -443,6 +527,11 @@ export default function Index({
                   height={1000}
                   className="w-20"
                 />
+              </div>
+              <div className="border-r border-r-border pr-2">
+                <h1 className="font-bold text-xl">
+                  {userControl?.LocationName}
+                </h1>
               </div>
               {headerTitle}
             </div>
@@ -484,7 +573,7 @@ export default function Index({
                           } rounded-md p-1 cursor-pointer`}
                           onClick={() => router.push("/admin/checkIns")}
                         >
-                          <Tooltip tooltip="Check-In Trails" position="bottom">
+                          <Tooltip tooltip="Calls" position="bottom">
                             <Backpack className="w-5 h-5" />
                           </Tooltip>
                         </div>
@@ -546,25 +635,6 @@ export default function Index({
                           </Tooltip>
                         </div>
                       )}
-                      {roleDetails.find(
-                        (role) =>
-                          role.Role.toLowerCase() === user.Role.toLowerCase() &&
-                          role.Menu.toLowerCase() === "check-in hub" &&
-                          role.Action.toLowerCase() === "view, edit"
-                      ) && (
-                        <div
-                          className={`${
-                            router.pathname === "/checkInHub"
-                              ? "bg-highlight"
-                              : "hover:bg-highlight"
-                          } rounded-md p-1 cursor-pointer`}
-                          onClick={() => router.push("/checkInHub")}
-                        >
-                          <Tooltip tooltip="Check-In Hub" position="bottom">
-                            <SmartphoneNfc className="w-5 h-5" />
-                          </Tooltip>
-                        </div>
-                      )}
                     </>
                   )}
                   {header}
@@ -621,12 +691,22 @@ export default function Index({
                             type="checkBox"
                             name="Status"
                             value={userOnline.toString()}
+                            readOnly={true}
                           />
                         </div>
                         <h1 className="text-xs font-bold">
                           {userOnline ? "Available" : "Away"}
                         </h1>
                       </div>
+                    </Tooltip>
+                  </div>
+                  <div className="px-2" onClick={handleChangePasswordToggle}>
+                    <Tooltip
+                      className="transform -translate-x-20"
+                      tooltip="Change Password"
+                      position="bottom"
+                    >
+                      <LockKeyhole className="w-5 h-5" />
                     </Tooltip>
                   </div>
                   <div onClick={handleLogOutToggle}>
@@ -725,8 +805,60 @@ export default function Index({
                 </div>
               </Modal>
             )}
+            {changePasswordModal && (
+              <Modal
+                onClose={handleCloseChangePasswordModal}
+                title="Change Password"
+              >
+                <form
+                  className="flex flex-col space-y-4 pt-4"
+                  onSubmit={handlePasswordChange}
+                >
+                  <div>
+                    <Input
+                      ref={changePasswordRef}
+                      type="password"
+                      name="oldPassword"
+                      placeholder="Old Password"
+                      value={changePasswordPayload.oldPassword}
+                      onChange={(e) =>
+                        setChangePasswordPayload({
+                          ...changePasswordPayload,
+                          oldPassword: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Input
+                      type="password"
+                      name="newPassword"
+                      placeholder="New Password"
+                      value={changePasswordPayload.newPassword}
+                      onChange={(e) =>
+                        setChangePasswordPayload({
+                          ...changePasswordPayload,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="flex gap-2 items-center justify-center">
+                    <Button text="Save" color="foreground" type="submit" />
+                    <Button
+                      text="Cancel"
+                      color="foreground"
+                      type="button"
+                      onClick={handleCloseChangePasswordModal}
+                    />
+                  </div>
+                </form>
+              </Modal>
+            )}
           </div>
-          <div className="p-2 overflow-auto">{children}</div>
+          <div className="p-2 flex-1 overflow-auto">{children}</div>
           {CallRingComponent}
         </div>
       </WithRole>
