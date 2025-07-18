@@ -491,7 +491,6 @@ function MyVideoConference({
   localStatus,
   setLocalStatus,
   setGuestCount,
-  setLocationsOnline,
   setOnHoldCount,
   setMissedCallCount,
   setCurrentLocalCallID,
@@ -542,14 +541,14 @@ function MyVideoConference({
 
   useEffect(() => {
     // 1) Build a Set of all LocationID strings from filteredUserLocationData
-    const validIDs = new Set(
-      filteredUserLocationData.map((loc) => loc?.LocationID?.toString())
-    );
+    // const validIDs = new Set(
+    //   filteredUserLocationData.map((loc) => loc?.LocationID?.toString())
+    // );
 
     // 2) From remoteTracks, pick only those identities whose .identity is in validIDs
-    const identities = remoteTracks
-      .map((t) => t.participant.identity.toString())
-      .filter((id) => validIDs.has(id));
+    // const identities = remoteTracks
+    //   .map((t) => t.participant.identity.toString())
+    //   .filter((id) => validIDs.has(id));
 
     // 3) Only update state if identities is different from locationsOnline
     // setLocationsOnline((prev: string[]) => {
