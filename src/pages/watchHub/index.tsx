@@ -230,12 +230,6 @@ export default function Index() {
     socketRef.current?.emit("get-calls");
   };
 
-  const toggleLocalCamera = () => {
-    roomInstance.localParticipant.setCameraEnabled(
-      !roomInstance.localParticipant.isCameraEnabled
-    );
-  };
-
   return (
     <Layout
       headerTitle={
@@ -364,7 +358,6 @@ export default function Index() {
                 location={loc}
                 userId={userId}
                 filteredUserLocationData={filteredUserLocationData}
-                toggleLocalCamera={toggleLocalCamera}
                 localStatus={localStatus}
                 setLocalStatus={setLocalStatus}
                 setGuestCount={setGuestCount}
@@ -386,7 +379,6 @@ function RoomConnector({
   location,
   userId,
   filteredUserLocationData,
-  toggleLocalCamera,
   localStatus,
   setLocalStatus,
   setGuestCount,
@@ -399,7 +391,6 @@ function RoomConnector({
   location: Location;
   userId: string;
   filteredUserLocationData: Location[];
-  toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
   setGuestCount: any;
@@ -434,6 +425,24 @@ function RoomConnector({
             process.env.NEXT_PUBLIC_LIVEKIT_URL!,
             data.token
           );
+
+          if (roomInstance.numParticipants > 0) {
+            setLocationsOnline((prev: string[]) => {
+              return [...prev, roomInstance.name];
+            });
+          }
+
+          console.log(
+            "Listener Count",
+            roomInstance.name,
+            roomInstance.listenerCount
+          );
+          console.log("Meta Data", roomInstance.name, roomInstance.metadata);
+          console.log(
+            "Num Participants",
+            roomInstance.name,
+            roomInstance.numParticipants
+          );
         }
       } catch (e) {
         console.error(e);
@@ -442,6 +451,9 @@ function RoomConnector({
 
     return () => {
       mounted = false;
+      setLocationsOnline((prev: string[]) => {
+        return prev.filter((name) => name !== roomInstance.name);
+      });
       roomInstance.disconnect();
     };
   }, [roomInstance, userId]);
@@ -455,7 +467,6 @@ function RoomConnector({
           name={userId}
           roomInstance={roomInstance}
           filteredUserLocationData={filteredUserLocationData}
-          toggleLocalCamera={toggleLocalCamera}
           localStatus={localStatus}
           setLocalStatus={setLocalStatus}
           setGuestCount={setGuestCount}
@@ -477,7 +488,6 @@ function MyVideoConference({
   name,
   roomInstance,
   filteredUserLocationData,
-  toggleLocalCamera,
   localStatus,
   setLocalStatus,
   setGuestCount,
@@ -491,7 +501,6 @@ function MyVideoConference({
   name: string;
   roomInstance: any;
   filteredUserLocationData: Location[];
-  toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
   setGuestCount: any;
@@ -543,22 +552,22 @@ function MyVideoConference({
       .filter((id) => validIDs.has(id));
 
     // 3) Only update state if identities is different from locationsOnline
-    setLocationsOnline((prev: string[]) => {
-      // If length differs, we definitely changed
-      if (prev.length !== identities.length) {
-        return identities;
-      }
-      // If same length, check each element (in this example we assume sorted order or
-      // that order must match. If you don’t care about order, you could sort both arrays
-      // or compare by Set membership instead.)
-      for (let i = 0; i < prev.length; i++) {
-        if (prev[i] !== identities[i]) {
-          return identities;
-        }
-      }
-      // no difference → return prev so React skips an update
-      return prev;
-    });
+    // setLocationsOnline((prev: string[]) => {
+    //   // If length differs, we definitely changed
+    //   if (prev.length !== identities.length) {
+    //     return identities;
+    //   }
+    //   // If same length, check each element (in this example we assume sorted order or
+    //   // that order must match. If you don’t care about order, you could sort both arrays
+    //   // or compare by Set membership instead.)
+    //   for (let i = 0; i < prev.length; i++) {
+    //     if (prev[i] !== identities[i]) {
+    //       return identities;
+    //     }
+    //   }
+    //   // no difference → return prev so React skips an update
+    //   return prev;
+    // });
   }, [remoteTracks]);
 
   return (
@@ -579,7 +588,6 @@ function MyVideoConference({
                 participant={track.participant}
                 name={name}
                 roomInstance={roomInstance}
-                toggleLocalCamera={toggleLocalCamera}
                 localStatus={localStatus}
                 setLocalStatus={setLocalStatus}
                 filteredUserLocationData={filteredUserLocationData}
@@ -597,9 +605,7 @@ function MyVideoConference({
           <div className="absolute top-2 left-2">
             <h1 className="text-xs font-bold">{location.LocationName}</h1>
           </div>
-          <h1 className="font-bold text-sm text-gray-500">
-            Location Offline
-          </h1>
+          <h1 className="font-bold text-sm text-gray-500">Location Offline</h1>
         </div>
       )}
     </div>
@@ -612,7 +618,6 @@ function ParticipantActions({
   participant,
   name,
   roomInstance,
-  toggleLocalCamera,
   localStatus,
   setLocalStatus,
   filteredUserLocationData,
@@ -627,7 +632,6 @@ function ParticipantActions({
   participant: Participant;
   name: string;
   roomInstance: any;
-  toggleLocalCamera: () => void;
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
   filteredUserLocationData: Location[];
@@ -1220,7 +1224,11 @@ function ParticipantActions({
             >
               <button
                 className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
-                onClick={toggleLocalCamera}
+                onClick={() => {
+                  room.localParticipant.setCameraEnabled(
+                    !room.localParticipant.isCameraEnabled
+                  );
+                }}
               >
                 {room.localParticipant.isCameraEnabled ? (
                   <Video className="w-4 h-4" />
@@ -1475,7 +1483,11 @@ function ParticipantActions({
                     >
                       <button
                         className="px-1 py-1 rounded-md cursor-pointer hover:bg-white/30 duration-300"
-                        onClick={toggleLocalCamera}
+                        onClick={() => {
+                          room.localParticipant.setCameraEnabled(
+                            !room.localParticipant.isCameraEnabled
+                          );
+                        }}
                       >
                         {room.localParticipant.isCameraEnabled ? (
                           <Video className="w-4 h-4" />
