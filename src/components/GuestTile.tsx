@@ -151,6 +151,7 @@ const GuestTile: (
                   trackRef={trackReference}
                   onSubscriptionStatusChanged={handleSubscribe}
                   manageSubscription={autoManageSubscription}
+                  className="aspect-video object-cover"
                 />
               ) : (
                 isTrackReference(trackReference) && (
