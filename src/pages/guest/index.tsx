@@ -706,7 +706,7 @@ export default function Index() {
             {location?.LocationBanner && location?.LocationBanner !== "" && (
               <img
                 src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationBanner}`}
-                alt="Banner"
+                alt=""
                 className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none"
                 style={{ objectFit: "cover" }}
               />
