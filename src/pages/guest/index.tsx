@@ -747,7 +747,7 @@ export default function Index() {
             <div className="w-full h-full flex relative">
               {/* Video Section (75% of the width) */}
               <RoomAudioRenderer />
-              <div className="w-3/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
+              <div className="w-3/4 h-full pt-[4.5rem] bg-zinc-900 flex flex-col items-center justify-center p-1 space-y-4">
                 {advertisementStatus === "video" ? (
                   <video
                     src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationAdvertisementVideo}`}
@@ -766,15 +766,14 @@ export default function Index() {
                           : "/images/background.png"
                       }
                       alt=""
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover rounded-md"
                     />
                   )
                 )}
               </div>
 
               {/* Receptionist Section (25% of the width) */}
-              <div className="w-1/4 h-full pt-20 bg-zinc-900 flex flex-col items-center justify-center p-4 space-y-6">
-                {/* <h1 className="font-bold text-2xl text-white">Receptionist</h1> */}
+              <div className="w-1/4 h-full pt-[4.5rem] bg-zinc-900 flex flex-col items-center justify-center p-1 space-y-4">
                 <div
                   className="w-full h-full flex flex-col items-center justify-center gap-4 bg-foreground border border-zinc-600 hover:bg-highlight duration-300 rounded-md p-4 cursor-pointer"
                   onClick={initiateCall}
