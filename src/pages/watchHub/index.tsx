@@ -261,7 +261,7 @@ export default function Index() {
                     {locationsOnline.length}
                   </h1>
                   <h1 className="w-fit text-[0.65rem] font-bold text-purple-500">
-                    Location(s) OnLine
+                    Location(s) Online
                   </h1>
                 </div>
               </div>

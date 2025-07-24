@@ -337,9 +337,14 @@ export default function Index() {
 
   useEffect(() => {
     setTimeout(() => {
-      setAdvertisementStatus("video");
-    }, 30000);
-  }, []);
+      if (
+        location?.LocationAdvertisementVideo &&
+        location?.LocationAdvertisementVideo.length !== 0
+      ) {
+        setAdvertisementStatus("video");
+      }
+    }, 3000);
+  }, [location]);
 
   // Livekit
   const guestVideoRef = useRef<HTMLDivElement>(null);
@@ -703,14 +708,16 @@ export default function Index() {
           {/* Top Header */}
           <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0 overflow-hidden">
             {/* Banner Image as Background */}
-            {location?.LocationBanner && location?.LocationBanner !== "" && location?.LocationBanner !== "null" && (
-              <img
-                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationBanner}`}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none"
-                style={{ objectFit: "cover" }}
-              />
-            )}
+            {location?.LocationBanner &&
+              location?.LocationBanner !== "" &&
+              location?.LocationBanner !== "null" && (
+                <img
+                  src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationBanner}`}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none"
+                  style={{ objectFit: "cover" }}
+                />
+              )}
 
             {/* Header Content */}
             <div className="relative z-10 flex items-center h-full">
@@ -956,14 +963,14 @@ function MyVideoConference({
 
   return (
     <div className="w-full h-fit relative rounded-md flex items-end justify-center gap-5 p-4">
-      <div className="w-1/2 h-fit aspect-video bg-black">
+      <div className="w-3/4 h-fit aspect-video bg-black">
         {remoteTracks.map((track, idx) => (
           <div key={track.track?.sid ?? idx} className="aspect-video w-full">
             <GuestTile trackRef={track} className="w-full" />
           </div>
         ))}
       </div>
-      <div className="aspect-video w-1/2 h-fit flex flex-col gap-2">
+      <div className="aspect-video w-1/4 h-fit flex flex-col gap-2">
         <div className="flex items-center gap-2 rounded-md bg-foreground pr-4">
           <div className="scale-150">
             <TrackToggle
