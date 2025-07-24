@@ -380,7 +380,9 @@ export default function Index() {
     (async () => {
       try {
         const resp = await fetch(
-          `/api/token?room=${location.LocationID?.toLocaleString()}&username=${location.LocationID}`
+          `/api/token?room=${location.LocationID?.toLocaleString()}&username=${
+            location.LocationID
+          }`
         );
         const data = await resp.json();
         console.log({ data });
@@ -698,15 +700,28 @@ export default function Index() {
       />
       <RoomContext.Provider value={roomInstance}>
         <div className="w-full h-screen bg-background flex flex-col text-white">
-          <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0">
-            <div>
+          {/* Top Header */}
+          <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0 overflow-hidden">
+            {/* Banner Image as Background */}
+            {location?.LocationBanner && location?.LocationBanner !== "" && (
+              <img
+                src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationBanner}`}
+                alt="Banner"
+                className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none select-none"
+                style={{ objectFit: "cover" }}
+              />
+            )}
+
+            {/* Header Content */}
+            <div className="relative z-10 flex items-center h-full">
               {location?.LocationLogo ? (
                 <img
                   src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationLogo}`}
                   alt="Logo"
-                  width={1000}
-                  height={1000}
-                  className="w-28"
+                  width={64}
+                  height={64}
+                  className="h-full w-auto max-h-full max-w-[4rem] object-contain"
+                  style={{ minHeight: 0 }}
                 />
               ) : (
                 <h1 className="font-extrabold text-5xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
@@ -714,12 +729,13 @@ export default function Index() {
                 </h1>
               )}
             </div>
-            <div className="absolute left-1/2 transform -translate-x-1/2">
+            <div className="absolute left-1/2 transform -translate-x-1/2 z-10">
               <h1 className="font-bold text-[36px]">
                 Welcome To {location?.LocationName}
               </h1>
             </div>
           </div>
+
           {!inCall && callStatus === "notInCall" && (
             <div className="w-full h-full flex relative">
               {/* Video Section (75% of the width) */}
@@ -943,11 +959,11 @@ function MyVideoConference({
       <div className="w-3/4 h-fit aspect-video bg-black">
         {remoteTracks.map((track, idx) => (
           <div key={track.track?.sid ?? idx} className="aspect-video w-full">
-            <GuestTile trackRef={track} />
+            <GuestTile trackRef={track} className="w-full" />
           </div>
         ))}
       </div>
-      <div className="aspect-video max-w-96 w-full h-fit flex flex-col gap-2">
+      <div className="aspect-video w-1/4 h-fit flex flex-col gap-2">
         <div className="flex items-center gap-2 rounded-md bg-foreground pr-4">
           <div className="scale-150">
             <TrackToggle

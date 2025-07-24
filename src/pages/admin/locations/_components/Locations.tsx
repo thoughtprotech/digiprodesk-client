@@ -30,7 +30,7 @@ export default function Locations({
     LocationCode: "",
     LocationType: "",
     LocationManager: null,
-    LocationVideoFeed: "",
+    LocationBanner: "",
     LocationParentID: "",
     LocationImage: "",
     LocationLogo: "",
@@ -44,7 +44,7 @@ export default function Locations({
       LocationCode: "",
       LocationType: "",
       LocationManager: null,
-      LocationVideoFeed: "",
+      LocationBanner: "",
       LocationParentID: "",
       LocationImage: "",
       LocationLogo: "",
@@ -93,7 +93,7 @@ export default function Locations({
       LocationCode: "",
       LocationType: "",
       LocationManager: null,
-      LocationVideoFeed: "",
+      LocationBanner: "",
       LocationParentID: "",
       LocationImage: "",
       LocationLogo: "",
@@ -205,7 +205,7 @@ export default function Locations({
           LocationCode: "",
           LocationType: "",
           LocationManager: null,
-          LocationVideoFeed: "",
+          LocationBanner: "",
           LocationParentID: "",
           LocationImage: null,
           LocationLogo: null,
@@ -332,7 +332,7 @@ export default function Locations({
           LocationManager: null,
           LocationParentID: "",
           LocationImage: "",
-          LocationVideoFeed: "",
+          LocationBanner: "",
           LocationLogo: "",
           LocationReceptionistPhoto: "",
           LocationAdvertisementVideo: "",
@@ -573,11 +573,12 @@ export default function Locations({
               </div>
               <div className="w-full flex justify-between gap-2">
                 <div className="w-full">
-                  <h1 className="font-bold text-sm">Video Feed</h1>
+                  <h1 className="font-bold text-sm">Location Banner</h1>
                   <Input
-                    name="LocationVideoFeed"
-                    value={createLocationFormData.LocationVideoFeed}
+                    name="LocationBanner"
+                    value={createLocationFormData.LocationBanner}
                     onChange={handleCreateLocationChange}
+                    type="file"
                   />
                 </div>
                 <div className="w-full">
@@ -822,11 +823,12 @@ export default function Locations({
               </div>
               <div className="w-full flex justify-between gap-2">
                 <div className="w-full">
-                  <h1 className="font-bold text-sm">Video Feed</h1>
+                  <h1 className="font-bold text-sm">Location Banner</h1>
                   <Input
-                    name="LocationVideoFeed"
-                    value={selectedLocation.LocationVideoFeed}
+                    name="LocationBanner"
+                    value={selectedLocation.LocationBanner}
                     onChange={handleEditLocationChange}
+                    type="file"
                   />
                 </div>
                 <div className="w-full">
@@ -1039,6 +1041,33 @@ export default function Locations({
                                 }`
                           }
                           alt="Receptionist Photo"
+                          className="w-20 h-20 object-contain rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                  {selectedLocation!.LocationBanner && (
+                  <div className="w-1/3 flex justify-center">
+                    <div className="w-full flex flex-col gap-2">
+                      <div>
+                        <h1 className="font-bold text-sm">
+                          Banner
+                        </h1>
+                      </div>
+                      <div className="w-full flex justify-center">
+                        <img
+                          src={
+                            selectedLocation!
+                              .LocationBanner instanceof File
+                              ? URL.createObjectURL(
+                                  selectedLocation!.LocationBanner
+                                )
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL}${
+                                  selectedLocation!.LocationBanner
+                                }`
+                          }
+                          alt="Banner Photo"
                           className="w-20 h-20 object-contain rounded-md"
                         />
                       </div>
