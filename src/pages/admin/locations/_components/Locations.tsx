@@ -715,6 +715,110 @@ export default function Locations({
                     <Button text='Preview' color='foreground' onClick={handleCloseCreateLocationModal} />
                   </div> */}
               </div>
+              <div className="w-full flex justify-between gap-2">
+                {createLocationFormData!.LocationImage && (
+                  <div className="w-1/3 flex justify-center">
+                    <div className="w-full flex flex-col gap-2">
+                      <div>
+                        <h1 className="font-bold text-sm">Location Image</h1>
+                      </div>
+                      <div className="w-full flex justify-center">
+                        <img
+                          src={
+                            createLocationFormData!.LocationImage instanceof File
+                              ? URL.createObjectURL(
+                                  createLocationFormData!.LocationImage
+                                )
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL}${
+                                  createLocationFormData!.LocationImage
+                                }`
+                          }
+                          alt="Location Image"
+                          className="w-20 h-20 object-contain rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {createLocationFormData!.LocationLogo && (
+                  <div className="w-1/3 flex justify-center">
+                    <div className="w-full flex flex-col gap-2">
+                      <div>
+                        <h1 className="font-bold text-sm">Location Logo</h1>
+                      </div>
+                      <div className="w-full flex justify-center">
+                        <img
+                          src={
+                            createLocationFormData!.LocationLogo instanceof File
+                              ? URL.createObjectURL(
+                                  createLocationFormData!.LocationLogo
+                                )
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL}${
+                                  createLocationFormData!.LocationLogo
+                                }`
+                          }
+                          alt="Location Logo"
+                          className="w-20 h-20 object-contain rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {createLocationFormData!.LocationReceptionistPhoto && (
+                  <div className="w-1/3 flex justify-center">
+                    <div className="w-full flex flex-col gap-2">
+                      <div>
+                        <h1 className="font-bold text-sm">
+                          Receptionist Photo
+                        </h1>
+                      </div>
+                      <div className="w-full flex justify-center">
+                        <img
+                          src={
+                            createLocationFormData!
+                              .LocationReceptionistPhoto instanceof File
+                              ? URL.createObjectURL(
+                                  createLocationFormData!.LocationReceptionistPhoto
+                                )
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL}${
+                                  createLocationFormData!.LocationReceptionistPhoto
+                                }`
+                          }
+                          alt="Receptionist Photo"
+                          className="w-20 h-20 object-contain rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                  {createLocationFormData!.LocationBanner && (
+                  <div className="w-1/3 flex justify-center">
+                    <div className="w-full flex flex-col gap-2">
+                      <div>
+                        <h1 className="font-bold text-sm">
+                          Banner
+                        </h1>
+                      </div>
+                      <div className="w-full flex justify-center">
+                        <img
+                          src={
+                            createLocationFormData!
+                              .LocationBanner instanceof File
+                              ? URL.createObjectURL(
+                                  createLocationFormData!.LocationBanner
+                                )
+                              : `${process.env.NEXT_PUBLIC_BACKEND_URL}${
+                                  createLocationFormData!.LocationBanner
+                                }`
+                          }
+                          alt="Banner Photo"
+                          className="w-20 h-20 object-contain rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="flex justify-center gap-2 border-t-2 border-t-border pt-4">
                 <Button text="Save" color="foreground" type="submit" />
                 <Button
