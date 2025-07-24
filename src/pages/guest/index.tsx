@@ -703,7 +703,7 @@ export default function Index() {
           {/* Top Header */}
           <div className="w-full h-16 flex items-center justify-between border-b-2 border-b-border z-50 bg-background px-2 absolute top-0 left-0 overflow-hidden">
             {/* Banner Image as Background */}
-            {location?.LocationBanner && location?.LocationBanner !== "" && (
+            {location?.LocationBanner && location?.LocationBanner !== "" && location?.LocationBanner !== "null" && (
               <img
                 src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${location?.LocationBanner}`}
                 alt=""
