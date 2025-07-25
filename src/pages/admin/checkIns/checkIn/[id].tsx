@@ -416,7 +416,7 @@ export default function Index() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/${currentCall?.CallID}.mp4`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/video-url?name=livekit-demo/${currentCall?.CallID}.mp4`,
         {
           method: "GET",
           headers: {

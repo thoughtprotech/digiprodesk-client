@@ -544,12 +544,10 @@ function MyVideoConference({
     // const validIDs = new Set(
     //   filteredUserLocationData.map((loc) => loc?.LocationID?.toString())
     // );
-
     // 2) From remoteTracks, pick only those identities whose .identity is in validIDs
     // const identities = remoteTracks
     //   .map((t) => t.participant.identity.toString())
     //   .filter((id) => validIDs.has(id));
-
     // 3) Only update state if identities is different from locationsOnline
     // setLocationsOnline((prev: string[]) => {
     //   // If length differs, we definitely changed
@@ -738,7 +736,7 @@ function ParticipantActions({
       socketRef.current?.emit(
         "call-heartbeat",
         JSON.stringify({
-          callId: currentCallID,
+          callId: currentCallID || pendingCall.CallID,
           userId: "receptionist",
         })
       );
@@ -888,6 +886,7 @@ function ParticipantActions({
         }
         return prev;
       });
+      console.log({ currentCallID, pendingCall });
       if (currentCallID.length === 0) {
         setCurrentCallID(pendingCall?.CallID);
         setCurrentLocalCallID(pendingCall?.CallID);
@@ -1110,7 +1109,7 @@ function ParticipantActions({
       heartbeatIntervalRef.current = null;
     }
 
-    if (currentCallID?.length > 0) {
+    if (currentCallID?.length > 0 || pendingCall?.CallID?.length > 0) {
       // Use window.setInterval so TS knows it’s the browser version (returns number)
       heartbeatIntervalRef.current = window.setInterval(() => {
         callHeartBeat();
@@ -1124,7 +1123,7 @@ function ParticipantActions({
         heartbeatIntervalRef.current = null;
       }
     };
-  }, [currentCallID]);
+  }, [currentCallID, pendingCall]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
