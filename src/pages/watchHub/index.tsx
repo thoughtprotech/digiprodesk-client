@@ -625,7 +625,6 @@ function ParticipantActions({
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
-  const room = useRoomContext();
   const [callStatus, setCallStatus] = useState<
     "notInCall" | "inCall" | "onHold" | "missed"
   >("notInCall");
