@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-asserted-optional-chain */
 import Layout from "@/components/Layout";
 import {
-  Disc,
   MapPin,
   Maximize,
   Mic,
@@ -15,8 +14,6 @@ import {
   Play,
   RefreshCcw,
   UserIcon,
-  Video,
-  VideoOff,
   X,
   XCircle,
 } from "lucide-react";
@@ -431,18 +428,6 @@ function RoomConnector({
               return [...prev, roomInstance.name];
             });
           }
-
-          console.log(
-            "Listener Count",
-            roomInstance.name,
-            roomInstance.listenerCount
-          );
-          console.log("Meta Data", roomInstance.name, roomInstance.metadata);
-          console.log(
-            "Num Participants",
-            roomInstance.name,
-            roomInstance.numParticipants
-          );
         }
       } catch (e) {
         console.error(e);
@@ -645,6 +630,7 @@ function ParticipantActions({
     "notInCall" | "inCall" | "onHold" | "missed"
   >("notInCall");
   const [currentCallID, setCurrentCallID] = useState<string>("");
+  const currentCallIdRef = useRef<string>("");
   const [pendingCall, setPendingCall] = useState<any>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -656,9 +642,11 @@ function ParticipantActions({
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   const toggleRecording = async () => {
-    if (!isRecording) {
+    console.log({ isRecording });
+    if (!isRecording && currentCallIdRef.current.length !== 0) {
+      console.log({ currentCallID });
       try {
-        const fileName = `${currentCallID}`;
+        const fileName = `${currentCallIdRef.current}`;
         const response = await fetch(
           process.env.NEXT_PUBLIC_STARTRECORDING_API!,
           {
@@ -669,14 +657,14 @@ function ParticipantActions({
             body: JSON.stringify({
               room: participant.identity.toString(),
               fileName: fileName,
-              callId: currentCallID,
+              callId: currentCallIdRef.current,
             }),
           }
         );
         const data = await response.json();
-        if (data.egressId.length > 0) {
+        if (data?.egressId?.length > 0) {
           setIsRecording(true);
-          setEgressId(data.egressId);
+          setEgressId(data?.egressId);
         } else {
           console.error("Failed to start recording:", data.error);
           toast.custom((t: any) => {
@@ -693,7 +681,7 @@ function ParticipantActions({
       await fetch(process.env.NEXT_PUBLIC_STOPRECORDING_API!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ egressId, callId: currentCallID }),
+        body: JSON.stringify({ egressId, callId: currentCallIdRef.current }),
       });
 
       setIsRecording(false);
@@ -732,7 +720,6 @@ function ParticipantActions({
 
   const callHeartBeat = async () => {
     if (socketRef.current) {
-      console.log("SENDING CALL HEARTBEAT", { currentCallID });
       socketRef.current?.emit(
         "call-heartbeat",
         JSON.stringify({
@@ -757,11 +744,13 @@ function ParticipantActions({
       setCallStatus("inCall");
       setLocalStatus("inCall");
       setCurrentCallID(pendingCall.CallID);
+      currentCallIdRef.current = pendingCall.CallID;
       setCurrentLocalCallID(pendingCall.CallID);
       setLocalMicEnabled(true);
       setMissedCallCount((prev: string[]) =>
         prev.filter((p) => p.toString() !== participant?.identity?.toString())
       );
+      toggleRecording();
       setTimeout(() => {
         socketRef.current?.emit(
           "join-call",
@@ -791,8 +780,10 @@ function ParticipantActions({
       );
       const callId = generateUUID();
       setCurrentCallID(callId);
+      currentCallIdRef.current = callId;
       setCurrentLocalCallID(callId);
       setLocalMicEnabled(true);
+      toggleRecording();
       setTimeout(() => {
         socketRef.current?.emit(
           "start-call",
@@ -886,9 +877,9 @@ function ParticipantActions({
         }
         return prev;
       });
-      console.log({ currentCallID, pendingCall });
       if (currentCallID.length === 0) {
         setCurrentCallID(pendingCall?.CallID);
+        currentCallIdRef.current = pendingCall?.CallID;
         setCurrentLocalCallID(pendingCall?.CallID);
         setPendingCall(null);
       }
@@ -916,6 +907,7 @@ function ParticipantActions({
       setCallStatus("notInCall");
       setLocalStatus("notInCall");
       setCurrentCallID("");
+      currentCallIdRef.current = "";
       setCurrentLocalCallID("");
       setLocalMicEnabled(false);
       const callId =
@@ -1072,6 +1064,7 @@ function ParticipantActions({
           setCallStatus("notInCall");
           setLocalStatus("notInCall");
           setCurrentCallID("");
+          currentCallIdRef.current = "";
           setCurrentLocalCallID("");
           setLocalMicEnabled(false);
         }
@@ -1216,7 +1209,7 @@ function ParticipantActions({
                 )}
               </button>
             </Tooltip>
-            <Tooltip
+            {/* <Tooltip
               tooltip={room.localParticipant.isCameraEnabled ? "Off" : "On"}
               position="bottom"
             >
@@ -1234,8 +1227,8 @@ function ParticipantActions({
                   <VideoOff className="w-4 h-4" />
                 )}
               </button>
-            </Tooltip>
-            <Tooltip
+            </Tooltip> */}
+            {/* <Tooltip
               tooltip={isRecording ? "Stop Recording" : "Start Recording"}
               position="bottom"
             >
@@ -1247,7 +1240,7 @@ function ParticipantActions({
               >
                 <Disc className="w-4 h-4" />
               </button>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip tooltip={"Hold Call"} position="bottom">
               <button
@@ -1473,7 +1466,7 @@ function ParticipantActions({
                         )}
                       </button>
                     </Tooltip>
-                    <Tooltip
+                    {/* <Tooltip
                       tooltip={
                         room.localParticipant.isCameraEnabled ? "Off" : "On"
                       }
@@ -1493,8 +1486,8 @@ function ParticipantActions({
                           <VideoOff className="w-4 h-4" />
                         )}
                       </button>
-                    </Tooltip>
-                    <Tooltip
+                    </Tooltip> */}
+                    {/* <Tooltip
                       tooltip={
                         isRecording ? "Stop Recording" : "Start Recording"
                       }
@@ -1508,7 +1501,7 @@ function ParticipantActions({
                       >
                         <Disc className="w-4 h-4" />
                       </button>
-                    </Tooltip>
+                    </Tooltip> */}
 
                     <Tooltip tooltip={"Hold Call"} position="bottom">
                       <button
