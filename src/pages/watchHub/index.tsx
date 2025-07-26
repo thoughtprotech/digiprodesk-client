@@ -347,7 +347,7 @@ export default function Index() {
             </div>
           </div>
         </div>
-        <div className="w-full h-full grid grid-cols-4 gap-2">
+        <div className="w-full h-full grid grid-cols-5">
           {filteredUserLocationData.map((loc) => {
             return (
               <RoomConnector
