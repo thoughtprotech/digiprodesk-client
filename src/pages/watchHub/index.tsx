@@ -576,7 +576,6 @@ function MyVideoConference({
                 setMissedCallCount={setMissedCallCount}
                 setCurrentLocalCallID={setCurrentLocalCallID}
                 onHoldCount={onHoldCount}
-                setLocationsOnline={setLocationsOnline}
               />
             </div>
           ))}
@@ -607,7 +606,6 @@ function ParticipantActions({
   setMissedCallCount,
   setCurrentLocalCallID,
   onHoldCount,
-  setLocationsOnline,
 }: {
   track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
@@ -622,7 +620,6 @@ function ParticipantActions({
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
   onHoldCount: string[];
-  setLocationsOnline: any;
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
