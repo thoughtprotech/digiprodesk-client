@@ -408,6 +408,14 @@ function RoomConnector({
   );
 
   useEffect(() => {
+    console.log("LOCATION ONLINE", location?.LocationName);
+
+    return () => {
+      console.log("LOCATION OFFLINE", location?.LocationName);
+    };
+  }, []);
+
+  useEffect(() => {
     if (userId.length === 0) return;
     let mounted = true;
     (async () => {
@@ -455,11 +463,11 @@ function RoomConnector({
           localStatus={localStatus}
           setLocalStatus={setLocalStatus}
           setGuestCount={setGuestCount}
-          setLocationsOnline={setLocationsOnline}
           setOnHoldCount={setOnHoldCount}
           setMissedCallCount={setMissedCallCount}
           setCurrentLocalCallID={setCurrentLocalCallID}
           onHoldCount={onHoldCount}
+          setLocationsOnline={setLocationsOnline}
         />
         {/* The RoomAudioRenderer takes care of room-wide audio for you. */}
         <RoomAudioRenderer />
@@ -480,6 +488,7 @@ function MyVideoConference({
   setMissedCallCount,
   setCurrentLocalCallID,
   onHoldCount,
+  setLocationsOnline,
 }: {
   location: Location;
   name: string;
@@ -488,11 +497,11 @@ function MyVideoConference({
   localStatus: "notInCall" | "inCall";
   setLocalStatus: any;
   setGuestCount: any;
-  setLocationsOnline: any;
   setOnHoldCount: any;
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
   onHoldCount: string[];
+  setLocationsOnline: any;
 }) {
   const room = useRoomContext();
   const localSid = room.localParticipant.sid;
@@ -525,31 +534,20 @@ function MyVideoConference({
   }, [filteredUserLocationData, remoteTracks]);
 
   useEffect(() => {
-    // 1) Build a Set of all LocationID strings from filteredUserLocationData
-    // const validIDs = new Set(
-    //   filteredUserLocationData.map((loc) => loc?.LocationID?.toString())
-    // );
-    // 2) From remoteTracks, pick only those identities whose .identity is in validIDs
-    // const identities = remoteTracks
-    //   .map((t) => t.participant.identity.toString())
-    //   .filter((id) => validIDs.has(id));
-    // 3) Only update state if identities is different from locationsOnline
-    // setLocationsOnline((prev: string[]) => {
-    //   // If length differs, we definitely changed
-    //   if (prev.length !== identities.length) {
-    //     return identities;
-    //   }
-    //   // If same length, check each element (in this example we assume sorted order or
-    //   // that order must match. If you don’t care about order, you could sort both arrays
-    //   // or compare by Set membership instead.)
-    //   for (let i = 0; i < prev.length; i++) {
-    //     if (prev[i] !== identities[i]) {
-    //       return identities;
-    //     }
-    //   }
-    //   // no difference → return prev so React skips an update
-    //   return prev;
-    // });
+    if (
+      remoteTracks[0]?.participant?.identity === location.LocationID?.toString()
+    ) {
+      setLocationsOnline((prev: any[]) => {
+        if (!prev.includes(location.LocationID?.toString())) {
+          return [...prev, location.LocationID?.toString()];
+        }
+        return prev;
+      });
+    } else {
+      setLocationsOnline((prev: any[]) => {
+        return prev.filter((id) => id !== location.LocationID?.toString());
+      });
+    }
   }, [remoteTracks]);
 
   return (
@@ -578,6 +576,7 @@ function MyVideoConference({
                 setMissedCallCount={setMissedCallCount}
                 setCurrentLocalCallID={setCurrentLocalCallID}
                 onHoldCount={onHoldCount}
+                setLocationsOnline={setLocationsOnline}
               />
             </div>
           ))}
@@ -608,6 +607,7 @@ function ParticipantActions({
   setMissedCallCount,
   setCurrentLocalCallID,
   onHoldCount,
+  setLocationsOnline,
 }: {
   track: TrackReferenceOrPlaceholder;
   remoteTracks: TrackReferenceOrPlaceholder[];
@@ -622,6 +622,7 @@ function ParticipantActions({
   setMissedCallCount: any;
   setCurrentLocalCallID: any;
   onHoldCount: string[];
+  setLocationsOnline: any;
 }) {
   const { socket } = useSocket();
   const socketRef = useRef<ReturnType<typeof io> | null>(null);
