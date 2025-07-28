@@ -5,7 +5,7 @@ import Input from "@/components/ui/Input";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
 import { Location, Role, User } from "@/utils/types";
-import { Plus } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import UserCard from "./_components/UserCard";
 import { parseCookies } from "nookies";
@@ -55,6 +55,7 @@ export default function Index() {
   const [editUserModal, setEditUserModal] = useState<boolean>(false);
   const [locationListData, setLocationListData] = useState<Location[]>([]);
   const [editPassword, setEditPassword] = useState<string>("");
+  const [removeUserPhoto, setRemoveUserPhoto] = useState(false);
 
   const handleOpenEditUser = (user: User) => {
     setEditUserModal(true);
@@ -242,6 +243,8 @@ export default function Index() {
       // Append the UserPhoto as a file if available
       if (selectedUser!.UserPhoto && selectedUser!.UserPhoto instanceof File) {
         formData.append("UserPhoto", selectedUser!.UserPhoto);
+      } else if (removeUserPhoto) {
+        formData.append("RemoveUserPhoto", "true");
       }
 
       console.log({ formData });
@@ -517,15 +520,28 @@ export default function Index() {
               </div>
               <div className="w-1/2">
                 <h1 className="font-bold text-sm">User Photo</h1>
-                <Input
-                  type="file"
-                  onChange={(e) =>
-                    setCreateUserFormData({
-                      ...createUserFormData,
-                      UserPhoto: e.target.value,
-                    })
-                  }
-                />
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="file"
+                    onChange={(e) =>
+                      setCreateUserFormData({
+                        ...createUserFormData,
+                        UserPhoto: e.target.value,
+                      })
+                    }
+                  />
+                  {createUserFormData.UserPhoto && (
+                    <Trash
+                      onClick={() =>
+                        setCreateUserFormData({
+                          ...createUserFormData,
+                          UserPhoto: null,
+                        })
+                      }
+                      className="text-red-500"
+                    />
+                  )}
+                </div>
               </div>
               <div className="h-full flex items-center gap-2">
                 <Input
@@ -665,16 +681,32 @@ export default function Index() {
               <div className="w-full flex items-center gap-2">
                 <div className="w-1/2">
                   <h1 className="font-bold text-sm">User Photo</h1>
-                  <Input
-                    type="file"
-                    onChange={(e) =>
-                      setSelectedUser({
-                        ...selectedUser!,
-                        UserPhoto: e.target.value,
-                      })
-                    }
-                    value={`${selectedUser?.UserPhoto}`}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="file"
+                      onChange={(e) =>
+                        setSelectedUser({
+                          ...selectedUser!,
+                          UserPhoto: e.target.value,
+                        })
+                      }
+                      value={`${selectedUser?.UserPhoto}`}
+                    />
+                    {(selectedUser.UserPhoto ||
+                      (typeof selectedUser.UserPhoto === "string" &&
+                        selectedUser.UserPhoto.length > 0)) && (
+                      <Trash
+                        className="text-red-500"
+                        onClick={() => {
+                          setSelectedUser({
+                            ...selectedUser!,
+                            UserPhoto: null,
+                          });
+                          setRemoveUserPhoto(true);
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
                 <Input
                   required
