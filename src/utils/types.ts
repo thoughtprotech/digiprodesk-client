@@ -107,7 +107,7 @@ export interface Location {
   LocationBanner?: any;
   LocationVideoFeed?: string;
   LocationReceptionistPhoto?: any;
-  LocationAdvertisementVideo?: string;
+  LocationAdvertisementVideo?: any;
   IsActive: number;
   CreatedBy?: number;
   CreatedOn?: Date;

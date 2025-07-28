@@ -7,7 +7,7 @@ import SearchInput from "@/components/ui/Search";
 import Select from "@/components/ui/Select";
 import Toast from "@/components/ui/Toast";
 import { Location, User } from "@/utils/types";
-import { Plus, X } from "lucide-react";
+import { Plus, Trash, X } from "lucide-react";
 import { parseCookies } from "nookies";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -53,6 +53,15 @@ export default function Locations({
       IsActive: 0,
     });
   const [userListData, setUserListData] = useState<User[]>([]);
+  const [removeLocationFiles, setRemoveLocationFiles] = useState<{
+    [key: string]: boolean;
+  }>({
+    LocationLogo: false,
+    LocationImage: false,
+    LocationReceptionistPhoto: false,
+    LocationBanner: false,
+    LocationAdvertisementVideo: false,
+  });
 
   const handleCreateLocationChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -69,7 +78,7 @@ export default function Locations({
     if (selectedLocation) {
       setSelectedLocation({
         ...selectedLocation,
-        [event.target.name]: event.target.value || "",
+        [event.target.name]: event.target.value || null,
       });
     }
   };
@@ -100,6 +109,13 @@ export default function Locations({
       LocationReceptionistPhoto: "",
       LocationAdvertisementVideo: "",
       IsActive: 0,
+    });
+    setRemoveLocationFiles({
+      LocationLogo: false,
+      LocationImage: false,
+      LocationReceptionistPhoto: false,
+      LocationBanner: false,
+      LocationAdvertisementVideo: false,
     });
     setEditLocationModal(false);
   };
@@ -559,6 +575,20 @@ export default function Locations({
                     type="file"
                     // required
                   />
+                  {createLocationFormData.LocationLogo && (
+                    <Button
+                      type="button"
+                      color="foreground"
+                      text="Remove"
+                      onClick={() =>
+                        setCreateLocationFormData({
+                          ...createLocationFormData,
+                          LocationLogo: null,
+                        })
+                      }
+                      className="mt-2"
+                    />
+                  )}
                 </div>
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Receptionist Photo</h1>
@@ -569,6 +599,20 @@ export default function Locations({
                     type="file"
                     // required
                   />
+                  {createLocationFormData.LocationReceptionistPhoto && (
+                    <Button
+                      type="button"
+                      color="foreground"
+                      text="Remove"
+                      onClick={() =>
+                        setCreateLocationFormData({
+                          ...createLocationFormData,
+                          LocationReceptionistPhoto: null,
+                        })
+                      }
+                      className="mt-2"
+                    />
+                  )}
                 </div>
               </div>
               <div className="w-full flex justify-between gap-2">
@@ -580,6 +624,20 @@ export default function Locations({
                     onChange={handleCreateLocationChange}
                     type="file"
                   />
+                  {createLocationFormData.LocationBanner && (
+                    <Button
+                      type="button"
+                      color="foreground"
+                      text="Remove"
+                      onClick={() =>
+                        setCreateLocationFormData({
+                          ...createLocationFormData,
+                          LocationBanner: null,
+                        })
+                      }
+                      className="mt-2"
+                    />
+                  )}
                 </div>
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Advertisement Video</h1>
@@ -589,6 +647,20 @@ export default function Locations({
                     onChange={handleCreateLocationChange}
                     type="video"
                   />
+                  {createLocationFormData.LocationAdvertisementVideo && (
+                    <Button
+                      type="button"
+                      color="foreground"
+                      text="Remove"
+                      onClick={() =>
+                        setCreateLocationFormData({
+                          ...createLocationFormData,
+                          LocationAdvertisementVideo: null,
+                        })
+                      }
+                      className="mt-2"
+                    />
+                  )}
                 </div>
               </div>
               <div className="w-full flex justify-between gap-2">
@@ -596,11 +668,25 @@ export default function Locations({
                   <h1 className="font-bold text-sm">Image</h1>
                   <Input
                     name="LocationImage"
-                    // value={createLocationFormData.LocationImage}
+                    value={createLocationFormData.LocationImage}
                     onChange={handleCreateLocationChange}
                     type="file"
                     // required
                   />
+                  {createLocationFormData.LocationImage && (
+                    <Button
+                      type="button"
+                      color="foreground"
+                      text="Remove"
+                      onClick={() =>
+                        setCreateLocationFormData({
+                          ...createLocationFormData,
+                          LocationImage: null,
+                        })
+                      }
+                      className="mt-2"
+                    />
+                  )}
                 </div>
                 <div className="w-full">
                   <h1 className="font-bold text-sm">Control</h1>
@@ -725,7 +811,8 @@ export default function Locations({
                       <div className="w-full flex justify-center">
                         <img
                           src={
-                            createLocationFormData!.LocationImage instanceof File
+                            createLocationFormData!.LocationImage instanceof
+                            File
                               ? URL.createObjectURL(
                                   createLocationFormData!.LocationImage
                                 )
@@ -778,10 +865,12 @@ export default function Locations({
                             createLocationFormData!
                               .LocationReceptionistPhoto instanceof File
                               ? URL.createObjectURL(
-                                  createLocationFormData!.LocationReceptionistPhoto
+                                  createLocationFormData!
+                                    .LocationReceptionistPhoto
                                 )
                               : `${process.env.NEXT_PUBLIC_BACKEND_URL}${
-                                  createLocationFormData!.LocationReceptionistPhoto
+                                  createLocationFormData!
+                                    .LocationReceptionistPhoto
                                 }`
                           }
                           alt="Receptionist Photo"
@@ -791,19 +880,17 @@ export default function Locations({
                     </div>
                   </div>
                 )}
-                  {createLocationFormData!.LocationBanner && (
+                {createLocationFormData!.LocationBanner && (
                   <div className="w-1/3 flex justify-center">
                     <div className="w-full flex flex-col gap-2">
                       <div>
-                        <h1 className="font-bold text-sm">
-                          Banner
-                        </h1>
+                        <h1 className="font-bold text-sm">Banner</h1>
                       </div>
                       <div className="w-full flex justify-center">
                         <img
                           src={
-                            createLocationFormData!
-                              .LocationBanner instanceof File
+                            createLocationFormData!.LocationBanner instanceof
+                            File
                               ? URL.createObjectURL(
                                   createLocationFormData!.LocationBanner
                                 )
@@ -909,7 +996,13 @@ export default function Locations({
                   <Input
                     name="LocationLogo"
                     value={selectedLocation!.LocationLogo}
-                    onChange={handleEditLocationChange}
+                    onChange={(e) => {
+                      setRemoveLocationFiles((prev) => ({
+                        ...prev,
+                        LocationLogo: false,
+                      }));
+                      handleEditLocationChange(e);
+                    }}
                     type="file"
                     // required
                   />
@@ -919,7 +1012,13 @@ export default function Locations({
                   <Input
                     name="LocationReceptionistPhoto"
                     value={selectedLocation!.LocationReceptionistPhoto}
-                    onChange={handleEditLocationChange}
+                    onChange={(e) => {
+                      setRemoveLocationFiles((prev) => ({
+                        ...prev,
+                        LocationReceptionistPhoto: false,
+                      }));
+                      handleEditLocationChange(e);
+                    }}
                     type="file"
                     // required
                   />
@@ -931,7 +1030,13 @@ export default function Locations({
                   <Input
                     name="LocationBanner"
                     value={selectedLocation.LocationBanner}
-                    onChange={handleEditLocationChange}
+                    onChange={(e) => {
+                      setRemoveLocationFiles((prev) => ({
+                        ...prev,
+                        LocationBanner: false,
+                      }));
+                      handleEditLocationChange(e);
+                    }}
                     type="file"
                   />
                 </div>
@@ -940,7 +1045,13 @@ export default function Locations({
                   <Input
                     name="LocationAdvertisementVideo"
                     value={selectedLocation.LocationAdvertisementVideo}
-                    onChange={handleEditLocationChange}
+                    onChange={(e) => {
+                      setRemoveLocationFiles((prev) => ({
+                        ...prev,
+                        LocationAdvertisementVideo: false,
+                      }));
+                      handleEditLocationChange(e);
+                    }}
                     type="video"
                   />
                 </div>
@@ -951,7 +1062,13 @@ export default function Locations({
                   <Input
                     name="LocationImage"
                     value={selectedLocation!.LocationImage}
-                    onChange={handleEditLocationChange}
+                    onChange={(e) => {
+                      setRemoveLocationFiles((prev) => ({
+                        ...prev,
+                        LocationImage: false,
+                      }));
+                      handleEditLocationChange(e);
+                    }}
                     type="file"
                     // required
                   />
@@ -1076,13 +1193,26 @@ export default function Locations({
                   </div> */}
               </div>
               <div className="w-full flex justify-between gap-2">
-                {selectedLocation!.LocationImage && (
-                  <div className="w-1/3 flex justify-center">
-                    <div className="w-full flex flex-col gap-2">
-                      <div>
-                        <h1 className="font-bold text-sm">Location Image</h1>
+                {selectedLocation!.LocationImage &&
+                  !removeLocationFiles.LocationImage && (
+                    <div className="mt-2 flex flex-col">
+                      <div className="flex gap-2 items-center">
+                        <h1 className="font-bold">Location Image</h1>
+                        <Trash
+                          className="text-red-500"
+                          onClick={() => {
+                            setSelectedLocation({
+                              ...selectedLocation!,
+                              LocationImage: null,
+                            });
+                            setRemoveLocationFiles((prev) => ({
+                              ...prev,
+                              LocationImage: true,
+                            }));
+                          }}
+                        />
                       </div>
-                      <div className="w-full flex justify-center">
+                      <div>
                         <img
                           src={
                             selectedLocation!.LocationImage instanceof File
@@ -1093,20 +1223,32 @@ export default function Locations({
                                   selectedLocation!.LocationImage
                                 }`
                           }
-                          alt="Location Image"
-                          className="w-20 h-20 object-contain rounded-md"
+                          alt="Location Logo"
+                          className="w-32 h-32 object-contain rounded-md"
                         />
                       </div>
                     </div>
-                  </div>
-                )}
-                {selectedLocation!.LocationLogo && (
-                  <div className="w-1/3 flex justify-center">
-                    <div className="w-full flex flex-col gap-2">
-                      <div>
-                        <h1 className="font-bold text-sm">Location Logo</h1>
+                  )}
+                {selectedLocation!.LocationLogo &&
+                  !removeLocationFiles.LocationLogo && (
+                    <div className="mt-2 flex flex-col">
+                      <div className="flex gap-2 items-center">
+                        <h1 className="font-bold">Logo</h1>
+                        <Trash
+                          className="text-red-500"
+                          onClick={() => {
+                            setSelectedLocation({
+                              ...selectedLocation!,
+                              LocationLogo: null,
+                            });
+                            setRemoveLocationFiles((prev) => ({
+                              ...prev,
+                              LocationLogo: true,
+                            }));
+                          }}
+                        />
                       </div>
-                      <div className="w-full flex justify-center">
+                      <div>
                         <img
                           src={
                             selectedLocation!.LocationLogo instanceof File
@@ -1118,21 +1260,31 @@ export default function Locations({
                                 }`
                           }
                           alt="Location Logo"
-                          className="w-20 h-20 object-contain rounded-md"
+                          className="w-32 h-32 object-contain rounded-md"
                         />
                       </div>
                     </div>
-                  </div>
-                )}
-                {selectedLocation!.LocationReceptionistPhoto && (
-                  <div className="w-1/3 flex justify-center">
-                    <div className="w-full flex flex-col gap-2">
-                      <div>
-                        <h1 className="font-bold text-sm">
-                          Receptionist Photo
-                        </h1>
+                  )}
+                {selectedLocation!.LocationReceptionistPhoto &&
+                  !removeLocationFiles.LocationReceptionistPhoto && (
+                    <div className="mt-2 flex flex-col">
+                      <div className="flex gap-2 items-center">
+                        <h1 className="font-bold">Receptionist Photo</h1>
+                        <Trash
+                          className="text-red-500"
+                          onClick={() => {
+                            setSelectedLocation({
+                              ...selectedLocation!,
+                              LocationReceptionistPhoto: null,
+                            });
+                            setRemoveLocationFiles((prev) => ({
+                              ...prev,
+                              LocationReceptionistPhoto: true,
+                            }));
+                          }}
+                        />
                       </div>
-                      <div className="w-full flex justify-center">
+                      <div>
                         <img
                           src={
                             selectedLocation!
@@ -1144,26 +1296,35 @@ export default function Locations({
                                   selectedLocation!.LocationReceptionistPhoto
                                 }`
                           }
-                          alt="Receptionist Photo"
-                          className="w-20 h-20 object-contain rounded-md"
+                          alt="Location Logo"
+                          className="w-32 h-32 object-contain rounded-md"
                         />
                       </div>
                     </div>
-                  </div>
-                )}
-                  {selectedLocation!.LocationBanner && (
-                  <div className="w-1/3 flex justify-center">
-                    <div className="w-full flex flex-col gap-2">
-                      <div>
-                        <h1 className="font-bold text-sm">
-                          Banner
-                        </h1>
+                  )}
+                {selectedLocation!.LocationBanner &&
+                  !removeLocationFiles.LocationBanner && (
+                    <div className="mt-2 flex flex-col">
+                      <div className="flex gap-2 items-center">
+                        <h1 className="font-bold">Banner</h1>
+                        <Trash
+                          className="text-red-500"
+                          onClick={() => {
+                            setSelectedLocation({
+                              ...selectedLocation!,
+                              LocationBanner: null,
+                            });
+                            setRemoveLocationFiles((prev) => ({
+                              ...prev,
+                              LocationBanner: true,
+                            }));
+                          }}
+                        />
                       </div>
-                      <div className="w-full flex justify-center">
+                      <div>
                         <img
                           src={
-                            selectedLocation!
-                              .LocationBanner instanceof File
+                            selectedLocation!.LocationBanner instanceof File
                               ? URL.createObjectURL(
                                   selectedLocation!.LocationBanner
                                 )
@@ -1171,13 +1332,33 @@ export default function Locations({
                                   selectedLocation!.LocationBanner
                                 }`
                           }
-                          alt="Banner Photo"
-                          className="w-20 h-20 object-contain rounded-md"
+                          alt="Location Logo"
+                          className="w-32 h-32 object-contain rounded-md"
                         />
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                  {selectedLocation!.LocationAdvertisementVideo &&
+                  !removeLocationFiles.LocationAdvertisementVideo && (
+                    <div className="mt-2 flex flex-col">
+                      <div className="flex gap-2 items-center">
+                        <h1 className="font-bold">Advertisement video</h1>
+                        <Trash
+                          className="text-red-500"
+                          onClick={() => {
+                            setSelectedLocation({
+                              ...selectedLocation!,
+                              LocationAdvertisementVideo: null,
+                            });
+                            setRemoveLocationFiles((prev) => ({
+                              ...prev,
+                              LocationAdvertisementVideo: true,
+                            }));
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
               </div>
               <div className="flex justify-center gap-2 border-t-2 border-t-border pt-4">
                 <Button text="Save" color="foreground" type="submit" />
